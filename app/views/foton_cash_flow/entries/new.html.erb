@@ -1,0 +1,26 @@
+<%# foton_cash_flow/app/views/cash_flow_entries/new.html.erb %>
+
+<h2><%= l(:label_cash_flow_new_entry) %></h2>
+
+<%# Verifica se há projetos disponíveis e, consequentemente, se @issue foi configurado com um projeto %>
+<% if @available_projects&.any? %>
+  <% if @available_projects&.many? %>
+    <div class="project-selection mb-4">
+      <label><%= l(:label_select_project) %></label>
+      <%= select_tag :selected_project,
+                     options_from_collection_for_select(@available_projects, :id, :name, @issue.project_id),
+                     class: 'form-control' %>
+    </div>
+  <% end %>
+
+  <%# Renderiza o formulário APENAS se houver projetos e @issue não for nil %>
+  <%= render partial: 'form', locals: { issue: @issue, custom_fields: @custom_fields } %>
+<% else %>
+  <%# Isso só seria executado se o `return` no controller falhasse ou se fosse uma renderização xhr sem o modal %>
+  <%# Aqui você pode colocar um aviso, embora o controller já trate isso. %>
+  <div class="alert alert-warning">
+    <%= l(:error_no_projects_available) %>
+    <%= link_to l(:button_create_project), new_project_path %>
+  </div>
+<% end %>
+

@@ -1,0 +1,33 @@
+
+<div class="cf-form-container">
+  <h2 class="cf-form-title"><%= l(:label_cash_flow_import) %></h2>
+  <div class="cf-box">
+    <p>
+      <%= l(:text_import_instructions) %>
+      <%= link_to l(:label_download_template), "/plugin_assets/redmine_cash_flow_pro/import_template.csv", class: 'cf-btn cf-btn-outline' %>
+    </p>
+    <ul class="cf-import-tips">
+      <li><%= l(:text_import_tip_date) %></li>
+      <li><%= l(:text_import_tip_amount) %></li>
+      <li><%= l(:text_import_tip_types) %></li>
+      <li><%= l(:text_import_tip_encoding) %></li>
+    </ul>
+    <%= form_tag import_cash_flow_entries_path, multipart: true, class: 'cf-form' do %>
+      <div class="cf-file-upload">
+        <%= label_tag :csv_file, l(:label_select_csv_file), class: 'cf-btn' %>
+        <%= file_field_tag :csv_file, accept: '.csv', class: 'cf-input', id: 'csv_file' %>
+        <span id="file-name"><%= l(:text_no_file_selected) %></span>
+      </div>
+      <div class="cf-actions">
+        <%= submit_tag l(:button_import), class: 'cf-btn cf-btn-primary' %>
+        <%= link_to l(:button_back), cash_flow_entries_path, class: 'cf-btn cf-btn-secondary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+<script>
+  document.getElementById('csv_file').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : '<%= l(:text_no_file_selected) %>';
+    document.getElementById('file-name').textContent = fileName;
+  });
+</script>

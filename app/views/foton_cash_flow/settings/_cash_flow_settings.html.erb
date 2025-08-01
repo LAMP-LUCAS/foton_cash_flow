@@ -1,0 +1,132 @@
+<h3><%= l(:label_cash_flow_settings) %></h3>
+
+<p>
+  <%= l(:label_cash_flow_setting_description) %>
+</p>
+
+<div class="box tabular settings">
+  <fieldset class="box">
+    <legend><%= l(:label_cash_flow_default_columns) %></legend>
+    <% columns = [
+      ['entry_date', l(:field_entry_date)],
+      ['transaction_type', l(:field_transaction_type)],
+      ['amount', l(:field_amount)],
+      ['category', l(:label_cash_flow_category)],
+      ['description', l(:field_description, default: 'Descrição')],
+      ['notes', l(:field_notes, default: 'Observação')]
+    ] %>
+    <div class="columns-grid">
+      <% columns.each do |col, label| %>
+        <label class="column-checkbox">
+          <%= check_box_tag 'settings[default_columns][]', col, (@settings['default_columns']||[]).include?(col) %> <%= label %>
+        </label>
+      <% end %>
+    </div>
+    <em class="info"><%= l(:text_cash_flow_default_columns_info) %></em>
+  </fieldset>
+
+  <fieldset class="box">
+    <legend><%= l(:label_cash_flow_custom_projects) %></legend>
+    <%= select_tag 'settings[custom_projects][]',
+      options_from_collection_for_select(Project.active.order(:name), 'id', 'name', (@settings['custom_projects']||[])),
+      multiple: true, class: 'select2', style: 'width: 60%' %>
+    <br/>
+    <em class="info"><%= l(:text_cash_flow_custom_projects_info) %></em>
+  </fieldset>
+
+  <fieldset class="box">
+    <legend><%= l(:label_cash_flow_permanent_users) %></legend>
+    <%= select_tag 'settings[permanent_users][]',
+      options_from_collection_for_select(User.active.order(:login), 'id', 'login', (@settings['permanent_users']||[])),
+      multiple: true, class: 'select2', style: 'width: 60%' %>
+    <br/>
+    <em class="info"><%= l(:text_cash_flow_permanent_users_info) %></em>
+  </fieldset>
+  <p>
+    <label><%= l(:label_cash_flow_currency) %></label>
+    <%= select_tag 'settings[default_currency]',
+                   options_for_select(['BRL', 'USD', 'EUR'], @settings['default_currency']),
+                   class: 'select2' %>
+    <br/>
+    <em class="info"><%= l(:text_cash_flow_currency_info) %></em>
+  </p>
+
+  <p>
+    <label><%= l(:label_cash_flow_show_in_top_menu) %></label>
+    <%= hidden_field_tag 'settings[show_in_top_menu]', '0' %>
+    <%= check_box_tag 'settings[show_in_top_menu]', '1', @settings['show_in_top_menu'] == '1' %>
+  </p>
+
+  <fieldset class="box">
+    <legend><%= l(:label_cash_flow_categories) %></legend>
+    <div id="cash_flow_categories">
+      <% (@settings['categories'] || []).each_with_index do |category, index| %>
+        <p class="category-item">
+          <%= text_field_tag 'settings[categories][]', category, 
+                            id: "category_#{index}",
+                            class: 'category-input' %>
+          <%= link_to l(:button_delete), '#',
+                      class: 'icon icon-del delete-category',
+                      onclick: 'jQuery(this).closest(".category-item").remove(); return false;' %>
+        </p>
+      <% end %>
+    </div>
+    <p>
+      <%= link_to l(:label_add_category), '#',
+          class: 'icon icon-add',
+          onclick: 'addNewCategory(); return false;' %>
+    </p>
+  </fieldset>
+  
+  <br>
+  
+  <p>
+    <%= link_to l(:label_cash_flow_diagnostics), diagnostics_cash_flow_entries_path %>
+  </p>
+</div>
+
+<%= javascript_tag do %>
+  function addNewCategory() {
+    var container = jQuery('#cash_flow_categories');
+    var index = container.children().length;
+    var html = '<p class="category-item">' +
+               '<input type="text" name="settings[categories][]" ' +
+               'id="category_' + index + '" class="category-input" />' +
+               '<a href="#" class="icon icon-del delete-category" ' +
+               'onclick="jQuery(this).closest(\'.category-item\').remove(); return false;">' +
+               '<%= j l(:button_delete) %></a></p>';
+    container.append(html);
+    jQuery('#category_' + index).focus();
+  }
+
+  jQuery(document).ready(function() {
+    jQuery('.select2').select2();
+  });
+<% end %>
+
+<style>
+  .columns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .column-checkbox {
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+    padding: 4px 0;
+  }
+  .category-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .category-input {
+    margin-right: 10px;
+    flex-grow: 1;
+  }
+  .delete-category {
+    margin-left: 5px;
+  }
+</style>

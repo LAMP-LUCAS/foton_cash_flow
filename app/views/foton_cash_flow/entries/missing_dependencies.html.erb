@@ -1,0 +1,52 @@
+<div class="flash error">
+  <h3><%= l(:error_plugin_dependencies_missing_title) %></h3>
+  
+  <% if @missing_tracker %>
+    <p><%= l(:error_plugin_dependencies_missing_tracker) %></p>
+  <% end %>
+  
+  <% if @missing_fields.any? %>
+    <p><%= l(:error_plugin_dependencies_missing_fields) %></p>
+    <ul>
+      <% @missing_fields.each do |field| %>
+        <li><%= field %></li>
+      <% end %>
+    </ul>
+  <% end %>
+  
+  <div class="actions">
+    <h4><%= l(:label_how_to_resolve) %></h4>
+    
+    <% if @missing_tracker %>
+      <% if @any_status %>
+        <%= button_to l(:button_create_finance_tracker), 
+                      {controller: 'trackers', action: 'create'}, 
+                      method: :post,
+                      params: {tracker: {name: 'Financeiro', position: 1}},
+                      class: 'button' %>
+      <% else %>
+        <p class="warning"><%= l(:warning_create_issue_status_first) %></p>
+        <%= link_to l(:button_create_issue_status), new_issue_status_path, class: 'button' %>
+      <% end %>
+    <% end %>
+    
+    <% @missing_fields.each do |field| %>
+      <%# Aqui pode-se adicionar instruções específicas para cada campo, se necessário %>
+    <% end %>
+  </div>
+  
+</div>
+                    when 'Categoria'
+                      {field_format: 'string', is_required: false}
+                    end %>
+      
+      <%= button_to "Criar Campo: #{field}", 
+                    {controller: 'custom_fields', action: 'create'}, 
+                    method: :post,
+                    params: {type: 'IssueCustomField', custom_field: {name: field}.merge(field_def)},
+                    class: 'button' %>
+    <% end %>
+    
+    <p>Ou configure manualmente através do <%= link_to 'Painel de Administração', admin_path %>.</p>
+  </div>
+</div>

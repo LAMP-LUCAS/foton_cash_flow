@@ -1,0 +1,47 @@
+<% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/index.html.erb %>
+
+<h2><%= l(:label_foton_cash_flow_entries) %></h2>
+
+<% # Controles Contextuais (Botões Adicionar, Importar, Exportar) %>
+<div class="contextual">
+
+  <%
+=begin%>
+ <%= link_to l(:button_new_entry), new_cash_flow_entry_path(project_id: @project), class: 'icon icon-add' %>  
+<%
+=end%>
+
+
+  <%= link_to l(:button_new_entry), new_project_issue_path(project_id: @project), class: 'icon icon-add' %>
+  <%= link_to l(:button_import), import_form_cash_flow_entries_path(project_id: @project), class: 'icon icon-import' %>
+  <%= link_to l(:button_export), export_cash_flow_entries_path(request.query_parameters.merge(project_id: @project)), class: 'icon icon-export' %>
+</div>
+
+<% # Renderiza o partial dos filtros ativos %>
+<%= render partial: 'foton_cash_flow/entries/active_filters', locals: { query: @query, project: @project } %>
+
+<% # Renderiza o partial do formulário de filtros %>
+<%= render partial: 'foton_cash_flow/entries/filter_form', locals: { query: @query, project: @project, cash_flow_status_collection: @cash_flow_status_collection } %>
+
+<% # Renderiza o partial da tabela %>
+<%= render partial: 'foton_cash_flow/entries/table', locals: {
+  project: @project,
+  issues_for_table: @issues_for_table,
+  issue_count: @issue_count,
+  issue_pages: @issue_pages,
+  limit: @limit,
+  total_revenue: @total_revenue,
+  total_expense: @total_expense,
+  balance: @balance
+} %>
+
+<% # Renderiza o partial dos gráficos %>
+<%= render partial: 'foton_cash_flow/entries/charts', locals: {
+  bar_chart_labels: @bar_chart_labels,
+  bar_chart_revenue: @bar_chart_revenue,
+  bar_chart_expense: @bar_chart_expense,
+  pie_chart_labels: @pie_chart_labels,
+  pie_chart_data: @pie_chart_data
+} %>
+
+<% # Fim do entries/index.html.erb %>

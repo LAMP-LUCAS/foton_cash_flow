@@ -1,0 +1,7 @@
+<h2><%= l(:label_cash_flow_settings) %></h2>
+
+<%= form_for :settings, url: cash_flow_settings_path, method: :post do |f| %>
+  <%= render partial: 'settings/cash_flow_settings', locals: { f: f } %>
+
+  <%= submit_tag l(:button_save) %>
+<% end %>

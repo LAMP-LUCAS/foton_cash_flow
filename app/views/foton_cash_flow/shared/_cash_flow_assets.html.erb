@@ -1,0 +1,10 @@
+<%# Partial para incluir assets do plugin %>
+<% if plugin_assets_loaded %>
+
+  <%= stylesheet_link_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
+  
+  <%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>
+  <%= javascript_include_tag 'cash_flow_dashboard', plugin: 'foton_cash_flow' %>
+  <%= javascript_include_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
+
+<% end %>

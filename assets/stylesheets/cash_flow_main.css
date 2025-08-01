@@ -1,0 +1,706 @@
+
+/* ======================
+   VARIÁVEIS GLOBAIS
+   ====================== */
+:root {
+  --primary-color: #3F51B5;
+  --primary-hover: #303F9F;
+  --primary-active: #1A237E;
+  --secondary-color: #f5f5f5;
+  --secondary-hover: #e0e0e0;
+  --text-on-primary: #FFFFFF;
+  --text-on-secondary: #212121; 
+  --text-on-light: #333333;
+  --text-color: #333333; /* Adicionada para consistência */
+  --text-link: inherit; /* Adicionada para consistência */
+  --border-color: #e0e0e0;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --error-color: #dc3545;
+  --disabled-color: #6c757d;
+  --border-radius: 6px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.15);
+  --transition: all 180ms ease; /* Padronizado para ms */
+  --background-light: #f8f9fa;
+  --background-white: #fff;
+  --focus-outline: 2px solid var(--primary-color); /* Para acessibilidade */
+  --text-on-outline: var(--primary-color); /* Texto no botão outline */
+  --text-on-outline-hover: var(--text-on-primary); /* Texto no hover do outline */
+}
+
+/* ======================
+   ESTILOS GERAIS
+   ====================== */
+
+.cf-page a {
+  color: var(--text-link);
+  text-decoration: none; 
+  transition: color 0.2s;
+}
+.cf-page a:hover, .cf-page a:focus {
+  color: var(--text-link);
+  text-decoration: underline;
+}
+
+/* ======================
+   LAYOUT PRINCIPAL
+   ====================== */
+.cash-flow-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+.cash-flow-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 32px;
+}
+
+/* ======================
+   ALERTA DE ERROS
+   ====================== */
+
+.warning-box {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #f0ad4e;
+  background-color: #fcf8e3;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.actions {
+  margin-top: 20px;
+}
+
+.button-positive {
+  background-color: #5cb85c;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.button-negative {
+  background-color: #d9534f;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+/* Estilo para o asterisco de campo obrigatório */
+.required-asterisk {
+  color: var(--error-color, #dc3545); /* Usar a cor de erro definida nas variáveis CSS */
+  margin-left: 4px;
+  font-weight: bold;
+}
+
+
+/* ======================
+   MENU CASCATA DE FILTROS
+   ====================== */
+.cf-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.cf-filter-btn {
+  text-decoration-color: var(--primary-color);
+  color: var(--primary-color);
+  border: var(--border-color);
+  border-radius: 5px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cf-filter-btn:hover, .cf-filter-btn:focus {
+  background: var(--background-light);
+}
+.cf-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cf-filter-tag {
+  background: #e3eaf3;
+  color: var(--text-color);
+  border-radius: 4px;
+  padding: 2px 8px 2px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.98em;
+}
+.cf-remove-filter {
+  background: none;
+  border: none;
+  color: var(--error-color);
+  font-size: 1.1em;
+  cursor: pointer;
+  margin-left: 2px;
+}
+.cf-filters-dropdown {
+  position: absolute;
+  top: 60px;
+  left: 40px;
+  z-index: 1000;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 24px 28px 18px 28px;
+  min-width: 340px;
+  max-width: 98vw;
+  min-height: 120px;
+  display: none;
+}
+.cf-filters-dropdown.active {
+  display: block;
+  animation: fadeIn 0.18s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cf-filters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.cf-filters-list label {
+  font-weight: 500;
+  color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cf-filters-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+/* ======================
+  GRID E LAYOUT GENÉRICO
+  ====================== */
+
+   
+/* ======================
+    CARDS DE RESUMO 
+====================== */
+.cf-summary {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  justify-content: flex-end; /* Alinha à direita em telas grandes */
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cf-summary .cf-card {
+  flex: 0 1 20px; /* Não cresce, pode encolher, base de 220px */
+  min-width: 180px;
+  background: var(--background-light);
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
+  padding: 18px;
+  text-align: center;
+}
+
+/* Estilos específicos para os valores */
+.cf-card-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+
+/* ======================
+   BOTÕES E INPUTS
+   ====================== */
+.cf-btn {
+  display: inline-flex; /* Melhor para alinhar ícones */
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espaço entre ícone e texto */
+  padding: 10px 24px;
+  border-radius: var(--border-radius);
+  border: 1.5px solid transparent; /* Borda transparente por padrão */
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none !important;
+  box-shadow: var(--box-shadow);
+  outline: none;
+  position: relative;
+  overflow: hidden; /* Para efeitos hover */
+}
+
+.cf-btn > a,
+.cf-btn > input[type="submit"],
+.cf-btn > button {
+  color: inherit !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border: none !important;
+  font: inherit !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Foco acessível para todos os botões */
+.cf-btn:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+/* Botão Primário - Contraste garantido */
+.cf-btn-primary {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  border-color: var(--primary-color);
+}
+
+/* Botão Secundário - Contraste revisado */
+.cf-btn-secondary {
+  background: var(--secondary-color);
+  color: var(--text-on-secondary); /* Texto mais escuro */
+  border-color: var(--border-color);
+}
+
+/* Botão Outline - Mais consistente */
+.cf-btn-outline {
+  background: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: none; /* Remove sombra para manter o foco no outline */
+  
+}
+
+/* Efeito hover sutil para todos os botões */
+.cf-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+/* Efeito active consistente */
+.cf-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estados específicos para cada tipo */
+.cf-btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.cf-btn-secondary:hover {
+  background: var(--secondary-hover);
+}
+
+.cf-btn-outline:hover {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+
+
+/* ======================
+   CONTRASTE ESPECÍFICO POR TIPO DE BOTÃO
+   ====================== */
+/* Primário (fundo escuro) */
+.cf-btn-primary,
+.cf-btn-primary > a {
+  color: var(--text-on-primary) !important;
+}
+
+/* Secundário (fundo claro) */
+.cf-btn-secondary,
+.cf-btn-secondary > a {
+  color: var(--text-on-secondary) !important;
+}
+
+/* Outline (transparente) */
+.cf-btn-outline,
+.cf-btn-outline > a {
+  color: var(--text-on-outline) !important;
+}
+
+/* Estados hover */
+.cf-btn-outline:hover,
+.cf-btn-outline:hover > a {
+  color: var(--text-on-outline-hover) !important;
+}
+
+/* Garante contraste mesmo com temas personalizados */
+.cf-btn-secondary {
+  background: var(--secondary-color);
+  border-color: var(--border-color);
+  /* Contraste mínimo garantido: 4.5:1 */
+  color: #222 !important; /* Mais escuro que o --text-on-secondary */
+}
+
+.cf-btn-secondary > a {
+  color: #222 !important;
+}
+
+/* Feedback visual para estados */
+.cf-btn:focus {
+  box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.3) !important;
+}
+
+/* ======================
+   GRUPO DE AÇÕES
+   ====================== */
+.cf-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+@media (max-width: 768px) {
+  .cf-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .cf-btn {
+    width: 100%; /* Botões ocupam toda a largura */
+  }
+}
+
+/* ======================
+   CORES DE VALORES
+   ====================== */
+.cf-success { color: var(--success-color); }
+.cf-danger { color: var(--error-color); }
+
+/* ======================
+   AJUSTES DE TABELA
+   ====================== */
+.cf-table th, .cf-table td {
+  padding: 8px 10px;
+}
+.cf-table th {
+  font-size: 1.05em;
+}
+.cf-table .no-data-message {
+  text-align: center;
+}
+
+
+/* ======================
+   MODAL
+   ====================== */
+
+.modal-content {
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+/* Project Selection */
+.project-selection {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+
+/* Estilos do Modal Personalizado */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Garante que o modal esteja acima de outros elementos */
+  opacity: 0; /* Começa invisível */
+  visibility: hidden; /* Escondido para leitores de tela */
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* Transição suave */
+}
+
+.custom-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-modal-content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: var(--border-radius); /* Reutiliza sua variável de raio de borda */
+  box-shadow: var(--box-shadow); /* Reutiliza sua variável de sombra */
+  max-width: 500px; /* Largura máxima do modal */
+  width: 90%; /* Ocupa 90% da largura disponível */
+  transform: translateY(-20px); /* Começa ligeiramente acima para animação */
+  transition: transform 0.3s ease; /* Transição suave para o conteúdo */
+}
+
+.custom-modal-overlay.active .custom-modal-content {
+  transform: translateY(0); /* Desliza para a posição final */
+}
+
+.custom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color); /* Reutiliza sua variável de cor de borda */
+}
+
+.custom-modal-header h5 {
+  margin: 0;
+  font-size: 1.2em;
+  color: var(--text-color); /* Reutiliza sua variável de cor de texto */
+}
+
+.custom-modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-color);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.custom-modal-close-btn:hover {
+  opacity: 1;
+}
+
+.custom-modal-body {
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end; /* Alinha os botões à direita */
+  gap: 10px; /* Espaço entre os botões */
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+}
+
+
+/* ======================
+   CARDS DE RESUMO
+   ====================== */
+.cf-card {
+  background: var(--background-light);
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
+  padding: 24px 18px;
+  text-align: center;
+  margin-bottom: 0;
+  transition: transform 0.18s cubic-bezier(.4,1.4,.6,1), box-shadow 0.18s;
+}
+
+.cf-card:hover, .cf-card:focus-within {
+  transform: translateY(-7px) scale(1.025);
+  box-shadow: 0 8px 32px rgba(63,81,181,0.18);
+}  
+
+.cf-card-label {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+.cf-card-value {
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+/* ======================
+   AÇÕES E BOTÕES
+   ====================== */
+.cf-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.header-actions.btn-group .btn { min-width: 110px; }
+
+/* ======================
+   TABELA DE LANÇAMENTOS
+   ====================== */
+
+/* Container da tabela (mantido seu estilo atual) */
+.cf-table-container {
+  background: var(--background-white);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  padding: 18px;
+}
+
+/* Modificador para layout lado a lado */
+.cf-table-container.cf-layout-sidebar {
+  position: relative; /* Remove qualquer posicionamento absoluto */
+  display: flex;
+  flex-wrap: wrap; /* Permite quebra de linha */
+  gap: 24px;
+}
+
+.cf-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  border: 1px solid #ddd; /* opcional - para visualização */
+}
+
+.cf-table-container .cf-table-wrapper {
+  flex: 1 1 600px; /* Cresce, encolhe, base de 600px */
+  min-width: 0; /* Corrige overflow */
+}
+
+.cf-table-container > .cf-summary {
+  flex: 0 1 280px; /* Não cresce, encolhe, base 280px */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Ajuste para o summary no layout lado a lado */
+.cf-table-container.cf-layout-sidebar > .cf-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 280px;
+}
+
+.table.cash-flow-entries th, .table.cash-flow-entries td {
+  vertical-align: middle;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+}
+.table.cash-flow-entries thead th {
+  background: #f1f3f6;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.no-data-message {
+  color: #888;
+  font-size: 1.1rem;
+  padding: 24px 0;
+}
+
+/* ======================
+   FILTROS E ÁREA DE FILTROS
+   ====================== */
+.filters-applied {
+  background: var(--background-light);
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+}
+.filter-tag {
+  background: #e3eaf3;
+  color: var(--text-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+/* ======================
+   RESPONSIVIDADE
+   ====================== */
+@media (max-width: 992px) {
+  .cf-summary {
+    justify-content: center; /* Centraliza em tablets */
+  }
+
+  .cf-table-container.cf-layout-sidebar {
+    flex-direction: column;
+  }
+  
+  .cf-table-container.cf-layout-sidebar > .cf-summary {
+    flex-direction: row;
+    min-width: 100%;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .cf-table-container .cf-table-wrapper, .cf-table-container > .cf-summary {
+    flex: 1 1 100%; /* Ocupa linha inteira */
+  }
+
+}
+
+@media (max-width: 768px) {
+  .cf-summary {
+    flex-direction: row;
+    justify-content: space-around; /* Distribui uniformemente */
+  }
+  
+  .cf-summary .cf-card {
+    flex: 1 1 160px; /* Ajusta para telas médias */
+    min-width: 120px;
+    padding: 12px 8px;
+  }
+
+  .cf-table-container.cf-layout-sidebar > .cf-summary {
+    flex-wrap: wrap;
+  }
+  
+  .cf-table-container.cf-layout-sidebar > .cf-summary .cf-card {
+    flex: 1 1 160px;
+    min-width: 120px;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .cf-summary {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .cf-summary .cf-card {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .cf-table-container.cf-layout-sidebar > .cf-summary {
+    flex-direction: column;
+  }
+
+}
+
+
+/* Adicione temporariamente para debug 
+.cf-table-container.cf-layout-sidebar {
+  border: 1px dashed blue;
+}
+.cf-table-container .cf-table-wrapper {
+  border: 1px dashed green;
+}
+
+*/

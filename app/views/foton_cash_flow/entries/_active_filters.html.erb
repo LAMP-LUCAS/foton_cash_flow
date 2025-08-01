@@ -1,0 +1,18 @@
+<% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_active_filters.html.erb %>
+
+<% if query.present? && query.reject { |_, v| v.blank? }.present? %>
+  <div class="filters">
+    <h3><%= l(:label_active_filters) %></h3>
+    <ul>
+      <% query.each do |key, value| %>
+        <% if value.present? && key != 'page' %> <%# Ignorar 'page' na exibição de filtros %>
+          <li><%= l("field_#{key}".to_sym) %>: <%= value %></li>
+        <% end %>
+      <% end %>
+      <li><%= link_to l(:button_clear), cash_flow_entries_path(project_id: project), class: 'icon icon-clear' %></li>
+    </ul>
+  </div>
+<% end %>
+
+<% # Fim da verificação de filtros ativos %>
+
