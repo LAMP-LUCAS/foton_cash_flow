@@ -37,8 +37,9 @@ class CreateFinancialTrackerAndFields < ActiveRecord::Migration[5.2]
       {
         name: 'Valor', field_format: 'float', is_required: true, is_for_all: true, searchable: true, is_filter: true,
         min_value: '-99999999999999.999999',
-        max_value: '99999999999999.999999'
-      
+        max_value: '99999999999999.999999',
+        regexp: '^-?\d{1,3}(\.\d{3})*(,\d+)?$', # Aceita 1.000,00 ou 1000,00
+        text_formatting: 'full'      
       },
       {
         name: 'Tipo de Transação', field_format: 'list', possible_values: ['revenue', 'expense'], is_required: true, is_for_all: true, searchable: true, is_filter: true

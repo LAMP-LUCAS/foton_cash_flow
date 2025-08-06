@@ -1,3 +1,5 @@
+# config/initializers/foton_cash_flow.rb
+
 if Rails.env.test?
   Rails.application.config.after_initialize do
     Setting.plugin_foton_cash_flow ||= {}

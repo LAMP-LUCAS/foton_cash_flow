@@ -45,6 +45,33 @@ module FotonCashFlow
         return false
       end
     end
+
+    # Novo método para parsear strings de moeda para decimal
+    def self.parse_currency_to_decimal(currency_string)
+      return nil unless currency_string.present?
+      
+      # Remove qualquer símbolo de moeda e separador de milhar
+      clean_string = currency_string.to_s.gsub(/[^0-9,\.]/, '')
+      
+      # Substitui a vírgula por ponto para o formato decimal
+      # Lida com casos como "1.000,50" ou "1,000.50"
+      if clean_string.count(',') > 1 # Caso de 1,000,000.00
+        clean_string = clean_string.delete(',')
+      elsif clean_string.include?('.') && clean_string.include?(',')
+        # Se tem ponto e vírgula, e o ponto vem antes da vírgula
+        # "1.000,50" -> 1000.50
+        clean_string = clean_string.gsub('.', '').gsub(',', '.')
+      elsif clean_string.include?(',')
+        # "123,45" -> 123.45
+        clean_string = clean_string.gsub(',', '.')
+      end
+      
+      # Tenta converter para BigDecimal para precisão
+      BigDecimal(clean_string)
+    rescue ArgumentError, TypeError => e
+      Rails.logger.error "[FOTON_CASH_FLOW][SettingsHelper] Falha ao converter valor de moeda '#{currency_string}' para decimal: #{e.message}"
+      nil
+    end
   end
 end
 

@@ -3,15 +3,17 @@
 module FotonCashFlow
   class EntriesController < ApplicationController
     include Rails.application.routes.url_helpers
+    helper FotonCashFlow::EntriesHelper
+    #helper :pagination # Opcional, se você tiver um helper de paginação separado.
 
-    before_action :find_project, only: [:index, :new, :create, :edit, :update, :destroy, :export, :import_form, :import]
-    before_action :authorize_cash_flow, only: [:index, :new, :create, :edit, :update, :destroy, :export, :import_form, :import]
-    #before_action :check_redirect_loop, only: [:index]
-    before_action :filter_params, only: [:index, :export] # Apply filter_params to export as well
-    before_action :ensure_cash_flow_dependencies
+    before_action :find_project, only: [:index]
+    before_action :authorize_cash_flow, only: [:index]
+    before_action :filter_params, only: [:index, :export] 
+    before_action :check_dependencies_and_set_flash, only: [:index]
+    #before_action :ensure_cash_flow_dependencies
     before_action :find_issue_and_set_custom_fields, only: [:edit, :update, :destroy]
     before_action :set_new_cash_flow_entry, only: [:new, :create]
-
+    
     rescue_from Exception, with: :handle_server_error # Para capturar qualquer erro e redirecionar
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
     rescue_from ActionController::ParameterMissing, with: :parameter_missing
@@ -19,58 +21,56 @@ module FotonCashFlow
     def index
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando CashFlow::EntriesController#index."
 
-      # Validar se o projeto financeiro interno está configurado se 'only_finance_project' estiver ativo
-      if Setting.plugin_foton_cash_flow['only_finance_project'].to_s == '1' && FotonCashFlow::SettingsHelper.internal_finance_project_id.blank?
-        Rails.logger.warn "[FOTON_CASH_FLOW][EntriesController] Projeto financeiro interno não configurado enquanto 'only_finance_project' está ativo."
-        flash[:warning] = l(:warning_internal_finance_project_not_set)
-        return redirect_to action: :index, project_id: nil # Redireciona para o índice sem filtro de projeto
-      end
+      # Verifica as dependências.
+      @dependencies_met = FotonCashFlow::SettingsHelper.all_dependencies_met?
 
-      # Filtra as issues com base nos parâmetros
-      @query = FotonCashFlow::Services::QueryBuilder.new(params, User.current).build
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] Query Builder retornou: #{@query.count} issues."
-      @cash_flow_status_collection = IssueStatus.all.map { |s| [s.name, s.id.to_s] }
-
-      Rails.logger.debug "[DEBUG] Conteúdo de @cash_flow_status_collection: #{@cash_flow_status_collection.inspect}"      
-      if @query.any?
-        Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] Primeira issue da query (ID: #{@query.first.id}, Class: #{@query.first.class}). Responde a cash_flow_transaction_type?: #{@query.first.respond_to?(:cash_flow_transaction_type)}"
+      unless @dependencies_met
+        flash.now[:warning] = l(:warning_cash_flow_dependencies_not_met_full)
+        # Se as dependências não foram atendidas, inicializa as variáveis
+        # para evitar erros na view e renderiza a página com o aviso.
+        @query = Issue.none
+        @total_revenue = @total_expense = @balance = BigDecimal('0.0')
+        @bar_chart_labels = @bar_chart_revenue = @bar_chart_expense = @pie_chart_labels = @pie_chart_data = []
       else
-        Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Nenhuma issue encontrada pela QueryBuilder."
+        # O bloco a seguir será executado somente se as dependências forem atendidas.
+        begin
+          # Filtra as issues com base nos parâmetros
+          @query = FotonCashFlow::Services::QueryBuilder.new(params, User.current).build
+          Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] Query Builder retornou: #{@query.count} issues."
+
+          # Calcula o sumário (receita, despesa, balanço)
+          summary_service = FotonCashFlow::Services::SummaryService.new(@query)
+          summary_service.calculate
+          @total_revenue = summary_service.total_revenue
+          @total_expense = summary_service.total_expense
+          @balance = summary_service.balance
+          @bar_chart_labels = summary_service.bar_chart_labels
+          @bar_chart_revenue = summary_service.bar_chart_revenue
+          @bar_chart_expense = summary_service.bar_chart_expense
+          @pie_chart_labels = summary_service.pie_chart_labels
+          @pie_chart_data = summary_service.pie_chart_data
+        rescue => e
+          Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro não crítico durante a execução do index: #{e.message}"
+          Rails.logger.error e.backtrace.join("\n")
+          flash.now[:error] = l(:error_cash_flow_processing_failed, msg: e.message)
+          @query = Issue.none
+          @total_revenue = @total_expense = @balance = BigDecimal('0.0')
+          @bar_chart_labels = @bar_chart_revenue = @bar_chart_expense = @pie_chart_labels = @pie_chart_data = []
+        end
       end
 
-      # Calcula o sumário (receita, despesa, balanço)
-      summary_service = FotonCashFlow::Services::SummaryService.new(@query)
-      summary_service.calculate
-      @total_revenue = summary_service.total_revenue
-      @total_expense = summary_service.total_expense
-      @balance = summary_service.balance
-      @bar_chart_labels = summary_service.bar_chart_labels
-      @bar_chart_revenue = summary_service.bar_chart_revenue
-      @bar_chart_expense = summary_service.bar_chart_expense
-      @pie_chart_labels = summary_service.pie_chart_labels
-      @pie_chart_data = summary_service.pie_chart_data
-
-      # Paginação
       @issue_count = @query.count
       @limit = per_page_option
       @issue_pages = Paginator.new @issue_count, @limit, params['page']
       @offset = @issue_pages.offset
       @issues_for_table = @query.limit(@limit).offset(@offset)
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] Issues paginadas para a tabela: #{@issues_for_table.count}."
 
-      Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Finalizando CashFlow::EntriesController#index."
-
-      # Renderiza a view
+      @cash_flow_status_collection = IssueStatus.all.map { |s| [s.name, s.id.to_s] }
+      
       respond_to do |format|
         format.html
         format.csv { send_data FotonCashFlow::Services::Exporter.new(@query, Setting.plugin_foton_cash_flow['default_currency']).export_csv, filename: "fluxo_de_caixa_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv" }
       end
-    rescue => e
-      # Este bloco captura erros inesperados que não são tratados por rescue_from ou before_action
-      Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro inesperado no EntriesController#index: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-      flash[:error] = l(:error_internal_server_error, msg: e.message)
-      redirect_to default_rescue_path
     end
 
     def new
@@ -212,15 +212,15 @@ module FotonCashFlow
       Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] [filter_params] Parâmetros filtrados: #{@filter_params.inspect}"
     end
 
-    def ensure_cash_flow_dependencies
-      unless FotonCashFlow::SettingsHelper.all_dependencies_met?
-        Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Dependências do fluxo de caixa não atendidas. Redirecionando."
-        flash[:error] = l(:error_cash_flow_dependencies_missing) # Usa uma chave de tradução para a mensagem
-        redirect_to default_rescue_path # Redireciona para um caminho seguro, como a página de configurações ou a home
-        return false # Impede a execução posterior da action
-      end
-      true
-    end
+    # def ensure_cash_flow_dependencies
+    #   unless FotonCashFlow::SettingsHelper.all_dependencies_met?
+    #     Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Dependências do fluxo de caixa não atendidas. Redirecionando."
+    #     flash[:error] = l(:error_cash_flow_dependencies_missing) # Usa uma chave de tradução para a mensagem
+    #     redirect_to diagnostics_path #default_rescue_path # Redireciona para um caminho seguro, como a página de configurações ou a home
+    #     return false # Impede a execução posterior da action
+    #   end
+    #   true
+    # end
 
     def find_issue_and_set_custom_fields
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] [find_issue_and_set_custom_fields] Buscando Issue ID #{params[:id]} para o projeto #{@project&.id}."
@@ -280,12 +280,33 @@ module FotonCashFlow
 
     # Define o caminho padrão para redirecionamentos de resgate
     def default_rescue_path
-      if @project.present?
-        cash_flow_entries_path(project_id: @project)
-      else
-        # Tenta ir para o index geral se não houver projeto
-        cash_flow_entries_path
+      begin
+        if @project.present?
+          Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Redirecionando para página do projeto."
+          project_path(@project) 
+        else
+          # Tenta ir para o index geral se não houver projeto
+          Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Redirecionando para página do Fluxo de Caixa."
+          cash_flow_entries_path
+        end
+      rescue => e
+        Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Erro inesperado no default_rescue_path: #{e.message}"
+        home_path
       end
     end
+
+  def check_dependencies_and_set_flash
+    Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Verificando dependências antes de carregar o índice."
+    @dependencies_met = FotonCashFlow::SettingsHelper.all_dependencies_met?
+    unless @dependencies_met
+      flash.now[:warning] = l(:warning_cash_flow_dependencies_not_met)
+      # O modal de sincronização será exibido na view
+    end
+    # @sync_issues_count = FotonCashFlow::Services::SynchronizationService.new.unsynced_issues_count
+    # No momento, esta linha foi comentada pois não há um SynchronizationService disponível.
+    # Será necessário implementar um serviço para verificar as issues não sincronizadas.
+    # Por ora, a lógica do modal será baseada apenas no status geral das dependências.
+  end
+
   end
 end

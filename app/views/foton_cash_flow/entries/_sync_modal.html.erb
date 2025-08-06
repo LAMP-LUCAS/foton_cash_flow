@@ -1,0 +1,28 @@
+<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_sync_modal.html.erb %>
+
+<div class="modal fade" id="syncModal" tabindex="-1" role="dialog" aria-labelledby="syncModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="syncModalLabel"><%= l(:label_cash_flow_diagnostics) %></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><%= l(:text_sync_modal_info) %></p>
+        <ul>
+          <li><%= l(:label_tracker_status) %>: <%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></li>
+          <li><%= l(:label_project) %>: <%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></li>
+          <li><%= l(:label_custom_fields) %>: <%= FotonCashFlow::SettingsHelper::CUSTOM_FIELD_NAMES.values.join(', ') %></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l(:button_close) %></button>
+        <%= link_to l(:button_sync_dependencies), foton_cash_flow_diagnostics_run_sync_path, method: :post, class: 'btn btn-primary' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Fim do arquivo _sync_modal.html.erb %>

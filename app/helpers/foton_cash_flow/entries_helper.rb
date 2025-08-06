@@ -7,21 +7,23 @@ module FotonCashFlow
     # Incluir o helper de paginação do Redmine para ter acesso a métodos como pagination_links
     include Redmine::Pagination::Helper
 
-
     # Cache de classe para IDs de custom fields
-    # Usamos uma variável de classe (@@) que é acessível globalmente dentro do módulo
-    @@class_cf_cache = {} # <<<<<<<<<< FUTURA MELHORIA: Trabalhar com caches mais seguros a nível de requisição ou um cache de Rails adequado
+    @@class_cf_cache = {}
 
     # =====================================================
-    #   FORMATAÇÃO DE DADOS
+    #  FORMATAÇÃO DE DADOS
     # =====================================================
+
+    # Formata o status da issue, usando a tradução padrão do Redmine.
+    def format_status(status)
+      content_tag(:span, status.name, class: "status-label status-#{status.id}")
+    end
 
     # Formata o tipo de transação com estilo apropriado
     def format_transaction_type(issue)
       Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] format_transaction_type chamado para Issue ID: #{issue&.id}. Objeto recebido: #{issue.class}"
       return ''.html_safe unless issue.present?
 
-      # Agora, usa o método do Issue para obter o tipo
       tipo = issue.cash_flow_transaction_type
       return ''.html_safe if tipo.blank?
 
@@ -42,20 +44,37 @@ module FotonCashFlow
       amount = extract_amount(value)
       css_class = amount_css_class(value, amount)
 
-      formatted_amount = format_currency(amount, options)
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Valor formatado: #{formatted_amount} , classe CSS: #{css_class}, amount: #{amount.to_s}"
+      # Usamos a localização do Redmine para garantir a formatação correta
+      # A formatação é delegada a um helper nativo do Rails
+      formatted_amount = l_currency(amount)
+      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Valor formatado: #{formatted_amount}, classe CSS: #{css_class}, amount: #{amount.to_s}"
+
       content_tag :span, formatted_amount, class: css_class
     end
 
     # Link para uma issue de fluxo de caixa
     def link_to_cash_flow_issue(issue)
       link_to "##{issue.id}", issue_path(issue),
-         title: issue.subject,
-         class: 'issue-link'
+        title: issue.subject,
+        class: 'issue-link'
+    end
+
+    # Formata a data.
+    def format_date(date_str)
+      date = Date.parse(date_str) rescue nil
+      if date.present?
+        format_date(date)
+      else
+        'N/A'
+      end
+    end
+
+    def l_currency(amount)
+      ActionController::Base.helpers.number_to_currency(amount, locale: I18n.locale)
     end
 
     # =====================================================
-    #   RECORRÊNCIA DE LANÇAMENTOS
+    #  RECORRÊNCIA DE LANÇAMENTOS
     # =====================================================
     
     # Helper method to get custom field ID by name
@@ -63,7 +82,6 @@ module FotonCashFlow
       # Cache the custom field IDs to avoid repeated database queries
       @@class_cf_cache[name] ||= CustomField.find_by(name: name)&.id
     end
-
 
     def recurrence_label(issue)
       return ''.html_safe unless issue.present?
@@ -87,7 +105,7 @@ module FotonCashFlow
     end
 
     # =====================================================
-    #   FILTRO DE DEMANDA
+    #  FILTRO DE DEMANDA
     # =====================================================
     def issue_filter_options(selected_issues = [])
       tracker = Tracker.find_by(name: 'Financeiro')
@@ -107,7 +125,7 @@ module FotonCashFlow
     end
 
     # =====================================================
-    #   COLEÇÕES PARA FORMULÁRIOS
+    #  COLEÇÕES PARA FORMULÁRIOS
     # =====================================================
     def transaction_type_collection
       [[l(:label_revenue), 'revenue'], [l(:label_expense), 'expense']]
@@ -116,10 +134,6 @@ module FotonCashFlow
     def project_collection_for_select(projects)
       projects.map { |p| [p.name, p.id] }.sort_by(&:first)
     end
-
-    # def cash_flow_status_collection
-    #   IssueStatus.all.map { |s| [s.name, s.id] }
-    # end
 
     def link_to_cash_flow_issue(issue)
       return '' unless issue.present? && issue.id.present?
@@ -131,35 +145,26 @@ module FotonCashFlow
 
     # =====================================================
     #
-    # ---------------  MÉTODOS PRIVADOS  ------------------
+    # ---------------  MÉTODOS PRIVADOS  ------------------
     #
     # =====================================================
     private
 
     # Extrai o valor monetário de diferentes tipos de entrada
     def extract_amount(value)
-      case value
-      when Issue
-        value.cash_flow_amount # Usando o método centralizado no Issue
-      when BigDecimal
-        value
-      when Numeric
-        BigDecimal(value.to_s)
-      when String
-        # Manter a lógica de sanitização de string para casos em que o valor não vem de uma Issue
-        value.gsub(/[^\\d.,-]/, '').to_d
-      else
-        BigDecimal('0.0')
-      end
+      value.is_a?(BigDecimal) ? value : BigDecimal(value.to_s.gsub('.', '').gsub(',', '.').to_s)
+    rescue
+      BigDecimal('0.0')
     end
 
     # Determina a classe CSS com base no valor
-    def amount_css_class(value, amount)
-      if value.is_a?(Issue)
-        # Usando o método centralizado no Issue
-        value.cash_flow_transaction_type == 'revenue' ? 'text-success' : 'text-danger'
+    def amount_css_class(original_value, amount)
+      if amount.positive?
+        'text-success'
+      elsif amount.negative?
+        'text-danger'
       else
-        amount >= 0 ? 'text-success' : 'text-danger'
+        ''
       end
     end
 
@@ -175,12 +180,23 @@ module FotonCashFlow
       number_to_currency(amount, options)
     end
 
-    # # Helper para obter o ID de um custom field pelo nome (com cache)
-    # def custom_field_id_by_name(name)
-    #   # Utilize o cache de classe para evitar múltiplas consultas ao banco de dados
-    #   @@class_cf_cache[name] ||= CustomField.find_by_name(name)&.id
-    # end
+    def custom_field_id_by_name(name)
+      @@class_cf_cache[name] ||= CustomField.find_by_name(name)&.id
+    end
+
+
+        # Método centralizado para formatação de moeda
+    def l_currency(amount)
+      # Adicionar opções padrão para o formato brasileiro
+      ActionController::Base.helpers.number_to_currency(
+        amount,
+        unit: 'R$',
+        separator: ',',
+        delimiter: '.',
+        precision: 2,
+        locale: :pt # Certifique-se que o locale está configurado corretamente no seu Redmine
+      )
+    end
+
   end
 end
-
-#Fim do entries_helper.rb

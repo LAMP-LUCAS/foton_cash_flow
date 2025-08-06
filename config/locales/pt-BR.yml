@@ -234,7 +234,6 @@ pt-BR:
     error_cf_entry_date_required: "Data do Lançamento é um campo obrigatório."
     error_cf_entry_date_invalid_format: "Data do Lançamento está em formato inválido."
     error_cf_amount_required: "Valor é um campo obrigatório."
-    error_cf_amount_invalid_format: "Valor está em formato inválido."
     error_cf_transaction_type_required: "Tipo de Transação é um campo obrigatório."
     error_cf_transaction_type_invalid_value: "Tipo de Transação possui um valor inválido."
     error_internal_server: "Erro interno no servidor. Detalhes: %{message}"
@@ -276,3 +275,4 @@ pt-BR:
 
   error_internal_server_error: "Erro nas configurações internas"
   error_cash_flow_dependencies_not_met: "As dependências essenciais do Fluxo de Caixa não foram configuradas. Por favor, verifique as configurações do plugin."
+  error_cf_amount_invalid_format: "Formato de valor inválido. Use 1.234,56 ou 1,234.56"

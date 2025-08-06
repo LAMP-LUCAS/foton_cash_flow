@@ -1,60 +1,49 @@
-<% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_charts.html.erb %>
+<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_charts.html.erb %>
 
-<div class="charts">
-  <h3><%= l(:label_cash_flow_charts) %></h3>
-  <div style="width: 800px; margin: auto;">
-    <canvas id="bar-chart"></canvas>
+<div class="cf-charts-container">
+  
+  <div class="cf-chart-card">
+    <h3 class="cf-chart-title">Receita vs. Despesa Mensal</h3>
+    <canvas id="cashFlowBarChart"></canvas>
   </div>
-  <div style="width: 400px; margin: auto;">
-    <canvas id="pie-chart"></canvas>
+
+  <div class="cf-chart-card">
+    <h3 class="cf-chart-title">Balanço Acumulado</h3>
+    <canvas id="cashFlowBalanceChart"></canvas>
   </div>
+
+  <div class="cf-chart-card">
+    <h3 class="cf-chart-title">Fluxo Acumulado</h3>
+    <canvas id="cashFlowCumulativeChart"></canvas>
+  </div>
+  
+  <div class="cf-chart-card">
+    <h3 class="cf-chart-title">Despesas por Categoria</h3>
+    <canvas id="cashFlowPieChart"></canvas>
+  </div>
+
 </div>
 
-<% content_for :header_tags do %>
-  <%= javascript_include_tag 'chart.min.js' %>
-  <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-      // Bar Chart
-      var barCtx = document.getElementById('bar-chart');
-      if (barCtx) {
-        new Chart(barCtx, {
-          type: 'bar',
-          data: {
-            labels: <%= bar_chart_labels.to_json.html_safe %>,
-            datasets: [
-              { label: '<%= l(:label_total_revenue) %>', data: <%= bar_chart_revenue.to_json.html_safe %>, backgroundColor: 'rgba(75, 192, 192, 0.6)' },
-              { label: '<%= l(:label_total_expense) %>', data: <%= bar_chart_expense.to_json.html_safe %>, backgroundColor: 'rgba(255, 99, 132, 0.6)' }
-            ]
-          },
-          options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
-          }
-        });
-      }
+<script>
+  window.cashFlowBarData = {
+    labels: <%= raw bar_chart_labels.to_json %>,
+    revenue: <%= raw bar_chart_revenue.to_json %>,
+    expense: <%= raw bar_chart_expense.to_json %>
+  };
 
-      // Pie Chart
-      var pieCtx = document.getElementById('pie-chart');
-      if (pieCtx) {
-        new Chart(pieCtx, {
-          type: 'pie',
-          data: {
-            labels: <%= pie_chart_labels.to_json.html_safe %>,
-            datasets: [{
-              data: <%= pie_chart_data.to_json.html_safe %>,
-              backgroundColor: [
-                'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
-                'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
-              ]
-            }]
-          },
-          options: {
-            responsive: true
-          }
-        });
-      }
-    });
-  </script>
-<% end %>
+  window.cashFlowPieData = {
+    labels: <%= raw pie_chart_labels.to_json %>,
+    data: <%= raw pie_chart_data.to_json %>
+  };
 
-<% # fim dos charts %>
+  window.cashFlowBalanceData = {
+    labels: <%= raw balance_chart_labels.to_json %>,
+    data: <%= raw balance_chart_data.to_json %>
+  };
+
+  window.cashFlowCumulativeData = {
+    labels: <%= raw cumulative_revenue_labels.to_json %>,
+    revenue: <%= raw cumulative_revenue_data.to_json %>,
+    expense: <%= raw cumulative_expense_data.to_json %>
+  };
+</script>

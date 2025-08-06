@@ -3,7 +3,7 @@
 require_dependency 'settings_helper'
 
 module FotonCashFlow
-  module Services 
+  module Services
     class QueryBuilder
       attr_reader :cf_cache
 
@@ -28,39 +28,44 @@ module FotonCashFlow
         issues = Issue.
           where(tracker_id: @finance_tracker_id).
           includes(:custom_values)
+        
+        # Lógica para pular o filtro de projeto se for admin
+        unless @user.admin? && !@params[:project_id].present?
+          if @params[:project_id].present?
+            project = Project.find_by(identifier: @params[:project_id])
+            issues = issues.where(project_id: project.id) if project
+          elsif Setting.plugin_foton_cash_flow['only_finance_project'] == '1'
+            internal_finance_project_id = FotonCashFlow::SettingsHelper.internal_finance_project_id
+            if internal_finance_project_id.present?
+              issues = issues.where(project_id: internal_finance_project_id)
+            else
+              Rails.logger.warn "[CASH_FLOW_BUILDER] Setting 'only_finance_project' está ativa, mas o ID do projeto interno não está configurado."
+            end
+          end
+        end
 
+        # Filtros de data
         if @params[:from_date].present?
           issues = issues.by_cash_flow_cf_date_range(@cf_ids[:entry_date], @params[:from_date], nil)
         end
-
         if @params[:to_date].present?
           issues = issues.by_cash_flow_cf_date_range(@cf_ids[:entry_date], nil, @params[:to_date])
         end
 
+        # Filtros de valor e categoria
         if @params[:transaction_type].present?
           issues = issues.by_cash_flow_cf_value(@cf_ids[:transaction_type], @params[:transaction_type])
         end
-
         if @params[:category].present?
           issues = issues.by_cash_flow_cf_value(@cf_ids[:category], @params[:category])
         end
 
+        # Filtro de busca
         if @params[:search].present?
           search_term = "%#{@params[:search].downcase}%"
           issues = issues.where("LOWER(issues.subject) LIKE :search OR LOWER(issues.description) LIKE :search", search: search_term)
         end
-
-        if @params[:project_id].present?
-          issues = issues.where(project_id: @params[:project_id])
-        elsif Setting.plugin_foton_cash_flow['only_finance_project'] == '1'
-          internal_finance_project_id = FotonCashFlow::SettingsHelper.internal_finance_project_id
-          if internal_finance_project_id.present?
-            issues = issues.where(project_id: internal_finance_project_id)
-          else
-            Rails.logger.warn "[CASH_FLOW_BUILDER] Setting 'only_finance_project' está ativa, mas o ID do projeto interno não está configurado."
-          end
-        end
-
+        
         issues
       end
 

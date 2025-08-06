@@ -7,9 +7,7 @@
 <h2 class="cf-title"><%= l(:label_cash_flow_diagnostics) %></h2>
 
 <div class="contextual">
-  <%= link_to l(:button_sync_dependencies), run_sync_diagnostics_path, method: :post,
-              data: { confirm: l(:text_cash_flow_sync_confirm) },
-              class: 'cf-btn cf-btn-primary' %>
+  <%= link_to l(:button_sync_dependencies), {controller: 'foton_cash_flow/diagnostics', action: 'run_sync'}, method: :post %>
 </div>
 
 <div class="cf-section">

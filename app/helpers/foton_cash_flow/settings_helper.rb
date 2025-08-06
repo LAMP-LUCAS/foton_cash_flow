@@ -137,178 +137,180 @@ module FotonCashFlow
 
         # Transições a partir de 'Nova'
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_new, new_status: status_in_progress
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_new,
+          new_status: status_in_progress
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_new, new_status: status_rejected
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_new,
+          new_status: status_rejected
         )
-
         # Transições a partir de 'Em Andamento'
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_in_progress, new_status: status_feedback
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_in_progress,
+          new_status: status_feedback
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_in_progress, new_status: status_resolved
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_in_progress,
+          new_status: status_resolved
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_in_progress, new_status: status_rejected
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_in_progress,
+          new_status: status_rejected
         )
-
         # Transições a partir de 'Feedback'
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_feedback, new_status: status_in_progress
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_feedback,
+          new_status: status_in_progress
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_feedback, new_status: status_resolved
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_feedback,
+          new_status: status_resolved
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_feedback, new_status: status_rejected
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_feedback,
+          new_status: status_rejected
         )
-
         # Transições de Reabertura (de status finalizados para 'Em Andamento')
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_resolved, new_status: status_in_progress
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_resolved,
+          new_status: status_in_progress
         )
         WorkflowTransition.find_or_create_by!(
-          tracker: finance_tracker, role: role, old_status: status_rejected, new_status: status_in_progress
+          tracker: finance_tracker,
+          role: role,
+          old_status: status_rejected,
+          new_status: status_in_progress
         )
       end
-      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Fluxo de trabalho do Tracker '#{finance_tracker.name}' configurado manualmente."
-
 
       # 3. Assegurar Custom Fields
       # ------------------------------------------------------------------
-      EXPECTED_CUSTOM_FIELD_ATTRIBUTES.each do |cf_name, attrs|
-        key = CUSTOM_FIELD_NAMES.key(cf_name)
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Iniciando verificação dos custom fields."
+      CUSTOM_FIELD_NAMES.each do |key, name|
+        cf = CustomField.find_or_initialize_by(name: name)
+        attributes = EXPECTED_CUSTOM_FIELD_ATTRIBUTES[name]
+        
+        cf.field_format = attributes[:field_format]
+        cf.is_required = attributes[:is_required]
+        cf.position = attributes[:position]
 
-        custom_field = IssueCustomField.find_or_initialize_by(name: cf_name) do |cf|
-          cf.field_format = attrs[:field_format]
-          cf.is_required = attrs[:is_required]
-          cf.min_length = attrs[:min_length] if attrs[:min_length].present?
-          cf.position = attrs[:position] if attrs[:position].present?
-          cf.is_filter = attrs[:is_filter] if attrs[:is_filter].present?
-          cf.editable = true # Por padrão, os campos são editáveis
-          cf.visible = true  # Por padrão, os campos são visíveis
+        if attributes[:field_format] == 'list'
+          cf.possible_values = attributes[:possible_values]
         end
 
-        # Atualiza atributos que podem mudar ou que não são definidos na inicialização
-        custom_field.field_format = attrs[:field_format]
-        custom_field.is_required = attrs[:is_required]
-        custom_field.min_length = attrs[:min_length] if attrs[:min_length].present?
-        custom_field.position = attrs[:position] if attrs[:position].present?
-        custom_field.is_filter = attrs[:is_filter] if attrs[:is_filter].present?
+        # Associar o CF ao Tracker financeiro
+        cf.trackers << finance_tracker unless cf.trackers.include?(finance_tracker)
 
+        cf.save!
+        Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf.name}' (ID: #{cf.id}) criado/assegurado."
 
-        if attrs[:field_format] == 'list'
-          case key
-          when :category
-            categories_from_settings_raw = Setting.plugin_foton_cash_flow['categories']
-
-            # Normaliza as categorias das configurações: garante que seja um array de strings.
-            actual_categories_from_settings = if categories_from_settings_raw.is_a?(Array)
-                                                categories_from_settings_raw.map do |c|
-                                                  c.is_a?(Hash) && c.key?('name') ? c['name'] : c.to_s
-                                                end.compact.presence
-                                              else
-                                                nil
-                                              end
-
-            # Usa categorias das settings se presentes, caso contrário, usa as padrão.
-            final_possible_values = actual_categories_from_settings || DEFAULT_CATEGORIES.dup
-
-            # Garante que possible_values nunca seja um array completamente vazio para campos de lista (validação Redmine)
-            # Redmine exige que possible_values seja um array de strings.
-            custom_field.possible_values = final_possible_values.map(&:to_s).any? ? final_possible_values.map(&:to_s) : [""]
-            Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf_name}' (Key: #{key}) carregado com categorias: #{custom_field.possible_values.inspect}"
-          else
-            # Para outros campos de lista, usa os valores possíveis definidos em EXPECTED_CUSTOM_FIELD_ATTRIBUTES
-            # Garante que os valores sejam strings e que não seja um array vazio real para o Redmine
-            custom_field.possible_values = (attrs[:possible_values] || []).map(&:to_s).any? ? (attrs[:possible_values] || []).map(&:to_s) : [""]
-            Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf_name}' (Key: #{key}) é um tipo lista, usando valores de atributos esperados ou padrão vazio."
-          end
-
-          # Define default_value para campos de lista obrigatórios se ainda não tiver um
-          if custom_field.is_required && custom_field.possible_values.any? && custom_field.default_value.blank?
-            custom_field.default_value = custom_field.possible_values.first
-          end
-        end
-
-        if custom_field.save
-          Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf_name}' (ID: #{custom_field.id}, Key: #{key}) ensured."
-          Setting.plugin_foton_cash_flow["#{key}_custom_field_id"] = custom_field.id
-        else
-          Rails.logger.error "[ERROR][SETTINGS_HELPER] Failed to save Custom Field '#{cf_name}': #{custom_field.errors.full_messages.join(', ')}"
-          return false
-        end
-
-        # Associar o Custom Field ao Tracker Financeiro
-        unless finance_tracker.custom_fields.include?(custom_field)
-          finance_tracker.custom_fields << custom_field
-          # Não precisa finance_tracker.save aqui se os custom_fields forem associados diretamente.
-          # A associação já salva implicitamente ao adicionar ao `has_many`.
-          # Mas se ocorrer um erro de validação no tracker por causa do CF, pode falhar silenciosamente.
-          # É mais seguro, se o tracker_custom_field estiver envolvido, salvar o Tracker.
-          # Por simplicidade, assumimos que adicionar ao array é suficiente para a relação.
-        end
+        # Salvar o ID do CF nas configurações do plugin para fácil acesso
+        Setting.plugin_foton_cash_flow["cf_#{key}_id"] = cf.id
       end
 
-      # Não é necessário chamar Setting.plugin_foton_cash_flow.save explicitamente,
-      # pois as atribuições individuais já persistem as configurações.
-      Rails.logger.info "[DEBUG][SETTINGS_HELPER] foton_cash_flow plugin settings updated."
+      # 4. Assegurar a Role 'Fluxo de Caixa'
+      # ------------------------------------------------------------------
+      cash_flow_role = Role.find_or_create_by!(name: 'Fluxo de Caixa') do |role|
+        role.permissions = [:view_cash_flow, :add_cash_flow_entries, :edit_cash_flow_entries, :delete_cash_flow_entries, :manage_cash_flow_settings]
+      end
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Role 'Fluxo de Caixa' (ID: #{cash_flow_role.id}) criada/assegurada."
+      Setting.plugin_foton_cash_flow['cash_flow_role_id'] = cash_flow_role.id
 
-      true # Indica sucesso
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] load_custom_field_ids_into_settings concluído."
+    end
+    
+    def self.expected_custom_field_attributes_for(field_key)
+      # Implementação que retorna os atributos esperados para cada campo
+      case field_key
+      when :entry_date
+        { required: true, format: :date }
+      when :amount
+        { required: true, format: :currency }
+      when :transaction_type
+        { required: true, possible_values: ['expense', 'revenue'] }
+      when :category
+        { required: true, possible_values: ['Arquitetos', 'Engenheiros', 'Construtoras', 'Empresas'] }
+      else
+        {}
+      end
+    end
+
+
+
+    # -----------------------------------------------------------------
+    # MÉTODOS DE AJUDA
+    # -----------------------------------------------------------------
+    
+    # Método para converter uma string de moeda no formato BR para BigDecimal de forma robusta
+    def self.parse_currency_to_decimal(value_str)
+      return BigDecimal('0.0') if value_str.blank?
+      
+      # Remove caracteres não numéricos exceto vírgula, ponto e sinal negativo
+      sanitized_str = value_str.to_s.gsub(/[^\d,\-\.]/, '')
+      
+      # Se houver vírgula e ponto, mantém apenas o último como separador decimal
+      if sanitized_str.count(',') > 0 && sanitized_str.count('.') > 0
+        if sanitized_str.rindex(',') > sanitized_str.rindex('.')
+          sanitized_str.gsub!('.', '') # Remove pontos (milhares)
+        else
+          sanitized_str.gsub!(',', '') # Remove vírgulas (milhares)
+        end
+      end
+      
+      # Substitui a vírgula por ponto se for o separador decimal
+      sanitized_str.gsub!(',', '.') if sanitized_str.count(',') == 1
+      
+      # Converte para BigDecimal
+      BigDecimal(sanitized_str)
     rescue => e
-      Rails.logger.error "[ERROR][SETTINGS_HELPER] Erro durante a sincronização de dependências: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-      false # Indica falha
+      Rails.logger.error "[FOTON_CASH_FLOW] Erro ao converter valor: #{value_str} - #{e.message}"
+      BigDecimal('0.0')
     end
-
-    # Método para obter um CF ID de forma fácil em qualquer lugar
+    
     def self.cf_id(key)
-      Setting.plugin_foton_cash_flow["#{key}_custom_field_id"]&.to_i
+      Setting.plugin_foton_cash_flow["cf_#{key}_id"]
     end
-
+    
     def self.finance_tracker_id
-      Setting.plugin_foton_cash_flow['finance_tracker_id']&.to_i
+      Setting.plugin_foton_cash_flow['finance_tracker_id']
     end
 
-    # Método para obter os valores possíveis de um Custom Field
-    def self.custom_field_possible_values(key)
-      cf_id_val = cf_id(key)
-      return [] unless cf_id_val.present?
-      CustomField.find_by(id: cf_id_val)&.possible_values || []
-    rescue ActiveRecord::RecordNotFound => e
-      Rails.logger.error "[SETTINGS_HELPER] Custom Field com ID #{cf_id_val} não encontrado para a chave #{key}: #{e.message}"
-      []
-    end
-
-    # Método para obter a lista de objetos CustomField relevantes para os formulários
-    def self.cash_flow_custom_fields_for_form
-      cf_ids = CUSTOM_FIELD_NAMES.keys.map { |key| cf_id(key) }.compact
-      CustomField.where(id: cf_ids).compact.sort_by(&:position)
-    end
-
-    # Método para verificar se todas as dependências essenciais estão configuradas
-    def self.all_dependencies_met?
-      internal_finance_project_id.present? &&
-      finance_tracker_id.present? &&
-      cf_id(:entry_date).present? &&
-      cf_id(:amount).present? &&
-      cf_id(:transaction_type).present? &&
-      cf_id(:category).present?
-    end
-
-    # Método para obter o ID do projeto financeiro interno, se configurado
     def self.internal_finance_project_id
-      Setting.plugin_foton_cash_flow['internal_finance_project_id']&.to_i
+      Setting.plugin_foton_cash_flow['internal_finance_project_id']
     end
 
-    # Novo método para obter os atributos esperados de um CF pelo nome do CF
-    def self.expected_custom_field_attributes_for(cf_name)
-      EXPECTED_CUSTOM_FIELD_ATTRIBUTES[cf_name.to_s] || {} # Retorna um hash vazio se não encontrado
-    end
+    def self.all_dependencies_met?
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Verificando se todas as dependências foram atendidas."
+      
+      expected_dependencies = [:entry_date, :amount, :transaction_type, :category]
+      dependencies_met = expected_dependencies.all? do |key|
+        cf_id = Setting.plugin_foton_cash_flow["cf_#{key}_id"]
+        cf_id.present? && CustomField.exists?(id: cf_id)
+      end
 
+      dependencies_met &= Setting.plugin_foton_cash_flow['finance_tracker_id'].present? && Tracker.exists?(id: Setting.plugin_foton_cash_flow['finance_tracker_id'])
+      dependencies_met &= Setting.plugin_foton_cash_flow['internal_finance_project_id'].present? && Project.exists?(id: Setting.plugin_foton_cash_flow['internal_finance_project_id'])
+
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Dependências atendidas: #{dependencies_met}"
+      dependencies_met
+    end
   end
 end
-
-# Fim do arquivo settings_helper.rb

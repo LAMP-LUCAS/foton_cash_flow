@@ -1,12 +1,16 @@
 <% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_active_filters.html.erb %>
 
-<% if query.present? && query.reject { |_, v| v.blank? }.present? %>
+<% if filter_params.present? && filter_params.reject { |k, v| v.blank? || k == 'project_id' }.present? %>
   <div class="filters">
     <h3><%= l(:label_active_filters) %></h3>
     <ul>
-      <% query.each do |key, value| %>
-        <% if value.present? && key != 'page' %> <%# Ignorar 'page' na exibição de filtros %>
-          <li><%= l("field_#{key}".to_sym) %>: <%= value %></li>
+      <% filter_params.each do |key, value| %>
+        <% if value.present? && key != 'page' %>
+          <li>
+            <strong><%= l("field_#{key}".to_sym) %>:</strong>
+            <%# Exibir o valor do filtro de forma mais amigável, se necessário %>
+            <%= value %>
+          </li>
         <% end %>
       <% end %>
       <li><%= link_to l(:button_clear), cash_flow_entries_path(project_id: project), class: 'icon icon-clear' %></li>

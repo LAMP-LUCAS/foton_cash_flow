@@ -7,13 +7,17 @@ require_dependency 'settings_helper'
 
 module FotonCashFlow
   module Patches
+    
     module IssuePatch
       extend ActiveSupport::Concern
 
       included do
+        include FotonCashFlow::SettingsHelper
+        
         # Log para confirmar a inclusão do patch
         Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] IssuePatch incluído no modelo Issue."
 
+        
         validate :validate_cash_flow_custom_fields, if: :cash_flow_issue?
 
         # --- SCOPES PARA FILTRAGEM DE CUSTOM FIELDS ---
@@ -118,7 +122,12 @@ module FotonCashFlow
         amount_cf_id = FotonCashFlow::SettingsHelper.cf_id(:amount)
         if amount_cf_id
           amount_value = get_custom_field_value(amount_cf_id)
-          Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Validação - Valor: #{amount_value.inspect}"
+          
+          # Nova validação de formato
+          unless amount_value =~ /^-?\d{1,3}(\.\d{3})*(,\d+)?$/ || amount_value =~ /^-?\d{1,3}(,\d{3})*(\.\d+)?$/
+            errors.add(:base, l(:error_cf_amount_invalid_format))
+          end
+          
           parsed_amount = FotonCashFlow::SettingsHelper.parse_currency_to_decimal(amount_value)
           if parsed_amount.nil? || parsed_amount <= 0
             errors.add(:base, l(:error_cf_amount_invalid))
@@ -165,6 +174,7 @@ module FotonCashFlow
         custom_field_values.detect { |v| v.custom_field_id == cf_id }.try(:value)
       end
     end
+
   end
 end
 

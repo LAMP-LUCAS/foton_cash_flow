@@ -3,37 +3,49 @@
 # frozen_string_literal: true
 
 RedmineApp::Application.routes.draw do
-  scope module: 'foton_cash_flow' do
-    # Rotas globais para entradas de fluxo de caixa (acessíveis via menu superior ou por administradores)
-    resources :cash_flow_entries, controller: 'entries', as: 'cash_flow_entries' do
-      collection do
-        get 'import_form'
-        post 'import'
-        get 'export'
-      end
-    end
+  namespace :foton_cash_flow do
 
-    # Rotas aninhadas a projetos para entradas de fluxo de caixa (acessíveis de dentro de um projeto)
-    resources :projects do
-      resources :cash_flow_entries, controller: 'entries', as: 'project_cash_flow_entries' do
-        collection do
-          get 'import_form'
-          post 'import'
-          get 'export'
-        end
-      end
+    # Rotas para o controlador de entradas de fluxo de caixa
+    resources :entries, only: [:index, :new, :create, :edit, :update, :destroy] do
+      get :export, on: :collection
+      get :import_form, on: :collection
+      post :import, on: :collection
     end
-
-    # Rotas de diagnóstico
-    resources :diagnostics, controller: 'diagnostics', only: [:index] do
-      collection do
-        post :run_sync
-      end
-    end
+    
+    # Rotas para o controlador de diagnósticos
+    get 'diagnostics', to: 'diagnostics#index', as: 'diagnostics'
+    post 'diagnostics/run_sync', to: 'diagnostics#run_sync', as: 'diagnostics_run_sync'
 
     # Rotas de configuração
-    resource :settings, controller: 'settings', only: [:index, :update]
+    resource :settings, only: [:index, :update] do
+      get :index, on: :collection
+    end
   end
-end
 
-#Fim do routes.rb
+  # Rotas aninhadas a projetos para entradas de fluxo de caixa
+  resources :projects do
+    resources :cash_flow_entries, controller: 'foton_cash_flow/entries'
+  end
+
+
+  resources :cash_flow_entries do
+    collection do
+      get 'import_form'  # Cria a rota import_form_cash_flow_entries_path
+    end
+  end
+
+
+  resources :cash_flow_entries do
+    collection do
+      get 'export'  # Isso criará export_cash_flow_entries_path
+    end
+  end
+
+  
+  namespace :foton_cash_flow do
+    resources :diagnostics do
+      post 'run_sync', on: :collection
+    end
+  end
+
+end

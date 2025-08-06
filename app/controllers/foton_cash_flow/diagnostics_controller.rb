@@ -23,7 +23,7 @@ module FotonCashFlow
         flash[:error] = l(:error_cash_flow_sync_failure, message: result[:message])
         Rails.logger.error "[DIAGNOSTICS] Sync failed: #{result[:message]}" # Log de falha
       end
-      redirect_to diagnostics_path # diagnostics_cash_flow_entries_path  - Redireciona de volta para a página de diagnóstico
+      redirect_to foton_cash_flow_diagnostics_path 
     end
 
     private

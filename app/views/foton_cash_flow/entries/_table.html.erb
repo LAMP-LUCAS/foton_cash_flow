@@ -1,15 +1,7 @@
 <% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_table.html.erb %>
 
-<% # Sumário %>
-<div class="summary">
-  <h3><%= l(:label_summary) %></h3>
-  <p><%= l(:label_total_revenue) %>: <%= format_amount(total_revenue) %></p>
-  <p><%= l(:label_total_expense) %>: <%= format_amount(total_expense) %></p>
-  <p><%= l(:label_balance) %>: <%= format_amount(balance) %></p>
-</div>
-
-<div class="autoscroll">
-  <table class="list entries">
+<div class="autoscroll cf-table-container">
+  <table class="list entries cf-table">
     <thead>
       <tr>
         <th><%= l(:field_id) %></th>
@@ -26,30 +18,24 @@
       <% if issues_for_table.any? %>
         <% issues_for_table.each do |issue| %>
           <tr>
-            <td><%= link_to_cash_flow_issue(issue) %></td>
-            <%# Usando os novos métodos do IssuePatch para acessar os valores dos campos personalizados %>
+            <td><%= link_to issue.id, issue_path(issue) %></td>
             <td><%= format_date(issue.cash_flow_entry_date) %></td>
             <td><%= issue.cash_flow_category %></td>
-            <td><%= format_transaction_type(issue) %></td> <%# Passa o objeto issue inteiro %>
-            <td><%= format_amount(issue) %></td> <%# Passa o objeto issue inteiro %>
+            <td><%= format_transaction_type(issue) %></td>
+            <td><%= format_amount(issue) %></td>
             <td><%= format_status(issue.status) %></td>
             <td><%= issue.subject %></td>
             <td class="buttons">
-              <%= link_to l(:button_edit), edit_cash_flow_entry_path(issue, project_id: project), class: 'icon icon-edit' %>
-              <%= link_to l(:button_delete), cash_flow_entry_path(issue, project_id: project), data: { confirm: l(:text_are_you_sure), method: :delete }, class: 'icon icon-del' %>
+              <%= link_to l(:button_edit), edit_issue_path(issue), class: 'icon icon-edit' %>
+              <%= link_to l(:button_delete), issue_path(issue), data: { confirm: l(:text_are_you_sure), method: :delete }, class: 'icon icon-del' %>
             </td>
           </tr>
         <% end %>
       <% else %>
         <tr>
-          <td colspan="8"><%= l(:label_no_data) %></td>
+          <td colspan="8" class="no-data-message"><%= l(:label_no_data) %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
 </div>
-
-<% # Renderiza links de paginação se houver mais de uma página %>
-<% #= pagination_links issue_pages, issue_count, per_page: limit %>
-
-<% # Fim do Sumário %>
