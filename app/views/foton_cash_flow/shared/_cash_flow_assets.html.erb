@@ -1,10 +1,19 @@
+<%# app\views\foton_cash_flow\shared\_cash_flow_assets.html.erb %>
+
 <%# Partial para incluir assets do plugin %>
 <% if plugin_assets_loaded %>
 
   <%= stylesheet_link_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
   
   <%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>
-  <%= javascript_include_tag 'chart.min.js', plugin: 'foton_cash_flow' %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <%
+=begin%>
+ <%= javascript_include_tag 'chart.min.js', plugin: 'foton_cash_flow', type: 'module' %> 
+<%
+=end%>
+  
   <%= javascript_include_tag 'cash_flow_dashboard', plugin: 'foton_cash_flow' %>
   <%= javascript_include_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
 

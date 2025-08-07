@@ -1,11 +1,9 @@
-# ./app/helpers/foton_cash_flow/entries_helper.rb
-
 # frozen_string_literal: true
 
 module FotonCashFlow
   module EntriesHelper
-    # Incluir o helper de paginação do Redmine para ter acesso a métodos como pagination_links
     include Redmine::Pagination::Helper
+    include Redmine::I18n
 
     # Cache de classe para IDs de custom fields
     @@class_cf_cache = {}
@@ -21,7 +19,6 @@ module FotonCashFlow
 
     # Formata o tipo de transação com estilo apropriado
     def format_transaction_type(issue)
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] format_transaction_type chamado para Issue ID: #{issue&.id}. Objeto recebido: #{issue.class}"
       return ''.html_safe unless issue.present?
 
       tipo = issue.cash_flow_transaction_type
@@ -34,20 +31,22 @@ module FotonCashFlow
               end
 
       content_tag :span, label,
-                class: "badge rounded-pill #{tipo == 'revenue' ? 'bg-success' : 'bg-danger'}",
-                style: "font-size:0.95em;"
+                  class: "badge rounded-pill #{tipo == 'revenue' ? 'bg-success' : 'bg-danger'}",
+                  style: "font-size:0.95em;"
     end
 
     # Formata o valor monetário com cor e símbolo de moeda
-    def format_amount(value, options = {})
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Executando format_amount. Valor recebido: #{value.inspect}. Tipo: #{value.class}"
-      amount = extract_amount(value)
-      css_class = amount_css_class(value, amount)
+    def format_amount(amount, options = {})
+      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Executando format_amount. Valor recebido: #{amount.inspect}. Tipo: #{amount.class}"
+      
+      # Garante que o valor é um BigDecimal ou um número antes de formatar
+      parsed_amount = amount.is_a?(BigDecimal) ? amount : BigDecimal(amount.to_s) rescue BigDecimal('0.0')
+
+      css_class = amount_css_class(nil, parsed_amount)
 
       # Usamos a localização do Redmine para garantir a formatação correta
-      # A formatação é delegada a um helper nativo do Rails
-      formatted_amount = l_currency(amount)
-      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Valor formatado: #{formatted_amount}, classe CSS: #{css_class}, amount: #{amount.to_s}"
+      formatted_amount = l_currency(parsed_amount)
+      Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Valor formatado: #{formatted_amount}, classe CSS: #{css_class}, amount: #{parsed_amount.to_s}"
 
       content_tag :span, formatted_amount, class: css_class
     end
@@ -63,23 +62,32 @@ module FotonCashFlow
     def format_date(date_str)
       date = Date.parse(date_str) rescue nil
       if date.present?
-        format_date(date)
+        # AQUI ESTÁ A CORREÇÃO
+        #ActionController::Base.helpers.l_date(date)
+        I18n.l(date, format: :default) # O formato :default pode ser ajustado conforme a necessidade do seu projeto.
       else
         'N/A'
       end
     end
 
+    # Método centralizado para formatação de moeda
     def l_currency(amount)
-      ActionController::Base.helpers.number_to_currency(amount, locale: I18n.locale)
+      ActionController::Base.helpers.number_to_currency(
+        amount,
+        unit: 'R$',
+        separator: ',',
+        delimiter: '.',
+        precision: 2,
+        locale: :pt
+      )
     end
-
+    
     # =====================================================
     #  RECORRÊNCIA DE LANÇAMENTOS
     # =====================================================
     
     # Helper method to get custom field ID by name
     def custom_field_id_by_name(name)
-      # Cache the custom field IDs to avoid repeated database queries
       @@class_cf_cache[name] ||= CustomField.find_by(name: name)&.id
     end
 
@@ -135,17 +143,9 @@ module FotonCashFlow
       projects.map { |p| [p.name, p.id] }.sort_by(&:first)
     end
 
-    def link_to_cash_flow_issue(issue)
-      return '' unless issue.present? && issue.id.present?
-
-      link_to "##{issue.id}", issue_path(issue),
-              title: issue.subject,
-              class: 'issue-link'
-    end
-
     # =====================================================
     #
-    # ---------------  MÉTODOS PRIVADOS  ------------------
+    # ---------------  MÉTODOS PRIVADOS  ------------------
     #
     # =====================================================
     private
@@ -183,20 +183,5 @@ module FotonCashFlow
     def custom_field_id_by_name(name)
       @@class_cf_cache[name] ||= CustomField.find_by_name(name)&.id
     end
-
-
-        # Método centralizado para formatação de moeda
-    def l_currency(amount)
-      # Adicionar opções padrão para o formato brasileiro
-      ActionController::Base.helpers.number_to_currency(
-        amount,
-        unit: 'R$',
-        separator: ',',
-        delimiter: '.',
-        precision: 2,
-        locale: :pt # Certifique-se que o locale está configurado corretamente no seu Redmine
-      )
-    end
-
   end
 end

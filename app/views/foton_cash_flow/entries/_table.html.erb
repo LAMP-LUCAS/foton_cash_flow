@@ -1,4 +1,4 @@
-<% # plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_table.html.erb %>
+<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_table.html.erb %>
 
 <div class="autoscroll cf-table-container">
   <table class="list entries cf-table">
@@ -18,11 +18,11 @@
       <% if issues_for_table.any? %>
         <% issues_for_table.each do |issue| %>
           <tr>
-            <td><%= link_to issue.id, issue_path(issue) %></td>
+            <td><%= link_to_cash_flow_issue(issue) %></td>
             <td><%= format_date(issue.cash_flow_entry_date) %></td>
             <td><%= issue.cash_flow_category %></td>
             <td><%= format_transaction_type(issue) %></td>
-            <td><%= format_amount(issue) %></td>
+            <td><%= format_amount(issue.cash_flow_amount) %></td>
             <td><%= format_status(issue.status) %></td>
             <td><%= issue.subject %></td>
             <td class="buttons">

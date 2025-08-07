@@ -4,22 +4,21 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="syncModalLabel"><%= l(:label_cash_flow_diagnostics) %></h5>
+        <h5 class="modal-title" id="syncModalLabel"><%= l(:title_check_and_sync) %></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p><%= l(:text_sync_modal_info) %></p>
-        <ul>
-          <li><%= l(:label_tracker_status) %>: <%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></li>
-          <li><%= l(:label_project) %>: <%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></li>
-          <li><%= l(:label_custom_fields) %>: <%= FotonCashFlow::SettingsHelper::CUSTOM_FIELD_NAMES.values.join(', ') %></li>
-        </ul>
+        <p><%= l(:text_cash_flow_sync_explanation) %></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l(:button_close) %></button>
-        <%= link_to l(:button_sync_dependencies), foton_cash_flow_diagnostics_run_sync_path, method: :post, class: 'btn btn-primary' %>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l(:button_cancel) %></button>
+        <%= form_tag(run_sync_foton_cash_flow_diagnostics_path, method: :post) do %>
+          <%= hidden_field_tag 'redirect_to_entries', 'true' %>
+          <%= hidden_field_tag 'project_id', @project.identifier %>
+          <%= submit_tag l(:button_sync_now), class: 'btn btn-primary' %>
+        <% end %>
       </div>
     </div>
   </div>

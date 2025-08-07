@@ -13,17 +13,28 @@ module FotonCashFlow
     end
 
     def run_sync
-      # Chama o método que tenta criar/re-sincronizar
       result = sync_dependencies_now
 
       if result[:success]
         flash[:notice] = l(:notice_cash_flow_sync_success)
-        Rails.logger.info "[DIAGNOSTICS] Sync successful." # Log de sucesso
+        Rails.logger.info "[DIAGNOSTICS] Sync successful."
       else
         flash[:error] = l(:error_cash_flow_sync_failure, message: result[:message])
-        Rails.logger.error "[DIAGNOSTICS] Sync failed: #{result[:message]}" # Log de falha
+        Rails.logger.error "[DIAGNOSTICS] Sync failed: #{result[:message]}"
       end
-      redirect_to foton_cash_flow_diagnostics_path 
+
+      # --- Lógica de redirecionamento ---
+      # Redireciona para a página de entradas do fluxo de caixa
+      # se o parâmetro `redirect_to_entries` estiver presente e for true.
+      if params[:redirect_to_entries] == 'true'
+        # O `redirect_back` é a melhor opção para voltar à página anterior
+        # de forma segura e robusta.
+        redirect_back(fallback_location: project_cash_flow_entries_path(project_id: params[:project_id]), notice: flash[:notice], error: flash[:error])
+      else
+        # Comportamento padrão: redireciona para a página de diagnósticos.
+        redirect_to foton_cash_flow_diagnostics_path
+      end
+      # -------------------------------------------
     end
 
     private
