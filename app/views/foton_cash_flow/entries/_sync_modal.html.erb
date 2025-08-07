@@ -14,11 +14,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l(:button_cancel) %></button>
-        <%= form_tag(run_sync_foton_cash_flow_diagnostics_path, method: :post) do %>
-          <%= hidden_field_tag 'redirect_to_entries', 'true' %>
-          <%= hidden_field_tag 'project_id', @project.identifier %>
-          <%= submit_tag l(:button_sync_now), class: 'btn btn-primary' %>
-        <% end %>
+        <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
       </div>
     </div>
   </div>

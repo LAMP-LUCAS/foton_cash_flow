@@ -285,4 +285,5 @@ pt-BR:
   button_sync_now: "Sincronizar Agora!"
   title_check_and_sync: "Checar e Sincronizar"
   text_cash_flow_sync_explanation: "Deseja sincronizar as configurações básicas para o plugin iniciar?"
-  error_cf_amount_invalid: "Erro - Formato do Valor Inválido"
+  error_cf_transaction_type_invalid: "O tipo de transação deve ser 'receita' ou 'despesa'."
+  error_cf_amount_invalid: "Valor deve ser um número válido."

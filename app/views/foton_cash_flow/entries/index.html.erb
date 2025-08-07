@@ -1,13 +1,13 @@
 <%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/index.html.erb %>
 
-<h2>
-  <%= l(:label_foton_cash_flow_entries) %>
+
+<h2><%= l(:label_foton_cash_flow_entries) %></h2>
+
+<div class="split-content">
   <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
-</h2>
+</div>
+
 <% if @dependencies_met == false %>
-  <div class="alert alert-warning" role="alert">
-    <%= l(:warning_cash_flow_dependencies_not_met_full) %>
-  </div>
   <%= render partial: 'foton_cash_flow/entries/sync_modal' %>
 <% elsif @query.empty? %>
   <p class="nodata"><%= l(:label_no_data) %></p>

@@ -1,7 +1,9 @@
-<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/index.html.erb %>
+<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_sync_btn.html.erb %>
 
 <%= form_tag(run_sync_foton_cash_flow_diagnostics_path, method: :post) do %>
           <%= hidden_field_tag 'redirect_to_entries', 'true' %>
           <%= hidden_field_tag 'project_id', @project.identifier %>
           <%= submit_tag l(:button_sync_now), class: 'btn btn-primary' %>
 <% end %>
+
+<%# Fim do arquivo _sync_btn.html.erb %>

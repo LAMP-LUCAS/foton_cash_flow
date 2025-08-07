@@ -122,15 +122,20 @@ module FotonCashFlow
         amount_cf_id = FotonCashFlow::SettingsHelper.cf_id(:amount)
         if amount_cf_id
           amount_value = get_custom_field_value(amount_cf_id)
-          
-          # Nova validação de formato
-          unless amount_value =~ /^-?\d{1,3}(\.\d{3})*(,\d+)?$/ || amount_value =~ /^-?\d{1,3}(,\d{3})*(\.\d+)?$/
-            errors.add(:base, l(:error_cf_amount_invalid_format))
-          end
-          
           parsed_amount = FotonCashFlow::SettingsHelper.parse_currency_to_decimal(amount_value)
-          if parsed_amount.nil? || parsed_amount <= 0
-            errors.add(:base, l(:error_cf_amount_invalid))
+          
+          # Se a string original estiver em branco, `parsed_amount` será '0.0',
+          # mas não queremos permitir lançamentos vazios. Por isso, a verificação
+          # `amount_value.present?` é essencial.
+          if amount_value.present?
+            if parsed_amount.nil? || parsed_amount <= 0
+              errors.add(:base, l(:error_cf_amount_invalid))
+            end
+          else
+            # Caso o campo seja obrigatório (is_required), o Redmine já lida
+            # com a validação de presença. Mas, se não for, esta validação aqui
+            # garante que não aceitamos valores vazios como válidos.
+            errors.add(:base, l(:error_cf_amount_invalid)) unless amount_cf_id.present? && CustomField.find(amount_cf_id).is_required == false
           end
         end
 

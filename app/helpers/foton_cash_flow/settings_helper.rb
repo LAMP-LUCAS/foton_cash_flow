@@ -20,7 +20,46 @@ module FotonCashFlow
     # Lista de categorias padrão para o campo 'Categoria'.
     # Esta lista será usada se o usuário não tiver configurado categorias personalizadas
     # e pode ser modificada futuramente nas configurações do plugin.
-    DEFAULT_CATEGORIES = ['Arquitetos', 'Engenheiros', 'Construtoras', 'Empresas'].freeze
+    DEFAULT_CATEGORIES = [
+                        '# Custos Diretos',
+                          'Mão de Obra Direta',
+                          'Materiais de Construção',
+                          'Serviços de Terceiros e Subempreiteiros',
+                          'Equipamentos e Máquinas',
+                        '# Custos Indiretos',
+                          'Mão de Obra Indireta',
+                          'Despesas de Escritório',
+                          'Despesas Administrativas',
+                          'Marketing e Vendas',
+                        '# Custos de Obras',
+                          'Canteiro de Obras',
+                          'Mobilização e Desmobilização',
+                          'Licenças e Alvarás',
+                        '# Custos Financeiros e de Capital',
+                          'Juros e Encargos Financeiros',
+                          'Seguros',
+                        '# Impostos e Tributos',
+                          'Impostos Diretos',
+                          'Impostos Indiretos',
+                          '---------------------',
+                        '# Receita de Prestação de Serviços',
+                          'Projetos e Consultoria',
+                          'Gestão de Obras',
+                          'Serviços de Engenharia',
+                          'Serviços de Construção',
+                        '# Receita de Venda de Produtos',
+                          'Venda de Imóveis',
+                          'Venda de Materiais',
+                          'Licenças de Software e Produtos Digitais',
+                        '# Receita de Royalties e Licenciamento',
+                          'Licenciamento de Projetos',
+                          'Royalties',
+                        '# Receita de Investimentos',
+                          'Rendimentos Financeiros',
+                          'Aluguel de Equipamentos',
+                          'Participação em Projetos',
+
+    ].freeze
 
     # Atributos esperados para os Custom Fields, incluindo valores possíveis
     # Esta constante centraliza as definições para validação e criação.
@@ -60,12 +99,18 @@ module FotonCashFlow
       # ------------------------------------------------------------------
       finance_project = Project.find_or_initialize_by(identifier: FINANCE_PROJECT_IDENTIFIER)
       finance_project.name = FINANCE_PROJECT_NAME
-      finance_project.is_public = false # Geralmente projetos financeiros não são públicos
+      finance_project.is_public = false
+
+      # Lógica para habilitar o módulo do seu plugin no projeto
+      # Verifique o nome do módulo no seu arquivo init.rb para ter certeza
+      unless finance_project.enabled_module_names.include?('foton_cash_flow')
+        finance_project.enabled_module_names << 'foton_cash_flow'
+      end
+
       finance_project.save!
       Rails.logger.info "[DEBUG][SETTINGS_HELPER] Projeto '#{finance_project.name}' criado/assegurado."
       Setting.plugin_foton_cash_flow['internal_finance_project_id'] = finance_project.id
       Rails.logger.info "[DEBUG][SETTINGS_HELPER] Projeto '#{finance_project.name}' (ID: #{finance_project.id}) assegurado."
-
 
       # 2. Assegurar Tracker 'Financeiro'
       # ------------------------------------------------------------------
@@ -204,26 +249,54 @@ module FotonCashFlow
       # 3. Assegurar Custom Fields
       # ------------------------------------------------------------------
       Rails.logger.info "[DEBUG][SETTINGS_HELPER] Iniciando verificação dos custom fields."
+
       CUSTOM_FIELD_NAMES.each do |key, name|
-        cf = CustomField.find_or_initialize_by(name: name)
+        cf = IssueCustomField.find_or_initialize_by(name: name)
         attributes = EXPECTED_CUSTOM_FIELD_ATTRIBUTES[name]
         
         cf.field_format = attributes[:field_format]
         cf.is_required = attributes[:is_required]
         cf.position = attributes[:position]
-
+        cf.is_filter = attributes[:is_filter] if attributes[:is_filter] # Linha importante para campos de filtro
+        
         if attributes[:field_format] == 'list'
-          cf.possible_values = attributes[:possible_values]
+          possible_values = attributes[:possible_values]
+          
+          if key == :category
+            configured_categories = Setting.plugin_foton_cash_flow['categories']
+            
+            if configured_categories.present?
+              if configured_categories.is_a?(Array)
+                possible_values = configured_categories.map do |c|
+                  c.is_a?(Hash) ? c['name'] : c
+                end
+              else
+                possible_values = configured_categories.split(',').map(&:strip).reject(&:blank?)
+              end
+            else
+              possible_values = DEFAULT_CATEGORIES.dup
+            end
+          end
+          
+          # Garantia final para evitar que a lista de valores seja vazia
+          cf.possible_values = possible_values.presence || DEFAULT_CATEGORIES.dup
         end
-
-        # Associar o CF ao Tracker financeiro
-        cf.trackers << finance_tracker unless cf.trackers.include?(finance_tracker)
-
-        cf.save!
-        Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf.name}' (ID: #{cf.id}) criado/assegurado."
-
-        # Salvar o ID do CF nas configurações do plugin para fácil acesso
-        Setting.plugin_foton_cash_flow["cf_#{key}_id"] = cf.id
+        
+        begin
+          cf.save!
+          
+          unless cf.trackers.include?(finance_tracker)
+            cf.trackers << finance_tracker
+            cf.save!
+            Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf.name}' associado ao Tracker '#{finance_tracker.name}'."
+          end
+          
+          Rails.logger.info "[DEBUG][SETTINGS_HELPER] Custom Field '#{cf.name}' (ID: #{cf.id}) criado/assegurado."
+          Setting.plugin_foton_cash_flow["cf_#{key}_id"] = cf.id
+        rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.error "[FOTON_CASH_FLOW] Erro ao salvar Custom Field '#{name}': #{e.message}"
+          raise e
+        end
       end
 
       # 4. Assegurar a Role 'Fluxo de Caixa'
@@ -252,8 +325,6 @@ module FotonCashFlow
         {}
       end
     end
-
-
 
     # -----------------------------------------------------------------
     # MÉTODOS DE AJUDA
