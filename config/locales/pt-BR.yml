@@ -287,3 +287,5 @@ pt-BR:
   text_cash_flow_sync_explanation: "Deseja sincronizar as configurações básicas para o plugin iniciar?"
   error_cf_transaction_type_invalid: "O tipo de transação deve ser 'receita' ou 'despesa'."
   error_cf_amount_invalid: "Valor deve ser um número válido."
+  notice_entry_date_set_to_today: "A data do lançamento foi definida automaticamente para hoje (%{date})"
+  foton_cash_flow_error_no_permission_to_change_date: "Você não tem permissão para alterar a data de lançamento"

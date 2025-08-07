@@ -13,12 +13,8 @@ module FotonCashFlow
 
       included do
         include FotonCashFlow::SettingsHelper
-        
-        # Log para confirmar a inclusão do patch
-        Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] IssuePatch incluído no modelo Issue."
 
-        
-        validate :validate_cash_flow_custom_fields, if: :cash_flow_issue?
+        Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] IssuePatch incluído no modelo Issue."
 
         # --- SCOPES PARA FILTRAGEM DE CUSTOM FIELDS ---
         # Estes scopes permitirão que CashFlowQueryBuilder construa queries complexas.
@@ -102,8 +98,11 @@ module FotonCashFlow
             nil
           end
         end
-      end # included do
 
+        before_validation :set_entry_date_if_blank, if: :cash_flow_issue?
+        validate :validate_entry_date_modification, if: :cash_flow_issue?
+      end # included do
+     
       # Validação dos campos personalizados de fluxo de caixa
       def validate_cash_flow_custom_fields
         Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Executando validação de custom fields para Issue ID #{id}."
@@ -124,52 +123,49 @@ module FotonCashFlow
           amount_value = get_custom_field_value(amount_cf_id)
           parsed_amount = FotonCashFlow::SettingsHelper.parse_currency_to_decimal(amount_value)
           
-          # Se a string original estiver em branco, `parsed_amount` será '0.0',
-          # mas não queremos permitir lançamentos vazios. Por isso, a verificação
-          # `amount_value.present?` é essencial.
           if amount_value.present?
             if parsed_amount.nil? || parsed_amount <= 0
               errors.add(:base, l(:error_cf_amount_invalid))
             end
           else
-            # Caso o campo seja obrigatório (is_required), o Redmine já lida
-            # com a validação de presença. Mas, se não for, esta validação aqui
-            # garante que não aceitamos valores vazios como válidos.
             errors.add(:base, l(:error_cf_amount_invalid)) unless amount_cf_id.present? && CustomField.find(amount_cf_id).is_required == false
           end
         end
 
-        # Validação da data de lançamento
-        entry_date_cf_id = FotonCashFlow::SettingsHelper.cf_id(:entry_date)
-        if entry_date_cf_id
-          entry_date_value = get_custom_field_value(entry_date_cf_id)
-          Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Validação - Data de Lançamento: #{entry_date_value.inspect}"
-          begin
-            Date.parse(entry_date_value) if entry_date_value.present?
-          rescue ArgumentError
-            errors.add(:base, l(:error_cf_entry_date_invalid))
+        # Validação da data de lançamento (apenas se não estiver sendo ignorada)
+        unless instance_variable_defined?(:@skip_date_validation) && @skip_date_validation
+          entry_date_cf_id = FotonCashFlow::SettingsHelper.cf_id(:entry_date)
+          if entry_date_cf_id
+            entry_date_value = get_custom_field_value(entry_date_cf_id)
+            Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Validação - Data de Lançamento: #{entry_date_value.inspect}"
+            
+            if entry_date_value.blank?
+              errors.add(:base, l(:error_cf_entry_date_required))
+            else
+              begin
+                Date.parse(entry_date_value)
+              rescue ArgumentError
+                errors.add(:base, l(:error_cf_entry_date_invalid))
+              end
+            end
           end
         end
 
-        # Validação da Categoria (se for custom field tipo lista e tiver valores definidos)
+        # Validação da Categoria
         category_cf_id = FotonCashFlow::SettingsHelper.cf_id(:category)
         if category_cf_id
           category_value = get_custom_field_value(category_cf_id)
           expected_category_attrs = FotonCashFlow::SettingsHelper.expected_custom_field_attributes_for(FotonCashFlow::SettingsHelper::CUSTOM_FIELD_NAMES[:category])
 
-          # Se a categoria é requerida e está em branco
           if expected_category_attrs[:is_required] && category_value.blank?
             errors.add(:base, l(:error_cf_category_required))
           end
 
-          # Se há valores de categoria e o valor atual não está entre os possíveis (e não está em branco)
           if category_value.present? && expected_category_attrs[:possible_values].present? && !expected_category_attrs[:possible_values].include?(category_value)
-              # Esta parte pode precisar de ajuste, pois 'Categoria' obtém valores de `Setting.plugin_foton_cash_flow['categories']`
-              # O SettingsHelper já lida com isso em custom_field_possible_values
-              available_categories = FotonCashFlow::SettingsHelper.custom_field_possible_values(:category)
-              unless available_categories.include?(category_value)
-                errors.add(:base, l(:error_cf_category_invalid_value))
-              end
+            available_categories = FotonCashFlow::SettingsHelper.custom_field_possible_values(:category)
+            unless available_categories.include?(category_value)
+              errors.add(:base, l(:error_cf_category_invalid_value))
+            end
           end
         end
       end
@@ -178,8 +174,73 @@ module FotonCashFlow
       def get_custom_field_value(cf_id)
         custom_field_values.detect { |v| v.custom_field_id == cf_id }.try(:value)
       end
-    end
+    
+      # Método para definir a data se ela não for fornecida, com a correção para persistir o valor
+      def set_entry_date_if_blank
+        Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Iniciando verificação e preenchimento da data de lançamento."
+        
+        entry_date_cf_id = FotonCashFlow::SettingsHelper.cf_id(:entry_date)
+        
+        if entry_date_cf_id.present?
+          Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] ID do Custom Field 'Data do Lançamento': #{entry_date_cf_id}"
 
+          # Encontrar o objeto CustomValue para a data do lançamento
+          entry_date_custom_value = self.custom_value_for(entry_date_cf_id)
+
+          if entry_date_custom_value.present?
+            if entry_date_custom_value.value.blank?
+              today_formatted = Date.today.to_s
+
+              # Log detalhado para entender o estado antes da atribuição
+              Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor do CustomValue antes da atualização: #{entry_date_custom_value.value.inspect}"
+              
+              # Atribuição correta: modifique o valor do objeto CustomValue
+              entry_date_custom_value.value = today_formatted
+              
+              # Log detalhado para entender o estado depois da atribuição
+              Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor do CustomValue depois da atualização: #{entry_date_custom_value.value.inspect}"
+              Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Campo 'Data do Lançamento' estava vazio. Definindo o valor para: #{today_formatted}"
+            else
+              Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Campo 'Data do Lançamento' já possui um valor. Nenhuma alteração feita."
+            end
+          else
+            Rails.logger.warn "[FOTON_CASH_FLOW][IssuePatch] Objeto CustomValue para 'Data do Lançamento' não encontrado."
+          end
+        else
+          Rails.logger.warn "[FOTON_CASH_FLOW][IssuePatch] Custom Field 'Data do Lançamento' não encontrado. Não foi possível preencher a data automaticamente."
+        end
+      end
+
+      def validate_entry_date_modification
+        Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Validando modificação da data de lançamento"
+        
+        entry_date_cf_id = FotonCashFlow::SettingsHelper.cf_id(:entry_date)
+        return unless entry_date_cf_id.present?
+
+        # Obter o objeto CustomValue
+        custom_value = custom_value_for(entry_date_cf_id)
+        
+        # Verificar se temos um objeto válido
+        if custom_value
+          Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] CustomValue encontrado: #{custom_value.inspect}"
+          Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor atual: #{custom_value.value}, Valor anterior: #{custom_value.value_was}"
+          
+          # Verificar se o valor foi alterado e se tinha um valor anterior
+          if custom_value.value_changed? && custom_value.value_was.present?
+            Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Data alterada de #{custom_value.value_was} para #{custom_value.value}"
+            
+            unless User.current.allowed_to?(:edit_cash_flow_entry_date, project)
+              errors.add(:base, l(:foton_cash_flow_error_no_permission_to_change_date))
+              Rails.logger.warn "[FOTON_CASH_FLOW][IssuePatch] Usuário #{User.current.login} tentou alterar data sem permissão"
+            end
+          end
+        else
+          Rails.logger.warn "[FOTON_CASH_FLOW][IssuePatch] CustomValue não encontrado para cf_id: #{entry_date_cf_id}"
+        end
+      end
+
+    end
+    
   end
 end
 

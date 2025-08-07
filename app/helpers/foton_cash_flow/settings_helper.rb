@@ -65,7 +65,7 @@ module FotonCashFlow
     # Esta constante centraliza as definições para validação e criação.
     EXPECTED_CUSTOM_FIELD_ATTRIBUTES = {
       CUSTOM_FIELD_NAMES[:entry_date] => {
-        field_format: 'date', is_required: true, position: 1
+        field_format: 'date', is_required: false, position: 1
       },
       CUSTOM_FIELD_NAMES[:amount] => {
         field_format: 'float', is_required: true, position: 2
@@ -276,11 +276,14 @@ module FotonCashFlow
             else
               possible_values = DEFAULT_CATEGORIES.dup
             end
+
+          elsif key == :entry_date
+            cf.is_required = true
           end
           
           # Garantia final para evitar que a lista de valores seja vazia
           cf.possible_values = possible_values.presence || DEFAULT_CATEGORIES.dup
-        end
+        end        
         
         begin
           cf.save!
@@ -301,9 +304,28 @@ module FotonCashFlow
 
       # 4. Assegurar a Role 'Fluxo de Caixa'
       # ------------------------------------------------------------------
-      cash_flow_role = Role.find_or_create_by!(name: 'Fluxo de Caixa') do |role|
-        role.permissions = [:view_cash_flow, :add_cash_flow_entries, :edit_cash_flow_entries, :delete_cash_flow_entries, :manage_cash_flow_settings]
+      cash_flow_role = Role.find_or_initialize_by(name: 'Fluxo de Caixa')
+      permissions = [
+        :view_cash_flow,
+        :add_cash_flow_entries,
+        :edit_cash_flow_entries,
+        :delete_cash_flow_entries,
+        :manage_cash_flow_settings,
+        :edit_cash_flow_entry_date # NOVA PERMISSÃO
+      ]
+      
+      if cash_flow_role.new_record?
+        cash_flow_role.permissions = permissions
+        cash_flow_role.save!
+      else
+        # Adiciona a nova permissão se não existir
+        current_permissions = cash_flow_role.permissions
+        unless current_permissions.include?(:edit_cash_flow_entry_date)
+          cash_flow_role.permissions = current_permissions + [:edit_cash_flow_entry_date]
+          cash_flow_role.save!
+        end
       end
+      
       Rails.logger.info "[DEBUG][SETTINGS_HELPER] Role 'Fluxo de Caixa' (ID: #{cash_flow_role.id}) criada/assegurada."
       Setting.plugin_foton_cash_flow['cash_flow_role_id'] = cash_flow_role.id
 

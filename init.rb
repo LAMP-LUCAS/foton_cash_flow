@@ -54,7 +54,12 @@ Redmine::Plugin.register :foton_cash_flow do |config|
       'foton_cash_flow/settings': [:index, :update],
       'foton_cash_flow/diagnostics': [:index, :run_sync]
     }, require: :member
-  end
+  
+    permission :edit_cash_flow_entry_date, {
+      :entries => [:update_date] }, :require => :member
+  
+  
+    end
 
   # Configurações (mantidas iguais)
   settings default: {
