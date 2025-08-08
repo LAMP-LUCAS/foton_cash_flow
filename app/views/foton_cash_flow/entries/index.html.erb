@@ -1,51 +1,55 @@
 <%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/index.html.erb %>
 
+<%= render 'foton_cash_flow/shared/cash_flow_assets' %>
 
-<h2><%= l(:label_foton_cash_flow_entries) %></h2>
-
-<div class="split-content">
+<div class="foton-cash-flow cash-flow-page">
+  <h2><%= l(:label_foton_cash_flow_entries) %></h2>
+  
   <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
-</div>
+  
+  <% if @dependencies_met == false %>
+    <%= render partial: 'foton_cash_flow/entries/sync_modal' %>
+  <% elsif @query.empty? %>
+    <p class="nodata"><%= l(:label_no_data) %></p>
+  <% end %>
 
-<% if @dependencies_met == false %>
-  <%= render partial: 'foton_cash_flow/entries/sync_modal' %>
-<% elsif @query.empty? %>
-  <p class="nodata"><%= l(:label_no_data) %></p>
-<% end %>
+  <% if @issues_for_table.present? %>
 
-<% if @issues_for_table.present? %>
+    <div class="cf-table-container cf-layout-sidebar">
 
-  <div class="cf-table-container cf-layout-sidebar">
-    <div class="cf-table-wrapper">
-      <%= render partial: 'foton_cash_flow/entries/table', locals: {
-          project: @project,
+      <div class="cf-table-wrapper">
+        <%= render partial: 'foton_cash_flow/entries/filters_modal' %>
+        <%= render partial: 'foton_cash_flow/entries/table', locals: { 
           issues_for_table: @issues_for_table,
-          issue_count: @issue_count,
-          issue_pages: @issue_pages,
-          limit: @limit
+          cumulative_revenue_labels: @cumulative_revenue_labels,
+          cumulative_revenue_data: @cumulative_revenue_data,
+          cumulative_expense_data: @cumulative_expense_data 
+        } %>
+      </div>
+
+      <%= render partial: 'foton_cash_flow/entries/summary', locals: {
+          total_revenue: @total_revenue,
+          total_expense: @total_expense,
+          balance: @balance
       } %>
+      
     </div>
-    
-    <%= render partial: 'foton_cash_flow/entries/summary', locals: {
-        total_revenue: @total_revenue,
-        total_expense: @total_expense,
-        balance: @balance
+
+    <%= render partial: 'foton_cash_flow/entries/charts', locals: {
+      bar_chart_labels: @bar_chart_labels,
+      bar_chart_revenue: @bar_chart_revenue,
+      bar_chart_expense: @bar_chart_expense,
+      pie_chart_labels: @pie_chart_labels,
+      pie_chart_data: @pie_chart_data,
+      balance_chart_labels: @balance_chart_labels,
+      balance_chart_data: @balance_chart_data,
+      cumulative_revenue_labels: @cumulative_revenue_labels,
+      cumulative_revenue_data: @cumulative_revenue_data,
+      cumulative_expense_data: @cumulative_expense_data
     } %>
-  </div>
 
-  <%= render partial: 'foton_cash_flow/entries/charts', locals: {
-    bar_chart_labels: @bar_chart_labels,
-    bar_chart_revenue: @bar_chart_revenue,
-    bar_chart_expense: @bar_chart_expense,
-    pie_chart_labels: @pie_chart_labels,
-    pie_chart_data: @pie_chart_data,
-    balance_chart_labels: @balance_chart_labels,
-    balance_chart_data: @balance_chart_data,
-    cumulative_revenue_labels: @cumulative_revenue_labels,
-    cumulative_revenue_data: @cumulative_revenue_data,
-    cumulative_expense_data: @cumulative_expense_data
-  } %>
+  <% end %>
 
-<% end %>
+</div>
 
 <%# Fim do arquivo index.html.erb %>

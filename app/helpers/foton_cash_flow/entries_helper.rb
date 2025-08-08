@@ -62,7 +62,6 @@ module FotonCashFlow
     def format_date(date_str)
       date = Date.parse(date_str) rescue nil
       if date.present?
-        # AQUI ESTÁ A CORREÇÃO
         #ActionController::Base.helpers.l_date(date)
         I18n.l(date, format: :default) # O formato :default pode ser ajustado conforme a necessidade do seu projeto.
       else

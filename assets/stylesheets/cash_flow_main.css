@@ -1,4 +1,4 @@
-
+/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css
 /* ======================
    VARIÁVEIS GLOBAIS
    ====================== */
@@ -47,7 +47,6 @@
    LAYOUT PRINCIPAL
    ====================== */
 .cash-flow-page {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 24px 0;
 }
@@ -664,6 +663,112 @@
   margin-bottom: 15px;
 }
 
+/* ======================
+    ESTILOS DA TABELA - INSPIRADOS NO NOTION
+    ====================== */
+
+/* Cores de fundo das linhas baseado no tipo de transação */
+.cf-table tr.receita {
+  background-color: var(--background-white);
+  border-left: 4px solid var(--success-color); /* Borda lateral para Receita */
+}
+
+.cf-table tr.despesa {
+  background-color: var(--background-white);
+  border-left: 4px solid var(--error-color); /* Borda lateral para Despesa */
+}
+
+/* Efeito de hover nas linhas */
+.cf-table tr:hover {
+  background-color: var(--background-light);
+  box-shadow: inset 0 0 0 1px var(--border-color);
+  transform: scale(1.005);
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Estilos de célula para manter o alinhamento */
+.cf-table td, .cf-table th {
+  vertical-align: middle;
+}
+
+/* Estilização das tags (Categoria, Tipo, Status) */
+.category-tag, .transaction-tag, .status-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-transform: capitalize;
+  line-height: 1;
+}
+
+/* Cores de fundo das tags (exemplo) */
+.status-tag {
+  background-color: #e6f7ff;
+  color: #0076c8;
+}
+
+.status-tag.aberto {
+  background-color: #fffbe6;
+  color: #d4a700;
+}
+
+.status-tag.pago {
+  background-color: #f6ffed;
+  color: #389e0d;
+}
+
+.category-tag.aquisicao-do-terreno, .category-tag.aprovacao-municipal, .category-tag.projetos {
+  /* Adicione as cores específicas das suas categorias aqui */
+  background-color: #f0f0f0; /* Cor padrão */
+  color: #555;
+}
+
+/* Exemplo de cores para o tipo de transação */
+.transaction-tag.receita {
+  background-color: #d9f7be;
+  color: #52c41a;
+}
+
+.transaction-tag.despesa {
+  background-color: #ffccc7;
+  color: #ff4d4f;
+}
+
+/* Estilo para a coluna de valor */
+.value-column.receita {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+.value-column.despesa {
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+/* Estilos para a descrição (subject) */
+.description-column {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ajustes de layout da tabela */
+.cf-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.cf-table td, .cf-table th {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cf-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 
 /* ======================
    RESPONSIVIDADE
@@ -731,6 +836,415 @@
 }
 
 
+/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css */
+
+/* ======================
+   MODAL DE FILTROS ADAPTATIVO
+   ====================== */
+.cf-filter-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(10px);
+  transition: transform 0.2s, opacity 0.2s;
+  animation: modalEnter 0.2s;
+}
+
+.cf-filter-modal-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cf-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cf-border);
+  flex-shrink: 0;
+}
+
+.cf-filter-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--cf-text);
+  margin: 0;
+}
+
+.cf-close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--cf-text);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.cf-close-modal-btn:hover {
+  background: var(--cf-bg-light);
+}
+
+.cf-filter-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.cf-filter-group {
+  margin-bottom: 20px;
+  display: none;
+}
+
+.cf-filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.cf-filter-field {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.cf-filter-operator {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  background: white;
+  font-size: 0.95rem;
+}
+
+.cf-filter-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.cf-filter-number-inputs,
+.cf-filter-date-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cf-filter-and {
+  margin: 0 5px;
+  color: var(--cf-text);
+  font-weight: 500;
+}
+
+.cf-filter-checkbox-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.cf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.cf-checkbox-label input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.cf-filter-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--cf-border);
+  flex-shrink: 0;
+}
+
+.cf-apply-filter-btn,
+.cf-clear-filter-btn {
+  padding: 8px 16px;
+  font-size: 0.95rem;
+}
+
+@keyframes modalEnter {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ======================
+   FILTROS ATIVOS
+   ====================== */
+.cf-active-filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-active-filters-label {
+  font-weight: 600;
+  color: var(--cf-text);
+  white-space: nowrap;
+}
+
+.cf-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.cf-filter-tag {
+  background: var(--cf-secondary);
+  border-radius: 20px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  max-width: 100%;
+}
+
+.cf-filter-tag span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cf-remove-filter {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cf-error);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.cf-remove-filter:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+/* ======================
+   RESPONSIVIDADE
+   ====================== */
+@media (max-width: 768px) {
+  .cf-filter-modal {
+    min-width: 280px;
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .cf-filter-body {
+    padding: 12px 16px;
+  }
+  
+  .cf-filter-header,
+  .cf-filter-actions {
+    padding: 12px 16px;
+  }
+  
+  .cf-filter-number-inputs,
+  .cf-filter-date-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .cf-filter-and {
+    text-align: center;
+    margin: 8px 0;
+  }
+}
+
+
+/* ======================
+   PAGINAÇÃO
+   ====================== */
+.cf-pagination-container {
+  margin: 20px 0;
+}
+
+.cf-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cf-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: white;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cf-pagination-btn:hover:not(.disabled) {
+  background: var(--background-light);
+  border-color: var(--primary-color);
+}
+
+.cf-pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cf-pagination-pages {
+  display: flex;
+  gap: 4px;
+}
+
+.cf-pagination-page {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: white;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cf-pagination-page:hover:not(.active) {
+  background: var(--background-light);
+  border-color: var(--primary-color);
+}
+
+.cf-pagination-page.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.cf-pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 4px;
+  color: var(--text-color);
+}
+
+/* ======================
+   ORDENAÇÃO
+   ====================== */
+.cf-sort-indicator {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  position: relative;
+}
+
+.cf-sort-indicator::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--text-color);
+  opacity: 0.3;
+}
+
+.cf-sort-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--text-color);
+  opacity: 0.3;
+}
+
+.cf-sort-indicator.asc::before {
+  opacity: 1;
+  border-bottom-color: var(--primary-color);
+}
+
+.cf-sort-indicator.desc::after {
+  opacity: 1;
+  border-top-color: var(--primary-color);
+}
+
+th[data-column] {
+  transition: background-color 0.2s;
+}
+
+th[data-column]:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ======================
+   CONTADOR DE LINHAS
+   ====================== */
+.cf-entries-count {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin: 10px 0;
+  text-align: right;
+}
+
+/* ======================
+   RESPONSIVIDADE
+   ====================== */
+@media (max-width: 768px) {
+  .cf-pagination {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .cf-pagination-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .cf-pagination-pages {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
 
 
 /* Adicione temporariamente para debug 
@@ -742,3 +1256,32 @@
 }
 
 */
+
+
+
+/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css */
+
+/* Ícones de filtro nas colunas */
+.cf-filter-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  vertical-align: middle;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.cf-filter-icon:hover {
+  opacity: 1;
+}
+
+/* Garantir visibilidade dos ícones */
+th .cf-filter-icon {
+  display: inline-block !important;
+}

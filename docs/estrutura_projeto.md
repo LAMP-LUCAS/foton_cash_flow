@@ -31,59 +31,88 @@ O Plugin foton Fluxo de Caixa é uma solução avançada para gerenciamento fina
 
 ``` directory
 .
+├── .vscode
+│   └── settings.json
 ├── app
-│   ├── assets
-│   │   ├── javascripts
-│   │   │   ├── README.md
-│   │   │   ├── application.js
-│   │   │   ├── cash_flow_main.js
-│   │   │   └── cash_flow_dashboard.js
-│   │   └── stylesheets
-│   │       ├── cash_flow_main.css
-│   │       └── README.md
 │   ├── controllers
-│   │   ├── admin
-│   │   │   └── cash_flow_settings_controller.rb
-│   │   ├── cash_flow_entries_controller.rb
-│   │   └── cash_flow_settings_controller.rb
+│   │   └── foton_cash_flow
+│   │       ├── diagnostics_controller.rb
+│   │       ├── entries_controller.rb
+│   │       └── settings_controller.rb
 │   ├── helpers
-│   │   └── cash_flow_entries_helper.rb
+│   │   └── foton_cash_flow
+│   │       ├── entries_helper.rb
+│   │       └── settings_helper.rb
 │   └── views
-│       ├── cash_flow_entries
-│       │   ├── _filter_header.html.erb
-│       │   ├── _form.html.erb
-│       │   ├── _head_assets.html.erb
-│       │   ├── edit.html.erb
-│       │   ├── import_form.html.erb
-│       │   ├── index.html.erb
-│       │   └── new.html.erb
-│       ├── cash_flow_settings
-│       │   ├── _cash_flow_pro_settings.html.erb
-│       │   └── index.html.erb
-│       └── settings
-│           └── _cash_flow_pro_settings.html.erb
+│       └── foton_cash_flow
+│           ├── diagnostics
+│           │   └── index.html.erb
+│           ├── entries
+│           │   ├── _charts.html.erb
+│           │   ├── _form.html.erb
+│           │   ├── _no_projects_modal.html.erb
+│           │   ├── _summary.html.erb
+│           │   ├── _sync_btn.html.erb
+│           │   ├── _sync_modal.html.erb
+│           │   ├── _table.html.erb
+│           │   ├── create.js.erb
+│           │   ├── edit.html.erb
+│           │   ├── import_form.html.erb
+│           │   ├── index.html.erb
+│           │   ├── new.html.erb
+│           │   └── no_projects_alert.html.erb
+│           ├── settings
+│           │   ├── _cash_flow_settings.html.erb
+│           │   └── index.html.erb
+│           └── shared
+│               └── _cash_flow_assets.html.erb
+├── assets
+│   ├── javascripts
+│   │   ├── application.js
+│   │   ├── cash_flow_dashboard.js
+│   │   ├── cash_flow_main.js
+│   │   └── README.md
+│   └── stylesheets
+│       ├── cash_flow_main.css
+│       └── README.md
 ├── config
+│   ├── initializers
+│   │   └── foton_cash_flow.rb
 │   ├── locales
 │   │   ├── en.yml
 │   │   └── pt-BR.yml
 │   └── routes.rb
 ├── db
 │   └── migrate
-│       ├── 20230101000000_create_cash_flow_entries.rb
-│       └── 20250717000000_add_issue_status_author_to_cash_flow_entries.rb
+│       └── 20250721000001_create_financial_tracker_and_fields.rb
+├── docs
+│   ├── Descritivo.md
+│   ├── estrutura_dados.md
+│   ├── estrutura_projeto.md
+│   └── import_template.csv
 ├── lib
-│   ├── redmine_cash_flow_pro
+│   ├── foton_cash_flow
+│   │   ├── patches
+│   │   │   ├── issue_patch.rb
+│   │   │   └── issues_controller_patch.rb
+│   │   ├── services
+│   │   │   ├── exporter.rb
+│   │   │   ├── importer.rb
+│   │   │   ├── query_builder.rb
+│   │   │   └── summary_service.rb
 │   │   └── hooks.rb
-│   └── redmine_cash_flow_pro.rb
-├── .config
-├── estrutura_projeto.md
+│   ├── tasks
+│   │   ├── .config
+│   │   ├── install_plugin.py
+│   │   ├── remove_plugin.py
+│   │   └── update_plugin.py
+│   └── foton_cash_flow.rb
+├── .gitattributes
+├── .gitignore
 ├── Gemfile
 ├── import_template.csv
 ├── init.rb
-├── install_plugin.py
-├── README.md
-├── remove_plugin.py
-└── update_plugin.py
+└── README.md
 ```
 
 ## Arquitetura e Organização

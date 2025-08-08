@@ -42,6 +42,23 @@ module FotonCashFlow
           query
         }
 
+        # --- NOVOS SCOPES ADICIONADOS PARA FILTRAGEM POR SERVIDOR ---
+        # Esses scopes encapsulam a lógica de filtragem para os campos específicos do plugin.
+        scope :by_transaction_type, ->(type) {
+          cf_id = FotonCashFlow::SettingsHelper.cf_id(:transaction_type)
+          by_cash_flow_cf_value(cf_id, type)
+        }
+
+        scope :by_category, ->(category_id) {
+          cf_id = FotonCashFlow::SettingsHelper.cf_id(:category)
+          by_cash_flow_cf_value(cf_id, category_id)
+        }
+
+        # O filtro de status usa a coluna padrão `status_id` da tabela `issues`.
+        scope :by_status, ->(status_id) {
+          where(status_id: status_id)
+        }
+
         # Validar se a issue é um lançamento de fluxo de caixa
         def cash_flow_issue?
           Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Verificando se é uma issue de fluxo de caixa. tracker_id: #{tracker_id}, finance_tracker_id: #{FotonCashFlow::SettingsHelper.finance_tracker_id}"
@@ -102,7 +119,7 @@ module FotonCashFlow
         before_validation :set_entry_date_if_blank, if: :cash_flow_issue?
         validate :validate_entry_date_modification, if: :cash_flow_issue?
       end # included do
-     
+      
       # Validação dos campos personalizados de fluxo de caixa
       def validate_cash_flow_custom_fields
         Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Executando validação de custom fields para Issue ID #{id}."
@@ -184,20 +201,13 @@ module FotonCashFlow
         if entry_date_cf_id.present?
           Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] ID do Custom Field 'Data do Lançamento': #{entry_date_cf_id}"
 
-          # Encontrar o objeto CustomValue para a data do lançamento
           entry_date_custom_value = self.custom_value_for(entry_date_cf_id)
 
           if entry_date_custom_value.present?
             if entry_date_custom_value.value.blank?
               today_formatted = Date.today.to_s
-
-              # Log detalhado para entender o estado antes da atribuição
               Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor do CustomValue antes da atualização: #{entry_date_custom_value.value.inspect}"
-              
-              # Atribuição correta: modifique o valor do objeto CustomValue
               entry_date_custom_value.value = today_formatted
-              
-              # Log detalhado para entender o estado depois da atribuição
               Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor do CustomValue depois da atualização: #{entry_date_custom_value.value.inspect}"
               Rails.logger.info "[FOTON_CASH_FLOW][IssuePatch] Campo 'Data do Lançamento' estava vazio. Definindo o valor para: #{today_formatted}"
             else
@@ -217,15 +227,12 @@ module FotonCashFlow
         entry_date_cf_id = FotonCashFlow::SettingsHelper.cf_id(:entry_date)
         return unless entry_date_cf_id.present?
 
-        # Obter o objeto CustomValue
         custom_value = custom_value_for(entry_date_cf_id)
         
-        # Verificar se temos um objeto válido
         if custom_value
           Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] CustomValue encontrado: #{custom_value.inspect}"
           Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Valor atual: #{custom_value.value}, Valor anterior: #{custom_value.value_was}"
           
-          # Verificar se o valor foi alterado e se tinha um valor anterior
           if custom_value.value_changed? && custom_value.value_was.present?
             Rails.logger.debug "[FOTON_CASH_FLOW][IssuePatch] Data alterada de #{custom_value.value_was} para #{custom_value.value}"
             
@@ -237,6 +244,16 @@ module FotonCashFlow
         else
           Rails.logger.warn "[FOTON_CASH_FLOW][IssuePatch] CustomValue não encontrado para cf_id: #{entry_date_cf_id}"
         end
+      end
+
+      # Retorna a data de lançamento como objeto Date (ou nil se inválido)
+      # Usado para operações que requerem objeto Date, como iso8601
+      def cash_flow_entry_date_object
+        date_str = cash_flow_entry_date
+        return nil if date_str.blank?
+        
+        # Tenta converter a string para objeto Date
+        Date.parse(date_str) rescue nil
       end
 
     end

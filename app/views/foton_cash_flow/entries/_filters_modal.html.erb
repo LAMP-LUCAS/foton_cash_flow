@@ -1,0 +1,150 @@
+<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_filters_modal.html.erb %>
+
+<%# Container para o contador de lançamentos %>
+<div class="cf-entries-count">Exibindo <%= @issues_for_table.size %> de <%= @issue_count %> lançamentos</div>
+
+<%# Container para os filtros ativos %>
+<div class="cf-filters-bar">
+  <div class="cf-active-filters-container">
+    <div class="cf-active-filters-label">Filtros aplicados:</div>
+    <div class="cf-active-filters"></div>
+    <button class="cf-clear-all-filters cf-btn cf-btn-outline">Limpar todos</button>
+  </div>
+</div>
+
+<%# Template para o modal de filtros %>
+<template id="filter-modal-template">
+  <div class="cf-filter-modal">
+    <div class="cf-filter-modal-inner">
+      <div class="cf-filter-header">
+        <h5 class="cf-filter-title"></h5>
+        <button class="cf-close-modal-btn">&times;</button>
+      </div>
+      <div class="cf-filter-body">
+        <%# Filtro de Texto (String) %>
+        <div class="cf-filter-group" data-type="string">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="contains">Contém</option>
+              <option value="starts_with">Começa com</option>
+              <option value="ends_with">Termina com</option>
+              <option value="equal">É igual a</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+            <input type="text" class="cf-filter-input" placeholder="Digite o valor">
+          </label>
+        </div>
+
+        <%# Filtro de Número (Number/Value) %>
+        <div class="cf-filter-group" data-type="number value">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="equal">Igual</option>
+              <option value="greater_than">Maior que</option>
+              <option value="less_than">Menor que</option>
+              <option value="between">Entre</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+          </label>
+          <div class="cf-filter-number-inputs">
+            <input type="number" name="filter_value_1" class="cf-filter-input" placeholder="Valor mínimo">
+            <span class="cf-filter-and" style="display: none;">e</span>
+            <input type="number" name="filter_value_2" class="cf-filter-input between-field" placeholder="Valor máximo" style="display: none;">
+          </div>
+        </div>
+
+        <%# Filtro de Data (Date) %>
+        <div class="cf-filter-group" data-type="date">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="equal">Em</option>
+              <option value="before">Antes de</option>
+              <option value="after">Depois de</option>
+              <option value="between">Entre datas</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+          </label>
+          <div class="cf-filter-date-inputs">
+            <input type="date" name="filter_date_1" class="cf-filter-input">
+            <span class="cf-filter-and" style="display: none;">e</span>
+            <input type="date" name="filter_date_2" class="cf-filter-input between-field" style="display: none;">
+          </div>
+        </div>
+
+        <%# Filtro de Status %>
+        <div class="cf-filter-group" data-type="status">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="is">É</option>
+              <option value="is_not">Não é</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+          </label>
+          <div class="cf-filter-checkbox-container">
+            <% if defined?(@statuses) && @statuses.present? %>
+              <% @statuses.each do |status| %>
+                <label class="cf-checkbox-label">
+                  <input type="checkbox" class="cf-filter-checkbox" value="<%= status.name %>">
+                  <span><%= status.name %></span>
+                </label>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Filtro de Categoria %>
+        <div class="cf-filter-group" data-type="category">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="is">É</option>
+              <option value="is_not">Não é</option>
+              <option value="contains">Contém</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+          </label>
+          <div class="cf-filter-checkbox-container">
+            <% if defined?(@categories) && @categories.present? %>
+              <% @categories.each do |category| %>
+                <label class="cf-checkbox-label">
+                  <input type="checkbox" class="cf-filter-checkbox" value="<%= category %>">
+                  <span><%= category %></span>
+                </label>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        
+        <%# Filtro de Tipo de Transação %>
+        <div class="cf-filter-group" data-type="transaction">
+          <label class="cf-filter-field">
+            <select class="cf-filter-operator">
+              <option value="is">É</option>
+              <option value="is_not">Não é</option>
+              <option value="is_empty">Está vazio</option>
+              <option value="is_not_empty">Não está vazio</option>
+            </select>
+          </label>
+          <div class="cf-filter-checkbox-container">
+            <label class="cf-checkbox-label">
+              <input type="checkbox" class="cf-filter-checkbox" value="revenue">
+              <span>Receita</span>
+            </label>
+            <label class="cf-checkbox-label">
+              <input type="checkbox" class="cf-filter-checkbox" value="expense">
+              <span>Despesa</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="cf-filter-actions">
+        <button class="cf-apply-filter-btn cf-btn cf-btn-primary">Aplicar</button>
+        <button class="cf-clear-filter-btn cf-btn cf-btn-outline">Limpar</button>
+      </div>
+    </div>
+  </div>
+</template>

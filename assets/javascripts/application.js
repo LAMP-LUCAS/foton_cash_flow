@@ -1,3 +1,5 @@
+// plugins/foton_cash_flow/assets/javascripts/application.js
+
 document.addEventListener('DOMContentLoaded', function() {
   // Verificação inicial via AJAX
   if (document.querySelector('#new_cash_flow_entry')) {

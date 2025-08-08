@@ -4,28 +4,63 @@
   <table class="list entries cf-table">
     <thead>
       <tr>
-        <th><%= l(:field_id) %></th>
-        <th><%= l(:field_date) %></th>
-        <th><%= l(:field_category) %></th>
-        <th><%= l(:field_transaction_type) %></th>
-        <th><%= l(:field_value) %></th>
-        <th><%= l(:field_status) %></th>
-        <th><%= l(:field_description) %></th>
-        <th></th>
+        <th class="id-column" data-column="id" data-type="number">
+          <%= l(:field_id) %> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="date-column" data-column="cash_flow_entry_date" data-type="date">
+          <%= l(:field_date) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="category-column" data-column="cash_flow_category" data-type="string">
+          <%= l(:field_category) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="transaction-column" data-column="cash_flow_transaction_type" data-type="string">
+          <%= l(:field_transaction_type) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="value-column" data-column="cash_flow_amount" data-type="value">
+          <%= l(:field_value) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="status-column" data-column="status" data-type="status">
+          <%= l(:field_status) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="description-column" data-column="subject" data-type="string">
+          <%= l(:field_description) %> <span class="cf-filter-icon icon icon-filter"></span> <span class="cf-sort-indicator"></span>
+        </th>
+        <th class="actions-column"><%= l(:label_actions) %></th>
       </tr>
     </thead>
     <tbody>
-      <% if issues_for_table.any? %>
-        <% issues_for_table.each do |issue| %>
-          <tr>
-            <td><%= link_to_cash_flow_issue(issue) %></td>
-            <td><%= format_date(issue.cash_flow_entry_date) %></td>
-            <td><%= issue.cash_flow_category %></td>
-            <td><%= format_transaction_type(issue) %></td>
-            <td><%= format_amount(issue.cash_flow_amount) %></td>
-            <td><%= format_status(issue.status) %></td>
-            <td><%= issue.subject %></td>
-            <td class="buttons">
+      <% if @issues_for_table.any? %>
+        <% @issues_for_table.each do |issue| %>
+          <tr class="issue-row <%= issue.cash_flow_transaction_type.to_s.downcase %>"
+              data-id="<%= issue.id %>"
+              data-cash-flow-entry-date="<%= issue.cash_flow_entry_date_object&.iso8601 || issue.cash_flow_entry_date %>"
+              data-cash-flow-category="<%= issue.cash_flow_category %>"
+              data-cash-flow-transaction-type="<%= issue.cash_flow_transaction_type %>"
+              data-cash-flow-amount="<%= issue.cash_flow_amount.to_f %>"
+              data-status="<%= issue.status.name %>"
+              data-subject="<%= issue.subject %>">
+            <td class="id-column"><%= link_to_cash_flow_issue(issue) %></td>
+            <td class="date-column"><%= format_date(issue.cash_flow_entry_date) %></td>
+            <td class="category-column">
+              <span class="category-tag category-<%= issue.cash_flow_category.parameterize %>">
+                <%= issue.cash_flow_category %>
+              </span>
+            </td>
+            <td class="transaction-column">
+              <span class="transaction-tag <%= issue.cash_flow_transaction_type.to_s.downcase %>">
+                <%= format_transaction_type(issue) %>
+              </span>
+            </td>
+            <td class="value-column <%= issue.cash_flow_transaction_type.to_s.downcase %>">
+              <%= format_amount(issue.cash_flow_amount) %>
+            </td>
+            <td class="status-column">
+              <span class="status-tag <%= issue.status.name.parameterize %>">
+                <%= format_status(issue.status) %>
+              </span>
+            </td>
+            <td class="description-column"><%= issue.subject %></td>
+            <td class="actions-column">
               <%= link_to l(:button_edit), edit_issue_path(issue), class: 'icon icon-edit' %>
               <%= link_to l(:button_delete), issue_path(issue), data: { confirm: l(:text_are_you_sure), method: :delete }, class: 'icon icon-del' %>
             </td>

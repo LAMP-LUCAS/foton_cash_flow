@@ -79,6 +79,7 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 - `assets/stylesheets/cash_flow_main.css`: CSS principal, unificado, documentado e sem dependências externas.
 - `assets/javascripts/cash_flow_main.js`: JS principal para filtros e interações (exceto gráficos).
 - `assets/javascripts/cash_flow_dashboard.js`: JS exclusivo para gráficos (Chart.js).
+- `assets/javascripts/application.js`: JS para novos lançamentos.
 
 ## Instalação, Atualização e Remoção Automatizadas
 

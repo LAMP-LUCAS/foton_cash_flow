@@ -21,24 +21,23 @@ module FotonCashFlow
     def index
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando CashFlow::EntriesController#index."
 
-      # Verifica as dependências.
       @dependencies_met = FotonCashFlow::SettingsHelper.all_dependencies_met?
 
       unless @dependencies_met
         flash.now[:warning] = l(:warning_cash_flow_dependencies_not_met_full)
-        # Se as dependências não foram atendidas, inicializa as variáveis
-        # para evitar erros na view e renderiza a página com o aviso.
         @query = Issue.none
         @total_revenue = @total_expense = @balance = BigDecimal('0.0')
         @bar_chart_labels = @bar_chart_revenue = @bar_chart_expense = @pie_chart_labels = @pie_chart_data = []
       else
-        # O bloco a seguir será executado somente se as dependências forem atendidas.
         begin
-          # Filtra as issues com base nos parâmetros
           @query = FotonCashFlow::Services::QueryBuilder.new(params, User.current).build
+          
+          # --- Adiciona a nova lógica de filtragem por servidor aqui ---
+          @query = apply_server_side_filters(@query)
+          # -----------------------------------------------------------
+
           Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] Query Builder retornou: #{@query.count} issues."
 
-          # Calcula o sumário (receita, despesa, balanço)
           summary_service = FotonCashFlow::Services::SummaryService.new(@query)
           summary_service.calculate
           @total_revenue = summary_service.total_revenue
@@ -63,7 +62,11 @@ module FotonCashFlow
       @limit = per_page_option
       @issue_pages = Paginator.new @issue_count, @limit, params['page']
       @offset = @issue_pages.offset
+      @issues = @project.issues.order(created_on: :desc)
       @issues_for_table = @query.limit(@limit).offset(@offset)
+      
+      @categories = @issues.map { |i| i.cash_flow_category }.uniq.compact.sort
+      @statuses = IssueStatus.all.sort_by(&:position)
 
       @cash_flow_status_collection = IssueStatus.all.map { |s| [s.name, s.id.to_s] }
       
@@ -208,19 +211,12 @@ module FotonCashFlow
     end
 
     def filter_params
-      @filter_params = params.permit(:from_date, :to_date, :transaction_type, :category, :search, :project_id, :status, :author, :page)
+      @filter_params = params.permit(
+        :from_date, :to_date, :search, :project_id, :author, :page,
+        :query_transaction_type, :query_status, :query_category
+      )
       Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] [filter_params] Parâmetros filtrados: #{@filter_params.inspect}"
     end
-
-    # def ensure_cash_flow_dependencies
-    #   unless FotonCashFlow::SettingsHelper.all_dependencies_met?
-    #     Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Dependências do fluxo de caixa não atendidas. Redirecionando."
-    #     flash[:error] = l(:error_cash_flow_dependencies_missing) # Usa uma chave de tradução para a mensagem
-    #     redirect_to diagnostics_path #default_rescue_path # Redireciona para um caminho seguro, como a página de configurações ou a home
-    #     return false # Impede a execução posterior da action
-    #   end
-    #   true
-    # end
 
     def find_issue_and_set_custom_fields
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] [find_issue_and_set_custom_fields] Buscando Issue ID #{params[:id]} para o projeto #{@project&.id}."
@@ -295,18 +291,43 @@ module FotonCashFlow
       end
     end
 
-  def check_dependencies_and_set_flash
-    Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Verificando dependências antes de carregar o índice."
-    @dependencies_met = FotonCashFlow::SettingsHelper.all_dependencies_met?
-    unless @dependencies_met
-      flash.now[:warning] = l(:warning_cash_flow_dependencies_not_met)
-      # O modal de sincronização será exibido na view
+    def check_dependencies_and_set_flash
+      Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Verificando dependências antes de carregar o índice."
+      @dependencies_met = FotonCashFlow::SettingsHelper.all_dependencies_met?
+      unless @dependencies_met
+        flash.now[:warning] = l(:warning_cash_flow_dependencies_not_met)
+        # O modal de sincronização será exibido na view
+      end
+      # @sync_issues_count = FotonCashFlow::Services::SynchronizationService.new.unsynced_issues_count
+      # No momento, esta linha foi comentada pois não há um SynchronizationService disponível.
+      # Será necessário implementar um serviço para verificar as issues não sincronizadas.
+      # Por ora, a lógica do modal será baseada apenas no status geral das dependências.
     end
-    # @sync_issues_count = FotonCashFlow::Services::SynchronizationService.new.unsynced_issues_count
-    # No momento, esta linha foi comentada pois não há um SynchronizationService disponível.
-    # Será necessário implementar um serviço para verificar as issues não sincronizadas.
-    # Por ora, a lógica do modal será baseada apenas no status geral das dependências.
-  end
 
+    def apply_server_side_filters(query)
+      filtered_query = query
+      # Filtro por tipo de transação (custom field)
+      if params[:query_transaction_type].present?
+        cf_id = FotonCashFlow::SettingsHelper.cf_id(:transaction_type)
+        filtered_query = filtered_query.by_cash_flow_cf_value(cf_id, params[:query_transaction_type])
+      end
+      # Filtro por status (coluna padrão)
+      if params[:query_status].present?
+        filtered_query = filtered_query.by_status(params[:query_status])
+      end
+      # Filtro por categoria (custom field)
+      if params[:query_category].present?
+        cf_id = FotonCashFlow::SettingsHelper.cf_id(:category)
+        filtered_query = filtered_query.by_cash_flow_cf_value(cf_id, params[:query_category])
+      end
+
+      # Exemplo de como você poderia usar outros filtros se necessário
+      # filtered_query = filtered_query.by_cash_flow_cf_date_range(...)
+      # filtered_query = filtered_query.by_subject(...)
+
+      filtered_query
+    end
+
+    
   end
 end
