@@ -1,0 +1,37 @@
+<%= javascript_tag do %>
+  (function() {
+    var customFieldId = "<%= FotonCashFlow::SettingsHelper.cf_id(:entry_date) %>";
+    var financeTrackerId = "<%= FotonCashFlow::SettingsHelper.finance_tracker_id %>";
+
+    if (!customFieldId) {
+      console.warn("FotonCashFlow: Custom field 'Data de Lançamento' não configurado.");
+      return;
+    }
+
+    var setTodayDate = function() {
+      var dateField = document.getElementById("issue_custom_field_values_" + customFieldId);
+      var currentTrackerId = document.getElementById("issue_tracker_id").value;
+      
+      // Apenas preenche se o campo estiver vazio e o tracker for o de finanças
+      if (dateField && currentTrackerId == financeTrackerId) {
+        if (!dateField.value) {
+          var today = new Date().toISOString().slice(0, 10);
+          dateField.value = today;
+          console.log("FotonCashFlow: Data de lançamento preenchida no cliente com: " + today);
+        }
+      }
+    };
+    
+    // Executa a função imediatamente ao carregar o formulário
+    setTodayDate();
+
+    // A cada mudança de tracker via AJAX, executa a função novamente
+    // para preencher se necessário.
+    $(document).on('ajax:success', function(event) {
+      if (event.target.id === 'new-issue-form') {
+        setTodayDate();
+      }
+    });
+
+  })();
+<% end %>

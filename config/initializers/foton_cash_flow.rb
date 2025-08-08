@@ -1,5 +1,7 @@
 # config/initializers/foton_cash_flow.rb
 
+Rails.application.config.active_support.to_time_preserves_timezone = true
+
 if Rails.env.test?
   Rails.application.config.after_initialize do
     Setting.plugin_foton_cash_flow ||= {}

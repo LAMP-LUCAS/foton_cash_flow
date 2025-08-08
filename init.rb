@@ -26,6 +26,7 @@ Redmine::Plugin.register :foton_cash_flow do |config|
 
   # Carregamento do hook para o layout do Redmine
   require_relative 'lib/foton_cash_flow/hooks' if File.exist?(File.join(__dir__, 'lib', 'foton_cash_flow', 'hooks.rb'))
+  
 
   # Use `ActiveSupport::Reloader.to_prepare` para garantir que o patch seja aplicado
   # corretamente em um ambiente Rails 7.
@@ -35,9 +36,9 @@ Redmine::Plugin.register :foton_cash_flow do |config|
     unless Issue.included_modules.include?(FotonCashFlow::Patches::IssuePatch)
       Issue.send(:include, FotonCashFlow::Patches::IssuePatch)
       Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' incluído com sucesso na classe Issue."
-    else
-      Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' já incluído. Pulando."
     end
+    
+    
   end
 
   # Permissões atualizadas

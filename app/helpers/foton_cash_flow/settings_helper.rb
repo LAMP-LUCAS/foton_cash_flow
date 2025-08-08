@@ -342,7 +342,7 @@ module FotonCashFlow
       when :transaction_type
         { required: true, possible_values: ['expense', 'revenue'] }
       when :category
-        { required: true, possible_values: ['Arquitetos', 'Engenheiros', 'Construtoras', 'Empresas'] }
+        { required: true, possible_values: ['Custos Fixos', 'Custos Variáveis', 'Receitas Fixas', 'Receitas Variáveis','Impostos e Tributos'] }
       else
         {}
       end
@@ -352,6 +352,75 @@ module FotonCashFlow
     # MÉTODOS DE AJUDA
     # -----------------------------------------------------------------
     
+    # Método para obter o ID do Custom Field de forma segura
+    def self.cf_id(key)
+      name = CUSTOM_FIELD_NAMES[key]
+      custom_field = IssueCustomField.find_by(name: name)
+      
+      if custom_field
+        Rails.logger.debug "[DEBUG][SETTINGS_HELPER] cf_id(#{key}) - Custom Field '#{name}' encontrado com ID: #{custom_field.id}"
+        custom_field.id
+      else
+        Rails.logger.warn "[ALERTA][SETTINGS_HELPER] cf_id(#{key}) - Custom Field '#{name}' não encontrado. Verifique a configuração do plugin. Retornando nil."
+        nil
+      end
+    end
+    
+    # Método para obter o ID do Tracker de forma segura
+    def self.finance_tracker_id
+      tracker = Tracker.find_by(name: FINANCE_TRACKER_NAME)
+      
+      if tracker
+        Rails.logger.debug "[DEBUG][SETTINGS_HELPER] finance_tracker_id - Tracker '#{FINANCE_TRACKER_NAME}' encontrado com ID: #{tracker.id}"
+        tracker.id
+      else
+        Rails.logger.warn "[ALERTA][SETTINGS_HELPER] finance_tracker_id - Tracker '#{FINANCE_TRACKER_NAME}' não encontrado. Verifique a configuração do plugin. Retornando nil."
+        nil
+      end
+    end
+
+    # Método para obter o ID do Projeto de forma segura
+    def self.internal_finance_project_id
+      project = Project.find_by(identifier: FINANCE_PROJECT_IDENTIFIER)
+      
+      if project
+        Rails.logger.debug "[DEBUG][SETTINGS_HELPER] internal_finance_project_id - Projeto '#{FINANCE_PROJECT_NAME}' encontrado com ID: #{project.id}"
+        project.id
+      else
+        Rails.logger.warn "[ALERTA][SETTINGS_HELPER] internal_finance_project_id - Projeto '#{FINANCE_PROJECT_NAME}' não encontrado. Verifique a configuração do plugin. Retornando nil."
+        nil
+      end
+    end
+
+    def self.all_dependencies_met?
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Verificando se todas as dependências foram atendidas."
+      
+      dependencies_met = true
+      
+      # Verificação do Projeto
+      if internal_finance_project_id.nil?
+        Rails.logger.error "[FOTON_CASH_FLOW][ERRO] Projeto Financeiro não encontrado."
+        dependencies_met = false
+      end
+
+      # Verificação do Tracker
+      if finance_tracker_id.nil?
+        Rails.logger.error "[FOTON_CASH_FLOW][ERRO] Tracker Financeiro não encontrado."
+        dependencies_met = false
+      end
+
+      # Verificação dos Custom Fields
+      CUSTOM_FIELD_NAMES.each do |key, name|
+        if cf_id(key).nil?
+          Rails.logger.error "[FOTON_CASH_FLOW][ERRO] Custom Field '#{name}' não encontrado."
+          dependencies_met = false
+        end
+      end
+      
+      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Dependências atendidas: #{dependencies_met}"
+      dependencies_met
+    end
+
     # Método para converter uma string de moeda no formato BR para BigDecimal de forma robusta
     def self.parse_currency_to_decimal(value_str)
       return BigDecimal('0.0') if value_str.blank?
@@ -377,33 +446,38 @@ module FotonCashFlow
       Rails.logger.error "[FOTON_CASH_FLOW] Erro ao converter valor: #{value_str} - #{e.message}"
       BigDecimal('0.0')
     end
-    
-    def self.cf_id(key)
-      Setting.plugin_foton_cash_flow["cf_#{key}_id"]
-    end
-    
-    def self.finance_tracker_id
-      Setting.plugin_foton_cash_flow['finance_tracker_id']
-    end
 
-    def self.internal_finance_project_id
-      Setting.plugin_foton_cash_flow['internal_finance_project_id']
-    end
-
-    def self.all_dependencies_met?
-      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Verificando se todas as dependências foram atendidas."
+    # Novo método de log para diagnóstico
+    def self.check_plugin_dependencies_log(parameters = nil)
+      Rails.logger.info "--- [DIAGNÓSTICO DO PLUGIN FOTON CASH FLOW] ---"
       
-      expected_dependencies = [:entry_date, :amount, :transaction_type, :category]
-      dependencies_met = expected_dependencies.all? do |key|
-        cf_id = Setting.plugin_foton_cash_flow["cf_#{key}_id"]
-        cf_id.present? && CustomField.exists?(id: cf_id)
+      # Log dos parâmetros recebidos (se fornecido)
+      if parameters
+        Rails.logger.info "--- Parâmetros Recebidos ---"
+        Rails.logger.info "  - Tracker ID: #{parameters.dig('issue', 'tracker_id')}"
+        Rails.logger.info "  - Custom Field Values: #{parameters.dig('issue', 'custom_field_values').inspect}"
       end
+      
+      # Log do Banco de Dados
+      Rails.logger.info "--- Configuração do Banco de Dados ---"
+      
+      project = Project.find_by(identifier: FINANCE_PROJECT_IDENTIFIER)
+      project_status = project.present? ? "ENCONTRADO (ID: #{project.id})" : "NÃO ENCONTRADO"
+      Rails.logger.info "  - Projeto Financeiro (Identificador: '#{FINANCE_PROJECT_IDENTIFIER}'): #{project_status}"
 
-      dependencies_met &= Setting.plugin_foton_cash_flow['finance_tracker_id'].present? && Tracker.exists?(id: Setting.plugin_foton_cash_flow['finance_tracker_id'])
-      dependencies_met &= Setting.plugin_foton_cash_flow['internal_finance_project_id'].present? && Project.exists?(id: Setting.plugin_foton_cash_flow['internal_finance_project_id'])
+      tracker = Tracker.find_by(name: FINANCE_TRACKER_NAME)
+      tracker_status = tracker.present? ? "ENCONTRADO (ID: #{tracker.id})" : "NÃO ENCONTRADO"
+      Rails.logger.info "  - Tracker Financeiro (Nome: '#{FINANCE_TRACKER_NAME}'): #{tracker_status}"
 
-      Rails.logger.info "[DEBUG][SETTINGS_HELPER] Dependências atendidas: #{dependencies_met}"
-      dependencies_met
+      Rails.logger.info "--- Custom Fields e seus IDs ---"
+      CUSTOM_FIELD_NAMES.each do |key, name|
+        cf = IssueCustomField.find_by(name: name)
+        cf_status = cf.present? ? "OK (ID: #{cf.id}, Posição: #{cf.position})" : "FALHA - Não encontrado"
+        Rails.logger.info "  - Campo '#{name}': #{cf_status}"
+      end
+      
+      Rails.logger.info "--- FIM DO DIAGNÓSTICO ---"
     end
+    
   end
 end
