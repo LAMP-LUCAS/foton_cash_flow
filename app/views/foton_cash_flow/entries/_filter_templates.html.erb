@@ -1,0 +1,72 @@
+<%# 
+  Arquivo: app/views/foton_cash_flow/entries/_filter_templates.html.erb
+  Descrição: Contém os templates para os pop-ups de filtro (estilo Notion).
+             Substitui a lógica do antigo _filters_modal.html.erb.
+%>
+<template id="filter-popup-template">
+  <div class="cf-filter-popup">
+    <div class="cf-filter-popup-body">
+      
+      <%# Filtro de Texto (String) %>
+      <div class="cf-filter-group" data-type="string" style="display: none;">
+        <select class="cf-filter-operator">
+          <option value="contains"><%= l(:filter_operator_contains) %></option>
+          <option value="not_contains"><%= l(:filter_operator_not_contains) %></option>
+          <option value="starts_with"><%= l(:filter_operator_starts_with) %></option>
+          <option value="ends_with"><%= l(:filter_operator_ends_with) %></option>
+          <option value="equal"><%= l(:filter_operator_is) %></option>
+          <option value="not_equal"><%= l(:filter_operator_is_not) %></option>
+          <option value="is_empty"><%= l(:filter_operator_is_empty) %></option>
+          <option value="is_not_empty"><%= l(:filter_operator_is_not_empty) %></option>
+        </select>
+        <input type="text" class="cf-filter-input" placeholder="<%= l(:placeholder_type_a_value) %>">
+      </div>
+
+      <%# Filtro de Número (Number/Value) %>
+      <div class="cf-filter-group" data-type="value" style="display: none;">
+        <select class="cf-filter-operator">
+          <option value="equal"><%= l(:filter_operator_is) %></option>
+          <option value="not_equal"><%= l(:filter_operator_is_not) %></option>
+          <option value="greater_than"><%= l(:filter_operator_greater_than) %></option>
+          <option value="less_than"><%= l(:filter_operator_less_than) %></option>
+          <option value="between"><%= l(:filter_operator_between) %></option>
+        </select>
+        <div class="cf-filter-number-inputs">
+          <input type="number" name="filter_value_1" class="cf-filter-input" placeholder="<%= l(:field_value) %>">
+          <span class="cf-filter-and" style="display: none;"><%= l(:label_and) %></span>
+          <input type="number" name="filter_value_2" class="cf-filter-input between-field" placeholder="<%= l(:label_other_value) %>" style="display: none;">
+        </div>
+      </div>
+
+      <%# Filtro de Data (Date) %>
+      <div class="cf-filter-group" data-type="date" style="display: none;">
+        <select class="cf-filter-operator">
+          <option value="equal"><%= l(:filter_operator_is) %></option>
+          <option value="before"><%= l(:filter_operator_before) %></option>
+          <option value="after"><%= l(:filter_operator_after) %></option>
+          <option value="between"><%= l(:filter_operator_between) %></option>
+        </select>
+        <div class="cf-filter-date-inputs">
+          <input type="date" name="filter_value_1" class="cf-filter-input">
+          <span class="cf-filter-and" style="display: none;"><%= l(:label_and) %></span>
+          <input type="date" name="filter_value_2" class="cf-filter-input between-field" style="display: none;">
+        </div>
+      </div>
+
+      <%# Filtro de Seleção (Status, Categoria, etc.) %>
+      <div class="cf-filter-group" data-type="status cash_flow_category cash_flow_transaction_type" style="display: none;">
+        <div class="cf-filter-search-container">
+          <input type="text" class="cf-filter-search" placeholder="<%= l(:button_search) %>...">
+        </div>
+        <div class="cf-filter-checkbox-container">
+          <%# Checkboxes serão gerados dinamicamente pelo JS %>
+        </div>
+      </div>
+      
+    </div>
+    <div class="cf-filter-popup-footer">
+      <button type="button" class="cf-btn cf-btn-secondary cf-clear-filter-btn"><%= l(:button_clear) %></button>
+      <button type="button" class="cf-btn cf-btn-primary cf-apply-filter-btn"><%= l(:button_apply) %></button>
+    </div>
+  </div>
+</template>

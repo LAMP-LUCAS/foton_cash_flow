@@ -77,9 +77,17 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 ## Estrutura de CSS/JS
 
 - `assets/stylesheets/cash_flow_main.css`: CSS principal, unificado, documentado e sem dependências externas.
-- `assets/javascripts/cash_flow_main.js`: JS principal para filtros e interações (exceto gráficos).
-- `assets/javascripts/cash_flow_dashboard.js`: JS exclusivo para gráficos (Chart.js).
-- `assets/javascripts/application.js`: JS para novos lançamentos.
+- `assets/javascripts/`: Contém todos os scripts do plugin, seguindo uma arquitetura modular:
+  - `application.js`: Ponto de entrada principal, que carrega o controlador da página atual.
+  - `controllers/`: Orquestram as páginas (ex: `cash_flow_page_controller.js`).
+  - `managers/`: Gerenciam a lógica de negócio (filtros, visualização, dados).
+  - `components/`: Componentes de UI reutilizáveis (popups, etc.).
+  - `cash_flow_dashboard.js`: Lógica para a renderização dos gráficos do dashboard.
+
+> [!TIP]
+> Para uma documentação técnica detalhada sobre os scripts, consulte o `Readme.md` na pasta `assets/javascripts`.
+
+---
 
 ## Instalação, Atualização e Remoção Automatizadas
 
@@ -161,7 +169,7 @@ Para atualizar o plugin para uma nova versão:
 1. **Acesse a pasta do plugin:**
 
    ```bash
-   cd /caminho/para/redmine/plugins/redmine_cash_flow_pro
+   cd /caminho/para/redmine/plugins/foton_cash_flow
    ```
 
 2. **Atualize o repositório:**
@@ -197,13 +205,13 @@ Se precisar remover o plugin:
 1. **Remova as migrações do banco de dados:**
 
    ```bash
-   docker compose exec redmine bundle exec rake redmine:plugins:migrate NAME=redmine_cash_flow_pro VERSION=0 RAILS_ENV=production
+   docker compose exec redmine bundle exec rake redmine:plugins:migrate NAME=foton_cash_flow VERSION=0 RAILS_ENV=production
    ```
 
 2. **Exclua a pasta do plugin:**
 
    ```bash
-   rm -rf /caminho/para/redmine/plugins/redmine_cash_flow_pro
+   rm -rf /caminho/para/redmine/plugins/foton_cash_flow
    ```
 
 3. **Reinicie o Redmine:**

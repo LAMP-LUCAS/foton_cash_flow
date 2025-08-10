@@ -1,29 +1,23 @@
-// plugins/foton_cash_flow/assets/javascripts/application.js
+//= require ./vendor/chart.umd.min.js
+//
+//= require ./controllers/cash_flow_page_controller.js
+//
+// A diretiva `//= require` acima é processada pelo Sprockets (Asset Pipeline do Rails).
+// Ela garante que o conteúdo de `cash_flow_page_controller.js` seja incluído
+// neste arquivo ANTES que ele seja enviado para o navegador.
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Verificação inicial via AJAX
-  if (document.querySelector('#new_cash_flow_entry')) {
-    Rails.ajax({
-      url: window.location.pathname,
-      type: 'GET',
-      dataType: 'json',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      success: function(response) {
-        if (response.modal) {
-          document.body.insertAdjacentHTML('beforeend', response.modal);
-          $('#no-projects-modal').modal('show');
-        }
-      }
-    });
+/**
+ * Ponto de entrada principal do JavaScript do plugin.
+ * Atua como um roteador para inicializar os controladores corretos
+ * com base na página atual.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  const cashFlowPage = document.querySelector('.cash-flow-page');
+  if (cashFlowPage) {
+    const controller = new CashFlowPageController(cashFlowPage);
+    controller.initialize();
   }
 
-  // Atualização do projeto selecionado
-  const projectSelect = document.querySelector('#selected_project');
-  if (projectSelect) {
-    projectSelect.addEventListener('change', function() {
-      const projectId = this.value;
-      // Atualiza o formulário com o novo projeto
-      document.querySelector('#issue_project_id').value = projectId;
-    });
-  }
+  // A lógica para outras páginas (ex: formulários de new/edit)
+  // pode ser adicionada aqui, inicializando outros controladores.
 });

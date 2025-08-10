@@ -32,6 +32,12 @@ Redmine::Plugin.register :foton_cash_flow do |config|
   ActiveSupport::Reloader.to_prepare do
     Rails.logger.info "[FOTON_CASH_FLOW] Verificando e aplicando patches..."
 
+    # Carrega a biblioteca principal do plugin e o patch dentro do to_prepare
+    # para garantir a ordem de carregamento correta em todos os ambientes.
+    require_relative 'lib/foton_cash_flow'
+    # Carrega o arquivo do patch aqui, garantindo que ele esteja disponível para inclusão.
+    require_relative 'lib/foton_cash_flow/patches/issue_patch'
+
     unless Issue.included_modules.include?(FotonCashFlow::Patches::IssuePatch)
       Issue.send(:include, FotonCashFlow::Patches::IssuePatch)
       Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' incluído com sucesso na classe Issue."

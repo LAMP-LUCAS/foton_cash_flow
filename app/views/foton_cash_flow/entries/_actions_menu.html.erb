@@ -1,0 +1,20 @@
+<%# 
+  Arquivo: app/views/foton_cash_flow/entries/_actions_menu.html.erb
+  Descrição: Menu suspenso para ações globais da página.
+%>
+<div class="cf-dropdown">
+  <button class="cf-btn cf-btn-secondary cf-dropdown-toggle" id="actions-menu-btn">
+    Ações <i class="icon icon-arrow-down"></i>
+  </button>
+  <div class="cf-dropdown-menu" id="actions-dropdown-menu">
+    <a href="#" class="cf-dropdown-item" data-toggle="modal" data-target="#syncModal">
+      <i class="icon icon-reload"></i> Sincronizar
+    </a>
+    <a href="#" class="cf-dropdown-item">
+      <i class="icon icon-upload"></i> Importar (CSV)
+    </a>
+    <a href="#" class="cf-dropdown-item">
+      <i class="icon icon-download"></i> Exportar (CSV)
+    </a>
+  </div>
+</div>

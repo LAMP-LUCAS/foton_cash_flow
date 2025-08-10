@@ -1,55 +1,24 @@
-<%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/index.html.erb %>
+<%#
+  Arquivo: app/views/foton_cash_flow/entries/index.html.erb
+  Descrição: View principal que renderiza a página de lançamentos do fluxo de caixa.
+%>
 
-<%= render 'foton_cash_flow/shared/cash_flow_assets' %>
-
-<div class="foton-cash-flow cash-flow-page">
-  <h2><%= l(:label_foton_cash_flow_entries) %></h2>
-  
-  <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
-  
-  <% if @dependencies_met == false %>
-    <%= render partial: 'foton_cash_flow/entries/sync_modal' %>
-  <% elsif @query.empty? %>
-    <p class="nodata"><%= l(:label_no_data) %></p>
-  <% end %>
-
-  <% if @issues_for_table.present? %>
-
-    <div class="cf-table-container cf-layout-sidebar">
-
-      <div class="cf-table-wrapper">
-        <%= render partial: 'foton_cash_flow/entries/filters_modal' %>
-        <%= render partial: 'foton_cash_flow/entries/table', locals: { 
-          issues_for_table: @issues_for_table,
-          cumulative_revenue_labels: @cumulative_revenue_labels,
-          cumulative_revenue_data: @cumulative_revenue_data,
-          cumulative_expense_data: @cumulative_expense_data 
-        } %>
-      </div>
-
-      <%= render partial: 'foton_cash_flow/entries/summary', locals: {
-          total_revenue: @total_revenue,
-          total_expense: @total_expense,
-          balance: @balance
-      } %>
-      
+<div class="cash-flow-page">
+  <div class="cf-header">
+    <h2><%= l(:label_foton_cash_flow_entries) %></h2>
+    <div class="cf-header-actions">
+      <%= link_to l(:button_new_entry), new_foton_cash_flow_entry_path, class: 'cf-btn cf-btn-primary icon icon-add' %>
+      <%# Outros botões como Importar/Exportar podem ser adicionados aqui %>
     </div>
+  </div>
 
-    <%= render partial: 'foton_cash_flow/entries/charts', locals: {
-      bar_chart_labels: @bar_chart_labels,
-      bar_chart_revenue: @bar_chart_revenue,
-      bar_chart_expense: @bar_chart_expense,
-      pie_chart_labels: @pie_chart_labels,
-      pie_chart_data: @pie_chart_data,
-      balance_chart_labels: @balance_chart_labels,
-      balance_chart_data: @balance_chart_data,
-      cumulative_revenue_labels: @cumulative_revenue_labels,
-      cumulative_revenue_data: @cumulative_revenue_data,
-      cumulative_expense_data: @cumulative_expense_data
-    } %>
+  <div class="cf-table-section">
+    <%# Barra que exibirá as "pílulas" de filtros ativos. %>
+    <div id="cf-active-filters-bar"></div>
 
-  <% end %>
+    <%= render 'table' %>
+  </div>
 
+  <%# Renderiza os templates que serão usados pelo JavaScript %>
+  <%= render 'filter_templates' %>
 </div>
-
-<%# Fim do arquivo index.html.erb %>

@@ -1,10 +1,12 @@
 
 pt-BR:
-  # ===================== CHAVES UTILIZADAS NAS VIEWS/CONTROLLER =====================
-  label_cash_flow_title: "Fluxo de Caixa"
-  label_cash_flow_actions: "Ações do Fluxo de Caixa"
-  button_new_entry: "Novo lançamento"
-  title_create_new_entry: "Criar novo lançamento"
+  foton_cash_flow:
+    # ===================== CHAVES UTILIZADAS NAS VIEWS/CONTROLLER =====================
+    label_cash_flow_title: "Fluxo de Caixa"
+    label_cash_flow_actions: "Ações do Fluxo de Caixa"
+    button_new_entry: "Novo lançamento"
+    title_create_new_entry: "Criar novo lançamento"
+    # ... e assim por diante para todas as outras chaves ...
   button_import: "Importar"
   title_import_entries: "Importar lançamentos"
   button_export: "Exportar"
@@ -48,13 +50,8 @@ pt-BR:
   label_other: "Outros"
   label_min: "Mínimo"
   label_max: "Máximo"
+  label_and: "e"
   notice_successful_create: "Lançamento criado com sucesso."
-  notice_successful_update: "Configurações atualizadas com sucesso."
-  notice_successful_delete: "Lançamento excluído com sucesso."
-  error_unable_to_delete_cash_flow_entry: "Não foi possível excluir o lançamento financeiro."
-  error_no_projects_available: "Você não possui projetos associados."
-  error_internal_server: "Erro interno do servidor"
-
 
   # Status (opcional)
   status_new: "Nova"
@@ -80,6 +77,7 @@ pt-BR:
   # As chaves abaixo não são utilizadas diretamente nas views/controller do fluxo de caixa.
   # Avalie se são usadas em outras partes do plugin antes de remover.
   label_all: "Todos"
+  button_search: "Buscar"
   button_edit: "Editar"
   button_delete: "Excluir"
   button_close: "Fechar"
@@ -231,6 +229,7 @@ pt-BR:
   error_too_many_redirects: "Detectamos um problema de redirecionamento. Você foi enviado para a página inicial do Redmine."
   
   foton_cash_flow:
+    # --- Mensagens de Sucesso e Erro (Flash) ---
     error_cf_entry_date_required: "Data do Lançamento é um campo obrigatório."
     error_cf_entry_date_invalid_format: "Data do Lançamento está em formato inválido."
     error_cf_amount_required: "Valor é um campo obrigatório."
@@ -245,13 +244,13 @@ pt-BR:
     error_loading_cash_flow_entries: "Ocorreu um erro ao carregar os lançamentos de fluxo de caixa."
     error_export_failed: "Falha na exportação dos dados: %{message}"
     error_no_file_selected: "Nenhum arquivo CSV selecionado para importação."
-    error_unable_to_delete_cash_flow_entry: "Não foi possível deletar o lançamento de fluxo de caixa."
+    error_unable_to_delete_entry: "Não foi possível deletar o lançamento de fluxo de caixa."
     notice_successful_create: "Lançamento criado com sucesso."
-    notice_successful_update: "Lançamento atualizado com sucesso."
+    notice_successful_update: "Lançamento atualizado com sucesso." # Usar para lançamentos
+    notice_settings_update: "Configurações atualizadas com sucesso." # Usar para a página de settings
     notice_successful_delete: "Lançamento deletado com sucesso."
     text_entries_imported_successfully: "entradas importadas com sucesso."
     text_some_entries_not_imported: "Algumas entradas não puderam ser importadas"
-
     notice_cash_flow_sync_success: "Sincronização de dependências concluída com sucesso!"
     error_cash_flow_sync_failure: "Falha na sincronização de dependências: %{message}"
   
@@ -289,3 +288,20 @@ pt-BR:
   error_cf_amount_invalid: "Valor deve ser um número válido."
   notice_entry_date_set_to_today: "A data do lançamento foi definida automaticamente para hoje (%{date})"
   foton_cash_flow_error_no_permission_to_change_date: "Você não tem permissão para alterar a data de lançamento"
+
+  # Filtros (Notion Style)
+  filter_operator_contains: "Contém"
+  filter_operator_not_contains: "Não contém"
+  filter_operator_starts_with: "Começa com"
+  filter_operator_ends_with: "Termina com"
+  filter_operator_is: "É igual a"
+  filter_operator_is_not: "Não é igual a"
+  filter_operator_is_empty: "Está vazio"
+  filter_operator_is_not_empty: "Não está vazio"
+  filter_operator_greater_than: "Maior que"
+  filter_operator_less_than: "Menor que"
+  filter_operator_between: "Entre"
+  filter_operator_before: "Antes de"
+  filter_operator_after: "Depois de"
+  placeholder_type_a_value: "Digite um valor..."
+  label_other_value: "outro valor"

@@ -1,1099 +1,299 @@
-/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css
-/* ======================
-   VARIÁVEIS GLOBAIS
-   ====================== */
+Visão Geral da Refatoração
+Este plano foi reescrito para incorporar seu feedback. O foco é:
+
+Simplificar e organizar o CSS, eliminando duplicatas.
+
+Implementar um layout de duas colunas (Tabela à esquerda, Sumário à direita).
+
+Redesenhar o sistema de filtros para imitar a funcionalidade do Notion.
+
+Garantir que todos os componentes, como modais, sigam uma diagramação limpa e consistente.
+
+1. CSS: Organização e Simplificação
+Objetivo: Unificar, simplificar e organizar todo o CSS em um único arquivo coeso e com capítulos bem definidos, aproveitando o código existente.
+
+Ação: Substitua o conteúdo de assets/stylesheets/cash_flow_main.css pelo código abaixo. Ele já está organizado e remove as redundâncias que você apontou (como a duplicação de .cf-pill e .category-tag).
+
+/*
+ * Foton Cash Flow - Folha de Estilos Principal
+ * Versão: 2.0
+ * Descrição: Estilos unificados para o plugin de Fluxo de Caixa.
+*/
+
+/* ==========================================================================
+   1. VARIÁVEIS GLOBAIS E RESET
+   ========================================================================== */
 :root {
+  /* Cores Primárias */
   --primary-color: #3F51B5;
   --primary-hover: #303F9F;
-  --primary-active: #1A237E;
-  --secondary-color: #f5f5f5;
-  --secondary-hover: #e0e0e0;
   --text-on-primary: #FFFFFF;
-  --text-on-secondary: #212121; 
-  --text-on-light: #333333;
-  --text-color: #333333; /* Adicionada para consistência */
-  --text-link: inherit; /* Adicionada para consistência */
-  --border-color: #e0e0e0;
+
+  /* Cores de Feedback */
   --success-color: #28a745;
   --warning-color: #ffc107;
   --error-color: #dc3545;
-  --disabled-color: #6c757d;
-  --border-radius: 6px;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
-  --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.15);
-  --transition: all 180ms ease; /* Padronizado para ms */
-  --background-light: #f8f9fa;
+
+  /* Cores de Fundo e Texto */
   --background-white: #fff;
-  --focus-outline: 2px solid var(--primary-color); /* Para acessibilidade */
-  --text-on-outline: var(--primary-color); /* Texto no botão outline */
-  --text-on-outline-hover: var(--text-on-primary); /* Texto no hover do outline */
+  --background-light: #f8f9fa;
+  --text-color: #333333;
+  --text-light: #6c757d;
+  --border-color: #e0e0e0;
+
+  /* Cores para Pílulas (Tags) */
+  --pill-bg-green: rgba(40, 167, 69, 0.1);
+  --pill-text-green: #28a745;
+  --pill-bg-red: rgba(220, 53, 69, 0.1);
+  --pill-text-red: #dc3545;
+  --pill-bg-blue: rgba(0, 123, 255, 0.1);
+  --pill-text-blue: #007bff;
+  --pill-bg-gray: rgba(108, 117, 125, 0.15);
+  --pill-text-gray: #6c757d;
+
+  /* Métricas e Efeitos */
+  --border-radius: 6px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --transition: all 0.2s ease-in-out;
 }
 
-/* ======================
-   ESTILOS GERAIS
-   ====================== */
-
-.cf-page a {
-  color: var(--text-link);
-  text-decoration: none; 
-  transition: color 0.2s;
-}
-.cf-page a:hover, .cf-page a:focus {
-  color: var(--text-link);
-  text-decoration: underline;
-}
-
-/* ======================
-   LAYOUT PRINCIPAL
-   ====================== */
+/* ==========================================================================
+   2. LAYOUT PRINCIPAL
+   ========================================================================== */
 .cash-flow-page {
-  margin: 0 auto;
   padding: 24px 0;
 }
-.cash-flow-title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--primary-color);
+
+.cf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
-  margin-bottom: 32px;
 }
 
-/* ======================
-   ALERTA DE ERROS
-   ====================== */
-
-.warning-box {
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid #f0ad4e;
-  background-color: #fcf8e3;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.actions {
-  margin-top: 20px;
-}
-
-.button-positive {
-  background-color: #5cb85c;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-}
-
-.button-negative {
-  background-color: #d9534f;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  margin-left: 10px;
-}
-
-/* Estilo para o asterisco de campo obrigatório */
-.required-asterisk {
-  color: var(--error-color, #dc3545); /* Usar a cor de erro definida nas variáveis CSS */
-  margin-left: 4px;
-  font-weight: bold;
-}
-
-
-/* ======================
-   MENU CASCATA DE FILTROS
-   ====================== */
-.cf-filters-bar {
+.cf-main-content {
   display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-.cf-filter-btn {
-  text-decoration-color: var(--primary-color);
-  color: var(--primary-color);
-  border: var(--border-color);
-  border-radius: 5px;
-  padding: 7px 18px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.cf-filter-btn:hover, .cf-filter-btn:focus {
-  background: var(--background-light);
-}
-.cf-active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.cf-filter-tag {
-  background: #e3eaf3;
-  color: var(--text-color);
-  border-radius: 4px;
-  padding: 2px 8px 2px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.98em;
-}
-.cf-remove-filter {
-  background: none;
-  border: none;
-  color: var(--error-color);
-  font-size: 1.1em;
-  cursor: pointer;
-  margin-left: 2px;
-}
-.cf-filters-dropdown {
-  position: absolute;
-  top: 60px;
-  left: 40px;
-  z-index: 1000;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 24px 28px 18px 28px;
-  min-width: 340px;
-  max-width: 98vw;
-  min-height: 120px;
-  display: none;
-}
-.cf-filters-dropdown.active {
-  display: block;
-  animation: fadeIn 0.18s;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.cf-filters-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.cf-filters-list label {
-  font-weight: 500;
-  color: var(--primary-color);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.cf-filters-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-/* ======================
-  GRID E LAYOUT GENÉRICO
-  ====================== */
-
-   
-/* ======================
-    CARDS DE RESUMO 
-====================== */
-.cf-summary {
-  display: flex;
-  gap: 16px;
-  margin-top: 24px;
-  justify-content: flex-end; /* Alinha à direita em telas grandes */
-  flex-wrap: wrap;
-  width: 100%;
+  gap: 24px;
+  align-items: flex-start;
 }
 
-.cf-summary .cf-card {
-  flex: 0 1 20px; /* Não cresce, pode encolher, base de 220px */
-  min-width: 180px;
-  background: var(--background-light);
-  border-radius: 10px;
-  box-shadow: var(--box-shadow);
-  padding: 18px;
-  text-align: center;
+.cf-table-section {
+  flex: 1;
+  min-width: 0; /* Previne overflow em flex container */
 }
 
-/* Estilos específicos para os valores */
-.cf-card-value {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-top: 8px;
+.cf-summary-section {
+  width: 280px;
+  flex-shrink: 0;
+  position: sticky; /* Mantém o sumário visível ao rolar */
+  top: 20px;
 }
 
+/* ==========================================================================
+   3. COMPONENTES (Botões, Cards, Dropdowns, Pílulas)
+   ========================================================================== */
 
-/* ======================
-   BOTÕES E INPUTS
-   ====================== */
+/* --- Botões --- */
 .cf-btn {
-  display: inline-flex; /* Melhor para alinhar ícones */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Espaço entre ícone e texto */
-  padding: 10px 24px;
+  gap: 8px;
+  padding: 8px 16px;
   border-radius: var(--border-radius);
-  border: 1.5px solid transparent; /* Borda transparente por padrão */
-  font-size: 1.08rem;
-  font-weight: 700;
+  border: 1px solid transparent;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none !important;
-  box-shadow: var(--box-shadow);
-  outline: none;
-  position: relative;
-  overflow: hidden; /* Para efeitos hover */
 }
-
-.cf-btn > a,
-.cf-btn > input[type="submit"],
-.cf-btn > button {
-  color: inherit !important;
-  text-decoration: none !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: transparent !important;
-  border: none !important;
-  font: inherit !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  margin: 0 !important;
+.cf-btn:hover {
+  transform: translateY(-1px);
 }
-
-/* Foco acessível para todos os botões */
-.cf-btn:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: 2px;
-}
-
-/* Botão Primário - Contraste garantido */
 .cf-btn-primary {
   background: var(--primary-color);
   color: var(--text-on-primary);
   border-color: var(--primary-color);
 }
-
-/* Botão Secundário - Contraste revisado */
-.cf-btn-secondary {
-  background: var(--secondary-color);
-  color: var(--text-on-secondary); /* Texto mais escuro */
-  border-color: var(--border-color);
-}
-
-/* Botão Outline - Mais consistente */
-.cf-btn-outline {
-  background: transparent;
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-  box-shadow: none; /* Remove sombra para manter o foco no outline */
-  
-}
-
-/* Efeito hover sutil para todos os botões */
-.cf-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--box-shadow-hover);
-}
-
-/* Efeito active consistente */
-.cf-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Estados específicos para cada tipo */
 .cf-btn-primary:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
 }
-
-.cf-btn-secondary:hover {
-  background: var(--secondary-hover);
-}
-
-.cf-btn-outline:hover {
-  background: var(--primary-color);
-  color: var(--text-on-primary);
-}
-
-
-
-/* ======================
-   CONTRASTE ESPECÍFICO POR TIPO DE BOTÃO
-   ====================== */
-/* Primário (fundo escuro) */
-.cf-btn-primary,
-.cf-btn-primary > a {
-  color: var(--text-on-primary) !important;
-}
-
-/* Secundário (fundo claro) */
-.cf-btn-secondary,
-.cf-btn-secondary > a {
-  color: var(--text-on-secondary) !important;
-}
-
-/* Outline (transparente) */
-.cf-btn-outline,
-.cf-btn-outline > a {
-  color: var(--text-on-outline) !important;
-}
-
-/* Estados hover */
-.cf-btn-outline:hover,
-.cf-btn-outline:hover > a {
-  color: var(--text-on-outline-hover) !important;
-}
-
-/* Garante contraste mesmo com temas personalizados */
 .cf-btn-secondary {
-  background: var(--secondary-color);
+  background: var(--background-white);
+  color: var(--text-color);
   border-color: var(--border-color);
-  /* Contraste mínimo garantido: 4.5:1 */
-  color: #222 !important; /* Mais escuro que o --text-on-secondary */
 }
-
-.cf-btn-secondary > a {
-  color: #222 !important;
-}
-
-/* Feedback visual para estados */
-.cf-btn:focus {
-  box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.3) !important;
-}
-
-/* ======================
-   GRUPO DE AÇÕES
-   ====================== */
-.cf-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 16px 0;
-}
-
-@media (max-width: 768px) {
-  .cf-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .cf-btn {
-    width: 100%; /* Botões ocupam toda a largura */
-  }
-}
-
-/* ======================
-   CORES DE VALORES
-   ====================== */
-.cf-success { color: var(--success-color); }
-.cf-danger { color: var(--error-color); }
-
-/* ======================
-   AJUSTES DE TABELA
-   ====================== */
-.cf-table th, .cf-table td {
-  padding: 8px 10px;
-}
-.cf-table th {
-  font-size: 1.05em;
-}
-.cf-table .no-data-message {
-  text-align: center;
-}
-
-
-/* ======================
-   MODAL
-   ====================== */
-
-.modal-content {
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.modal-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #eee;
-}
-
-/* Project Selection */
-.project-selection {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-
-/* Estilos do Modal Personalizado */
-.custom-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro semitransparente */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* Garante que o modal esteja acima de outros elementos */
-  opacity: 0; /* Começa invisível */
-  visibility: hidden; /* Escondido para leitores de tela */
-  transition: opacity 0.3s ease, visibility 0.3s ease; /* Transição suave */
-}
-
-.custom-modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.custom-modal-content {
-  background-color: #fff;
-  padding: 25px;
-  border-radius: var(--border-radius); /* Reutiliza sua variável de raio de borda */
-  box-shadow: var(--box-shadow); /* Reutiliza sua variável de sombra */
-  max-width: 500px; /* Largura máxima do modal */
-  width: 90%; /* Ocupa 90% da largura disponível */
-  transform: translateY(-20px); /* Começa ligeiramente acima para animação */
-  transition: transform 0.3s ease; /* Transição suave para o conteúdo */
-}
-
-.custom-modal-overlay.active .custom-modal-content {
-  transform: translateY(0); /* Desliza para a posição final */
-}
-
-.custom-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-color); /* Reutiliza sua variável de cor de borda */
-}
-
-.custom-modal-header h5 {
-  margin: 0;
-  font-size: 1.2em;
-  color: var(--text-color); /* Reutiliza sua variável de cor de texto */
-}
-
-.custom-modal-close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5em;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--text-color);
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-.custom-modal-close-btn:hover {
-  opacity: 1;
-}
-
-.custom-modal-body {
-  margin-bottom: 20px;
-  color: var(--text-color);
-}
-
-.custom-modal-footer {
-  display: flex;
-  justify-content: flex-end; /* Alinha os botões à direita */
-  gap: 10px; /* Espaço entre os botões */
-  border-top: 1px solid var(--border-color);
-  padding-top: 15px;
-}
-
-
-/* ======================
-   CARDS DE RESUMO
-   ====================== */
-.cf-card {
+.cf-btn-secondary:hover {
   background: var(--background-light);
-  border-radius: 10px;
-  box-shadow: var(--box-shadow);
-  padding: 24px 18px;
-  text-align: center;
-  margin-bottom: 0;
-  transition: transform 0.18s cubic-bezier(.4,1.4,.6,1), box-shadow 0.18s;
+  border-color: #ccc;
+}
+.cf-btn-danger {
+  background: var(--error-color);
+  color: var(--text-on-primary);
+  border-color: var(--error-color);
 }
 
-.cf-card:hover, .cf-card:focus-within {
-  transform: translateY(-7px) scale(1.025);
-  box-shadow: 0 8px 32px rgba(63,81,181,0.18);
-}  
-
+/* --- Cards de Sumário --- */
+.cf-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cf-card {
+  background: var(--background-white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+}
 .cf-card-label {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: var(--text-light);
   margin-bottom: 8px;
 }
 .cf-card-value {
-  font-size: 1.7rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
+.cf-card-value.cf-success { color: var(--success-color); }
+.cf-card-value.cf-danger { color: var(--error-color); }
 
-/* ======================
-   AÇÕES E BOTÕES
-   ====================== */
-.cf-actions {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+/* --- Menu Dropdown --- */
+.cf-dropdown {
+  position: relative;
+  display: inline-block;
 }
-.header-actions.btn-group .btn { min-width: 110px; }
+.cf-dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px);
+  background-color: var(--background-white);
+  min-width: 200px;
+  box-shadow: var(--box-shadow);
+  z-index: 100;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+.cf-dropdown-menu.show { display: block; }
+.cf-dropdown-item {
+  color: var(--text-color);
+  padding: 10px 14px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cf-dropdown-item:hover {
+  background-color: var(--background-light);
+}
 
-/* ======================
-   TABELA DE LANÇAMENTOS
-   ====================== */
+/* --- Pílulas (Tags) Unificadas --- */
+.cf-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.cf-pill.type-revenue { background-color: var(--pill-bg-green); color: var(--pill-text-green); }
+.cf-pill.type-expense { background-color: var(--pill-bg-red); color: var(--pill-text-red); }
+.cf-pill.status { background-color: var(--pill-bg-blue); color: var(--pill-text-blue); }
+.cf-pill.category { background-color: var(--pill-bg-gray); color: var(--pill-text-gray); }
 
-/* Container da tabela (mantido seu estilo atual) */
+
+/* ==========================================================================
+   4. TABELA E INTERAÇÕES
+   ========================================================================== */
 .cf-table-container {
   background: var(--background-white);
-  border-radius: 8px;
-  box-shadow: var(--box-shadow);
-  padding: 18px;
-}
-
-/* Modificador para layout lado a lado */
-.cf-table-container.cf-layout-sidebar {
-  position: relative; /* Remove qualquer posicionamento absoluto */
-  display: flex;
-  flex-wrap: wrap; /* Permite quebra de linha */
-  gap: 24px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  overflow: hidden; /* Garante que a borda arredondada funcione */
 }
 
 .cf-table-wrapper {
-  overflow-x: auto;
-  width: 100%;
-  border: 1px solid #ddd; /* opcional - para visualização */
+  max-height: 65vh; /* ALTURA FIXA DA TABELA */
+  overflow-x: auto; /* Rolagem horizontal se necessário */
+  overflow-y: auto; /* Rolagem vertical */
 }
 
-.cf-table-container .cf-table-wrapper {
-  flex: 1 1 600px; /* Cresce, encolhe, base de 600px */
-  min-width: 0; /* Corrige overflow */
-}
-
-.cf-table-container > .cf-summary {
-  flex: 0 1 280px; /* Não cresce, encolhe, base 280px */
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Ajuste para o summary no layout lado a lado */
-.cf-table-container.cf-layout-sidebar > .cf-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 280px;
-}
-
-.table.cash-flow-entries th, .table.cash-flow-entries td {
-  vertical-align: middle;
-  border: none;
-  border-bottom: 1px solid var(--border-color);
-}
-.table.cash-flow-entries thead th {
-  background: #f1f3f6;
-  color: var(--primary-color);
-  font-weight: 600;
-}
-.no-data-message {
-  color: #888;
-  font-size: 1.1rem;
-  padding: 24px 0;
-}
-
-/* ======================
-   FILTROS E ÁREA DE FILTROS
-   ====================== */
-.filters-applied {
-  background: var(--background-light);
-  border-radius: 6px;
-  padding: 10px 16px;
-  margin-bottom: 18px;
-  font-size: 1rem;
-}
-.filter-tag {
-  background: #e3eaf3;
-  color: var(--text-color);
-  border-radius: 4px;
-  padding: 2px 8px;
-  margin-right: 6px;
-  display: inline-block;
-}
-
-
-/* ======================
-   ESTILOS DOS GRÁFICOS
-   ====================== */
-
-.cf-charts-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-top: 24px;
-}
-
-.cf-chart-card {
-  background: var(--background-white);
-  border-radius: 8px;
-  box-shadow: var(--box-shadow);
-  padding: 18px;
-  transition: transform 0.18s cubic-bezier(.4,1.4,.6,1), box-shadow 0.18s;
-  height: 100%;
-}
-
-.cf-chart-card:hover {
-  transform: translateY(-7px) scale(1.025);
-  box-shadow: 0 8px 32px rgba(63,81,181,0.18);
-}
-
-.cf-chart-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-/* ======================
-    ESTILOS DA TABELA - INSPIRADOS NO NOTION
-    ====================== */
-
-/* Cores de fundo das linhas baseado no tipo de transação */
-.cf-table tr.receita {
-  background-color: var(--background-white);
-  border-left: 4px solid var(--success-color); /* Borda lateral para Receita */
-}
-
-.cf-table tr.despesa {
-  background-color: var(--background-white);
-  border-left: 4px solid var(--error-color); /* Borda lateral para Despesa */
-}
-
-/* Efeito de hover nas linhas */
-.cf-table tr:hover {
-  background-color: var(--background-light);
-  box-shadow: inset 0 0 0 1px var(--border-color);
-  transform: scale(1.005);
-  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-}
-
-/* Estilos de célula para manter o alinhamento */
-.cf-table td, .cf-table th {
-  vertical-align: middle;
-}
-
-/* Estilização das tags (Categoria, Tipo, Status) */
-.category-tag, .transaction-tag, .status-tag {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: 500;
-  text-transform: capitalize;
-  line-height: 1;
-}
-
-/* Cores de fundo das tags (exemplo) */
-.status-tag {
-  background-color: #e6f7ff;
-  color: #0076c8;
-}
-
-.status-tag.aberto {
-  background-color: #fffbe6;
-  color: #d4a700;
-}
-
-.status-tag.pago {
-  background-color: #f6ffed;
-  color: #389e0d;
-}
-
-.category-tag.aquisicao-do-terreno, .category-tag.aprovacao-municipal, .category-tag.projetos {
-  /* Adicione as cores específicas das suas categorias aqui */
-  background-color: #f0f0f0; /* Cor padrão */
-  color: #555;
-}
-
-/* Exemplo de cores para o tipo de transação */
-.transaction-tag.receita {
-  background-color: #d9f7be;
-  color: #52c41a;
-}
-
-.transaction-tag.despesa {
-  background-color: #ffccc7;
-  color: #ff4d4f;
-}
-
-/* Estilo para a coluna de valor */
-.value-column.receita {
-  color: var(--success-color);
-  font-weight: 600;
-}
-
-.value-column.despesa {
-  color: var(--error-color);
-  font-weight: 600;
-}
-
-/* Estilos para a descrição (subject) */
-.description-column {
-  max-width: 300px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Ajustes de layout da tabela */
 .cf-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
 }
 
-.cf-table td, .cf-table th {
+.cf-table th, .cf-table td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: middle;
   border-bottom: 1px solid var(--border-color);
 }
 
-.cf-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-
-/* ======================
-   RESPONSIVIDADE
-   ====================== */
-@media (max-width: 992px) {
-  .cf-summary {
-    justify-content: center; /* Centraliza em tablets */
-  }
-
-  .cf-table-container.cf-layout-sidebar {
-    flex-direction: column;
-  }
-  
-  .cf-table-container.cf-layout-sidebar > .cf-summary {
-    flex-direction: row;
-    min-width: 100%;
-    justify-content: center;
-    margin-top: 24px;
-  }
-
-  .cf-table-container .cf-table-wrapper, .cf-table-container > .cf-summary {
-    flex: 1 1 100%; /* Ocupa linha inteira */
-  }
-
-}
-
-@media (max-width: 768px) {
-  .cf-summary {
-    flex-direction: row;
-    justify-content: space-around; /* Distribui uniformemente */
-  }
-  
-  .cf-summary .cf-card {
-    flex: 1 1 160px; /* Ajusta para telas médias */
-    min-width: 120px;
-    padding: 12px 8px;
-  }
-
-  .cf-table-container.cf-layout-sidebar > .cf-summary {
-    flex-wrap: wrap;
-  }
-  
-  .cf-table-container.cf-layout-sidebar > .cf-summary .cf-card {
-    flex: 1 1 160px;
-    min-width: 120px;
-  }
-
-}
-
-@media (max-width: 480px) {
-  .cf-summary {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .cf-summary .cf-card {
-    width: 100%;
-    flex: 1 1 auto;
-  }
-
-  .cf-table-container.cf-layout-sidebar > .cf-summary {
-    flex-direction: column;
-  }
-
-}
-
-
-/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css */
-
-/* ======================
-   MODAL DE FILTROS ADAPTATIVO
-   ====================== */
-.cf-filter-modal {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  min-width: 300px;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(10px);
-  transition: transform 0.2s, opacity 0.2s;
-  animation: modalEnter 0.2s;
-}
-
-.cf-filter-modal-inner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.cf-filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--cf-border);
-  flex-shrink: 0;
-}
-
-.cf-filter-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--cf-text);
-  margin: 0;
-}
-
-.cf-close-modal-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--cf-text);
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.2s;
-  padding: 0;
-}
-
-.cf-close-modal-btn:hover {
-  background: var(--cf-bg-light);
-}
-
-.cf-filter-body {
-  padding: 16px 20px;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
-.cf-filter-group {
-  margin-bottom: 20px;
-  display: none;
-}
-
-.cf-filter-group:last-child {
-  margin-bottom: 0;
-}
-
-.cf-filter-field {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.cf-filter-operator {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--cf-border);
-  border-radius: 4px;
-  margin-bottom: 12px;
-  background: white;
-  font-size: 0.95rem;
-}
-
-.cf-filter-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--cf-border);
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
-
-.cf-filter-number-inputs,
-.cf-filter-date-inputs {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.cf-filter-and {
-  margin: 0 5px;
-  color: var(--cf-text);
-  font-weight: 500;
-}
-
-.cf-filter-checkbox-container {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid var(--cf-border);
-  border-radius: 4px;
-  padding: 8px;
-}
-
-.cf-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  cursor: pointer;
-}
-
-.cf-checkbox-label input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-}
-
-.cf-filter-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  padding: 16px 20px;
-  border-top: 1px solid var(--cf-border);
-  flex-shrink: 0;
-}
-
-.cf-apply-filter-btn,
-.cf-clear-filter-btn {
-  padding: 8px 16px;
-  font-size: 0.95rem;
-}
-
-@keyframes modalEnter {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* ======================
-   FILTROS ATIVOS
-   ====================== */
-.cf-active-filters-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--cf-border);
-}
-
-.cf-active-filters-label {
-  font-weight: 600;
-  color: var(--cf-text);
-  white-space: nowrap;
-}
-
-.cf-active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  flex: 1;
-  min-width: 200px;
-}
-
-.cf-filter-tag {
-  background: var(--cf-secondary);
-  border-radius: 20px;
-  padding: 4px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.cf-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--background-light);
   font-size: 0.9rem;
-  max-width: 100%;
-}
-
-.cf-filter-tag span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cf-remove-filter {
-  background: none;
-  border: none;
+  font-weight: 500;
+  color: var(--text-light);
+  text-transform: uppercase;
   cursor: pointer;
-  color: var(--cf-error);
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.2s;
-  padding: 0;
-  flex-shrink: 0;
 }
 
-.cf-remove-filter:hover {
-  background: rgba(220, 53, 69, 0.1);
+.cf-table tbody tr:hover {
+  background-color: var(--background-light);
 }
 
-/* ======================
-   RESPONSIVIDADE
-   ====================== */
-@media (max-width: 768px) {
-  .cf-filter-modal {
-    min-width: 280px;
-    max-width: 95vw;
-    max-height: 90vh;
-  }
-  
-  .cf-filter-body {
-    padding: 12px 16px;
-  }
-  
-  .cf-filter-header,
-  .cf-filter-actions {
-    padding: 12px 16px;
-  }
-  
-  .cf-filter-number-inputs,
-  .cf-filter-date-inputs {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .cf-filter-and {
-    text-align: center;
-    margin: 8px 0;
-  }
+.cf-table .value-column.revenue { color: var(--success-color); }
+.cf-table .value-column.expense { color: var(--error-color); }
+.cf-table .actions-column { text-align: right; }
+.cf-table .actions-column a { margin-left: 12px; }
+
+/* --- Ordenação --- */
+.cf-sort-indicator {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  position: relative;
+  opacity: 0.4;
+}
+th:hover .cf-sort-indicator { opacity: 1; }
+.cf-sort-indicator.asc::before, .cf-sort-indicator.desc::after { opacity: 1; border-color: var(--primary-color); }
+
+.cf-sort-indicator::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--text-color);
+  opacity: 0.3;
+}
+
+.cf-sort-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--text-color);
+  opacity: 0.3;
 }
 
 
-/* ======================
-   PAGINAÇÃO
-   ====================== */
+/* --- Paginação --- *
 .cf-pagination-container {
-  margin: 20px 0;
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
 .cf-pagination {
@@ -1165,123 +365,193 @@
   color: var(--text-color);
 }
 
-/* ======================
-   ORDENAÇÃO
-   ====================== */
-.cf-sort-indicator {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 6px;
-  position: relative;
-}
 
-.cf-sort-indicator::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-bottom: 4px solid var(--text-color);
-  opacity: 0.3;
-}
+/* ==========================================================================
+   5. FILTROS (Estilo Notion)
+   ========================================================================== */
 
-.cf-sort-indicator::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid var(--text-color);
-  opacity: 0.3;
-}
-
-.cf-sort-indicator.asc::before {
-  opacity: 1;
-  border-bottom-color: var(--primary-color);
-}
-
-.cf-sort-indicator.desc::after {
-  opacity: 1;
-  border-top-color: var(--primary-color);
-}
-
-th[data-column] {
-  transition: background-color 0.2s;
-}
-
-th[data-column]:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* ======================
-   CONTADOR DE LINHAS
-   ====================== */
-.cf-entries-count {
-  font-size: 0.9rem;
-  color: var(--text-color);
-  margin: 10px 0;
-  text-align: right;
-}
-
-/* ======================
-   RESPONSIVIDADE
-   ====================== */
-@media (max-width: 768px) {
-  .cf-pagination {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .cf-pagination-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .cf-pagination-pages {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-
-
-/* Adicione temporariamente para debug 
-.cf-table-container.cf-layout-sidebar {
-  border: 1px dashed blue;
-}
-.cf-table-container .cf-table-wrapper {
-  border: 1px dashed green;
-}
-
-*/
-
-
-
-/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css */
-
-/* Ícones de filtro nas colunas */
-.cf-filter-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 8px;
-  vertical-align: middle;
-  cursor: pointer;
+/* --- Ícone de Filtro no Cabeçalho --- */
+.cf-table thead th .cf-filter-icon {
   opacity: 0.5;
-  transition: opacity 0.2s;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  transition: var(--transition);
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
-.cf-filter-icon:hover {
+.cf-table thead th:hover .cf-filter-icon {
   opacity: 1;
 }
 
-/* Garantir visibilidade dos ícones */
-th .cf-filter-icon {
-  display: inline-block !important;
+.cf-table thead th .cf-filter-icon.active {
+  opacity: 1;
+  color: var(--primary-color);
+}
+
+/* --- Barra de Filtros Ativos --- */
+#cf-active-filters-bar {
+  padding: 0 16px 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 20px; /* Garante espaço mesmo quando vazia */
+}
+
+/* --- Pílula de Filtro Ativo --- */
+.cf-filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 4px 8px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.cf-filter-pill:hover {
+  border-color: #bbb;
+  background-color: #e9ecef;
+}
+.cf-filter-pill .pill-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  font-size: 1.2em;
+  line-height: 1;
+  color: var(--text-light);
+}
+.cf-filter-pill .pill-remove-btn:hover {
+  color: var(--text-color);
+}
+
+/* --- Popup de Filtro --- */
+.cf-filter-popup {
+  display: none; /* Oculto por padrão, controlado por JS */
+  position: absolute;
+  z-index: 1010;
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  width: 320px;
+}
+.cf-filter-popup-body {
+  padding: 12px;
+}
+.cf-filter-popup-footer {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+.cf-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cf-filter-group select,
+.cf-filter-group input[type="text"],
+.cf-filter-group input[type="number"],
+.cf-filter-group input[type="date"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+.cf-filter-number-inputs, .cf-filter-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   6. MODAIS
+   ========================================================================== */
+.cf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none; /* Alterado para 'none' por padrão */
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.cf-modal-overlay.show {
+  display: flex; /* Mostra o modal */
+}
+.cf-modal-content {
+  background: var(--background-white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  width: 90%;
+  max-width: 500px;
+}
+.cf-modal-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cf-modal-header h5 { margin: 0; font-size: 1.2rem; }
+.cf-modal-close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; opacity: 0.5; }
+.cf-modal-close-btn:hover { opacity: 1; }
+.cf-modal-body { padding: 16px; }
+.cf-modal-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   7. GRÁFICOS
+   ========================================================================== */
+.cf-charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+.cf-chart-card {
+  background: var(--background-white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+}
+.cf-chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   8. RESPONSIVIDADE
+   ========================================================================== */
+@media (max-width: 992px) {
+  .cf-main-content {
+    flex-direction: column;
+  }
+  .cf-summary-section {
+    width: 100%;
+    position: static; /* Remove o sticky em telas menores */
+  }
+  .cf-summary {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  .cf-summary .cf-card {
+    flex: 1;
+  }
+  .cf-table-wrapper {
+    max-height: none; /* Remove altura fixa em telas menores */
+  }
 }

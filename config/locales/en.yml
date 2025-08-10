@@ -1,5 +1,6 @@
 en:
   label_cash_flow: "Cash Flow"
+  label_foton_cash_flow_entries: "Financial Entries"
   label_cash_flow_new_entry: "New Cash Flow Entry"
   label_cash_flow_edit_entry: "Edit Cash Flow Entry"
   label_cash_flow_revenue: "Revenue"
@@ -17,6 +18,12 @@ en:
   field_entry_date: "Entry Date"
   field_transaction_type: "Transaction Type"
   field_amount: "Amount"
+  field_value: "Value"
+  field_id: "ID"
+  field_date: "Date"
+  field_category: "Category"
+  field_description: "Description"
+  field_status: "Status"
 
   label_cash_flow_diagnostics: "Cash Flow Diagnostics"
   button_sync_dependencies: "Sync Dependencies"
@@ -45,3 +52,29 @@ en:
   text_cash_flow_missing_fields_summary: "The following custom fields are missing: %{fields}."
   text_cash_flow_incorrect_config_summary: "The following custom fields have incorrect configurations: %{fields}."
   text_cash_flow_sync_recommendation: "It is recommended to run the synchronization to ensure all dependencies are correctly set up."
+
+  # Buttons
+  button_new_entry: "New Entry"
+  button_apply: "Apply"
+  button_clear: "Clear"
+  button_search: "Search"
+
+  # Labels
+  label_and: "and"
+  label_other_value: "other value"
+
+  # Filters (Notion Style)
+  filter_operator_contains: "Contains"
+  filter_operator_not_contains: "Does not contain"
+  filter_operator_starts_with: "Starts with"
+  filter_operator_ends_with: "Ends with"
+  filter_operator_is: "Is"
+  filter_operator_is_not: "Is not"
+  filter_operator_is_empty: "Is empty"
+  filter_operator_is_not_empty: "Is not empty"
+  filter_operator_greater_than: "Greater than"
+  filter_operator_less_than: "Less than"
+  filter_operator_between: "Between"
+  filter_operator_before: "Before"
+  filter_operator_after: "After"
+  placeholder_type_a_value: "Type a value..."

@@ -5,13 +5,11 @@
 module FotonCashFlow
   class Hooks < Redmine::Hook::ViewListener
     def view_layouts_base_html_head(context = {})
-      controller_name = context[:controller]&.controller_name
-      if controller_name && ['entries', 'settings'].include?(controller_name)
-        context[:controller].render_to_string(
-          partial: 'foton_cash_flow/shared/cash_flow_assets',
-          locals: { plugin_assets_loaded: true }
-        )
-      end
+      controller = context[:controller]
+      return unless controller
+      return unless ['entries', 'settings', 'diagnostics'].include?(controller.controller_name)
+      stylesheet_link_tag('cash_flow_main', plugin: 'foton_cash_flow') + # Carrega o CSS do plugin
+        javascript_include_tag('application', plugin: 'foton_cash_flow')   # Carrega o JS unificado (incluindo Chart.js)
     end
   end
 end
