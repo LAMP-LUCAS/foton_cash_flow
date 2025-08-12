@@ -244,6 +244,9 @@
 
 .column-title {
   display: block; /* Garante que o título ocupe a linha */
+  margin: 0.3rem;
+  margin-right: 0.9rem;
+  text-align: center;
 }
 
 .column-icons {
