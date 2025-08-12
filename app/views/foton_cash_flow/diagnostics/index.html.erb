@@ -4,62 +4,62 @@
   <%= stylesheet_link_tag "cash_flow_main", plugin: 'foton_cash_flow' %>
 <% end %>
 
-<h2 class="cf-title"><%= l(:label_cash_flow_diagnostics) %></h2>
+<h2 class="cf-title"><%= l('foton_cash_flow.diagnostics.title') %></h2>
 
 <div class="contextual">
-  <%= link_to l(:button_sync_dependencies), {controller: 'foton_cash_flow/diagnostics', action: 'run_sync'}, method: :post %>
+  <%= link_to l('foton_cash_flow.diagnostics.sync_button'), {controller: 'foton_cash_flow/diagnostics', action: 'run_sync'}, method: :post, class: 'icon icon-sync' %>
 </div>
 
 <div class="cf-section">
-  <h3><%= l(:label_project_status) %></h3>
+  <h3><%= l('foton_cash_flow.diagnostics.project_status') %></h3>
   <p>
-    <%= l(:label_project_name) %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></strong><br/>
-    <%= l(:label_status) %>:
+    <%= l('foton_cash_flow.diagnostics.project_name') %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></strong><br/>
+    <%= l('foton_cash_flow.diagnostics.status') %>:
     <% if @diagnostic_results[:project_present] %>
-      <span class="cf-success"><%= l(:text_cash_flow_status_found) %></span> (ID: <%= @diagnostic_results[:project_id] %>)
+      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.found') %></span> (ID: <%= @diagnostic_results[:project_id] %>)
     <% else %>
-      <span class="cf-danger"><%= l(:text_cash_flow_status_missing) %></span>
+      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
     <% end %>
   </p>
 </div>
 
 <div class="cf-section">
-  <h3><%= l(:label_tracker_status) %></h3>
+  <h3><%= l('foton_cash_flow.diagnostics.tracker_status') %></h3>
   <p>
-    <%= l(:label_tracker_name) %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></strong><br/>
-    <%= l(:label_status) %>:
+    <%= l('foton_cash_flow.diagnostics.tracker_name') %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></strong><br/>
+    <%= l('foton_cash_flow.diagnostics.status') %>:
     <% if @diagnostic_results[:tracker_present] %>
-      <span class="cf-success"><%= l(:text_cash_flow_status_found) %></span> (ID: <%= @diagnostic_results[:tracker_id] %>)
+      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.found') %></span> (ID: <%= @diagnostic_results[:tracker_id] %>)
     <% else %>
-      <span class="cf-danger"><%= l(:text_cash_flow_status_missing) %></span>
+      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
     <% end %>
   </p>
   <p>
-    <%= l(:label_tracker_project_association) %>:
+    <%= l('foton_cash_flow.diagnostics.tracker_project_association') %>:
     <% if @diagnostic_results[:tracker_associated_with_project] %>
-      <span class="cf-success"><%= l(:text_cash_flow_status_ok) %></span>
+      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span>
     <% else %>
-      <span class="cf-danger"><%= l(:text_cash_flow_status_not_associated) %></span>
+      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.details_tracker_not_associated', tracker: FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME) %></span>
     <% end %>
   </p>
   <p>
-    <%= l(:label_tracker_workflow_configured) %>:
+    <%= l('foton_cash_flow.diagnostics.tracker_workflow_configured') %>:
     <% if @diagnostic_results[:tracker_workflow_configured] %>
-      <span class="cf-success"><%= l(:text_cash_flow_status_ok) %></span>
+      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span>
     <% else %>
-      <span class="cf-warning"><%= l(:text_cash_flow_status_not_configured) %></span>
+      <span class="cf-warning"><%= l('foton_cash_flow.diagnostics.details_not_configured') %></span>
     <% end %>
   </p>
 </div>
 
 <div class="cf-section">
-  <h3><%= l(:label_custom_fields_status) %></h3>
+  <h3><%= l('foton_cash_flow.diagnostics.cf_status') %></h3>
   <table class="list issues">
     <thead>
       <tr>
-        <th><%= l(:label_cf_name) %></th>
-        <th><%= l(:label_status) %></th>
-        <th><%= l(:label_details) %></th>
+        <th><%= l('foton_cash_flow.diagnostics.cf_name') %></th>
+        <th><%= l('foton_cash_flow.diagnostics.status') %></th>
+        <th><%= l('foton_cash_flow.diagnostics.details') %></th>
       </tr>
     </thead>
     <tbody>
@@ -69,22 +69,20 @@
           <td><%= cf_name %></td>
           <td>
             <% if cf_status[:present] && cf_status[:configured_correctly] %>
-              <span class="cf-success"><%= l(:text_cash_flow_status_ok) %></span> (ID: <%= cf_status[:id] %>)
+              <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span> (ID: <%= cf_status[:id] %>)
             <% elsif cf_status[:present] && !cf_status[:configured_correctly] %>
-              <span class="cf-warning"><%= l(:text_cash_flow_status_needs_attention) %></span> (ID: <%= cf_status[:id] %>)
+              <span class="cf-warning"><%= l('foton_cash_flow.diagnostics.needs_attention') %></span> (ID: <%= cf_status[:id] %>)
             <% else %>
-              <span class="cf-danger"><%= l(:text_cash_flow_status_missing) %></span>
+              <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
             <% end %>
           </td>
           <td>
             <% if cf_status[:details].any? %>
               <ul>
-                <% cf_status[:details].each do |detail| %>
-                  <li><%= detail %></li>
-                <% end %>
+                <% cf_status[:details].each { |detail| content_tag :li, detail } %>
               </ul>
             <% else %>
-              <%= l(:text_cash_flow_cf_details_ok) %>
+              <%= l('foton_cash_flow.diagnostics.details_ok') %>
             <% end %>
           </td>
         </tr>
@@ -94,35 +92,22 @@
 
   <% if @diagnostic_results[:missing_custom_fields].any? %>
     <p class="cf-danger">
-      <%= l(:text_cash_flow_missing_fields_summary, fields: @diagnostic_results[:missing_custom_fields].join(', ')) %>
+      <%= l('foton_cash_flow.diagnostics.missing_fields_summary', fields: @diagnostic_results[:missing_custom_fields].join(', ')) %>
     </p>
   <% end %>
 
   <% if @diagnostic_results[:incorrectly_configured_fields].any? %>
     <p class="cf-warning">
-      <%= l(:text_cash_flow_incorrect_config_summary, fields: @diagnostic_results[:incorrectly_configured_fields].join(', ')) %>
+      <%= l('foton_cash_flow.diagnostics.incorrect_config_summary', fields: @diagnostic_results[:incorrectly_configured_fields].join(', ')) %>
     </p>
   <% end %>
 
   <% unless @diagnostic_results[:all_dependencies_met] %>
-  <p class="cf-danger">
-    <%= l(:text_cash_flow_dependencies_not_met) %>
-  </p>
-<%
-=begin%>
- 
-  <% unless @diagnostic_results[:tracker_present] && @diagnostic_results[:all_custom_fields_present] && @diagnostic_results[:all_custom_fields_configured_correctly] %>
-    <p class="cf-info">
-      <%= l(:text_cash_flow_sync_recommendation) %>
-    </p>
-  <% end %>
- 
-<%
-=end%>
-
+    <p class="cf-danger"><%= l('foton_cash_flow.notices.dependencies_missing') %></p>
+    <p class="cf-info"><%= l('foton_cash_flow.diagnostics.sync_recommendation') %></p>
   <% else %>
     <p class="cf-success">
-      <%= l(:text_cash_flow_dependencies_met) %>
+      <%= l('foton_cash_flow.diagnostics.dependencies_met') %>
     </p>
   <% end %>
 

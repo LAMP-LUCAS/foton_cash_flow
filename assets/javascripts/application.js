@@ -1,21 +1,23 @@
-//= require ./vendor/chart.umd.min.js
-//
-//= require ./controllers/cash_flow_page_controller.js
-//
-// A diretiva `//= require` acima é processada pelo Sprockets (Asset Pipeline do Rails).
-// Ela garante que o conteúdo de `cash_flow_page_controller.js` seja incluído
-// neste arquivo ANTES que ele seja enviado para o navegador.
-
 /**
  * Ponto de entrada principal do JavaScript do plugin.
  * Atua como um roteador para inicializar os controladores corretos
  * com base na página atual.
  */
+
+// Cria o namespace global para o plugin se ele ainda não existir.
+// Isso deve ser feito antes de qualquer outra lógica.
+window.FotonCashFlow = window.FotonCashFlow || {};
+
 document.addEventListener('DOMContentLoaded', () => {
   const cashFlowPage = document.querySelector('.cash-flow-page');
   if (cashFlowPage) {
-    const controller = new CashFlowPageController(cashFlowPage);
-    controller.initialize();
+    // Agora verificamos se o Controller existe dentro do nosso namespace.
+    if (typeof FotonCashFlow.CashFlowPageController !== 'undefined') {
+      const controller = new FotonCashFlow.CashFlowPageController(cashFlowPage);
+      controller.initialize();
+    } else {
+      console.error('FOTON CASH FLOW: FotonCashFlow.CashFlowPageController não foi encontrado. Verifique a ordem de carregamento dos scripts em _cash_flow_assets.html.erb.');
+    }
   }
 
   // A lógica para outras páginas (ex: formulários de new/edit)

@@ -1,6 +1,6 @@
 <%# Espera: issue (local), custom_fields (local) %>
 <div class="cf-form-container">
-  <%= form_for @issue, url: (issue.new_record? ? cash_flow_entries_path(project_id: @issue.project_id) : cash_flow_entry_path(@issue)), html: { class: 'cf-form' } do |f| %>
+  <%= form_for @issue, url: (issue.new_record? ? project_cash_flow_entries_path(@issue.project) : project_cash_flow_entry_path(@issue.project, @issue)), html: { class: 'cf-form' } do |f| %>
     <%= f.hidden_field :project_id, value: @issue.project_id %>
     <%# Se o tracker_id é definido no controller (ex: @issue.tracker = tracker),
         você pode passá-lo como hidden_field para garantir que seja incluído nos parâmetros. %>
@@ -9,24 +9,24 @@
     <%# **IMPORTANTE:** Este é o elemento que exibirá os erros de validação do modelo %>
     <%= error_messages_for @issue %>
 
-    <h2 class="cf-form-title"><%= issue.new_record? ? l(:title_create_new_entry) : l(:title_edit_entry) %></h2>
+    <h2 class="cf-form-title"><%= issue.new_record? ? l('foton_cash_flow.general.new_entry') : l('foton_cash_flow.general.edit_entry') %></h2>
     <div class="cf-fields">
       <div class="cf-field">
-        <label for="issue_subject"><%= l(:field_subject) %></label>
-        <%= f.text_field :subject, class: 'cf-input', placeholder: l(:field_subject), required: true %>
+        <label for="issue_subject"><%= l('foton_cash_flow.fields.subject') %></label>
+        <%= f.text_field :subject, class: 'cf-input', placeholder: l('foton_cash_flow.fields.subject') %>
       </div>
       <div class="cf-field">
-        <label for="issue_description"><%= l(:field_description) %></label>
-        <%= f.text_area :description, class: 'cf-input', placeholder: l(:field_description) %>
+        <label for="issue_description"><%= l('foton_cash_flow.fields.description') %></label>
+        <%= f.text_area :description, class: 'cf-input', placeholder: l('foton_cash_flow.fields.description') %>
       </div>
 
       <%# Adicionar campos de Status e Prioridade %>
       <div class="cf-field">
-        <label for="issue_status_id"><%= l(:field_status) %></label>
+        <label for="issue_status_id"><%= l('foton_cash_flow.fields.status') %></label>
         <%= f.collection_select :status_id, IssueStatus.all, :id, :name, { include_blank: true }, class: 'cf-input' %>
       </div>
       <div class="cf-field">
-        <label for="issue_priority_id"><%= l(:field_priority) %></label>
+        <label for="issue_priority_id"><%= l('foton_cash_flow.fields.priority') %></label>
         <%= f.collection_select :priority_id, IssuePriority.all, :id, :name, { include_blank: true }, class: 'cf-input' %>
       </div>
 
@@ -34,13 +34,17 @@
       <% custom_fields.each do |cf| %>
         <div class="cf-field">
           <label for="issue_custom_field_values_<%= cf.id %>">
-            <%= l("field_#{cf.name.parameterize.underscore}", default: cf.name) %>
+            <%= l("field_#{cf.name.parameterize.underscore}", default: cf.name) # Usa as chaves adicionadas no pt-BR.yml %>
             <% if cf.is_required? %><span class="required-asterisk">*</span><% end %>
           </label>
           <% if cf.field_format == 'list' %>
-            <%= select_tag "issue[custom_field_values][#{cf.id}]", options_for_select(cf.possible_values.map { |v| [l("label_#{v}".to_sym, default: v), v] }, @issue.custom_field_value(cf.id)), include_blank: !cf.is_required?, class: 'cf-input', required: cf.is_required? %>
+            <%# Traduz as opções usando a seção 'cf_options' do yml %>
+            <% translated_options = cf.possible_values.map do |v|
+                 [l("foton_cash_flow.cf_options.#{v.parameterize.underscore}", default: v), v]
+               end %>
+            <%= select_tag "issue[custom_field_values][#{cf.id}]", options_for_select(translated_options, @issue.custom_field_value(cf.id)), include_blank: !cf.is_required?, class: 'cf-input', required: cf.is_required? %>
           <% elsif cf.field_format == 'date' %>
-            <%= text_field_tag "issue[custom_field_values][#{cf.id}]", @issue.custom_field_value(cf.id), class: 'cf-input', type: 'date', placeholder: l(:label_date), required: cf.is_required? %>
+            <%= text_field_tag "issue[custom_field_values][#{cf.id}]", @issue.custom_field_value(cf.id), class: 'cf-input', type: 'date', placeholder: l('foton_cash_flow.fields.date'), required: cf.is_required? %>
           <% elsif cf.field_format == 'float' %>
             <%# **CORREÇÃO AQUI:** Adicionado type="number" e step="any" para validação do navegador %>
             <%= text_field_tag "issue[custom_field_values][#{cf.id}]", @issue.custom_field_value(cf.id), class: 'cf-input', placeholder: l("field_#{cf.name.parameterize.underscore}", default: cf.name), required: cf.is_required?, type: 'number', step: 'any' %>
@@ -52,8 +56,8 @@
 
     </div>
     <div class="cf-actions-form">
-      <%= f.submit l(:button_save), class: 'cf-button cf-button-primary' %>
-      <%= link_to l(:button_cancel), cash_flow_entries_path, class: 'cf-button cf-button-secondary' %>
+      <%= f.submit l('foton_cash_flow.general.save'), class: 'cf-button cf-button-primary' %>
+      <%= link_to l('foton_cash_flow.general.cancel'), cash_flow_entries_path, class: 'cf-button cf-button-secondary' %>
     </div>
   <% end %>
 </div>

@@ -1,21 +1,25 @@
-<%# app\views\foton_cash_flow\shared\_cash_flow_assets.html.erb %>
+<%#
+  Arquivo: app/views/foton_cash_flow/shared/_cash_flow_assets.html.erb
+  Descrição: Carrega todos os assets JavaScript do plugin na ordem correta.
+             A ordem é crucial para que o padrão de namespace funcione, garantindo
+             que nenhuma classe seja chamada antes de ser definida.
+%>
 
-<%# Partial para incluir assets do plugin %>
-<%
-=begin%>
- <% if plugin_assets_loaded %> 
-<%
-=end%>
+<%#
+  ORDEM DE CARREGAMENTO:
+  1. Bibliotecas externas (ex: Chart.js)
+  2. Componentes de UI (ex: FilterPopup)
+  3. Managers (que podem usar os componentes)
+  4. Controllers (que usam os managers)
+  5. Application.js (o ponto de entrada que inicializa o controller)
+%>
 
-  <%= stylesheet_link_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
-  
-  <%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>  
-  <%= javascript_include_tag 'cash_flow_dashboard', plugin: 'foton_cash_flow' %>
-  <%= javascript_include_tag 'cash_flow_main', plugin: 'foton_cash_flow' %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-<%
-=begin%>
- <% end %> 
-<%
-=end%>
+<%= javascript_include_tag 'components/filter_popup', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'managers/view_manager', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'managers/filter_manager', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'managers/dashboard_manager', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'controllers/cash_flow_page_controller', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>
+

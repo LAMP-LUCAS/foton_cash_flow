@@ -4,16 +4,16 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="syncModalLabel"><%= l(:title_check_and_sync) %></h5>
+        <h5 class="modal-title" id="syncModalLabel"><%= l('foton_cash_flow.diagnostics.check_and_sync_title') %></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p><%= l(:text_cash_flow_sync_explanation) %></p>
+        <p><%= l('foton_cash_flow.notices.sync_explanation') %></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l(:button_cancel) %></button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l('foton_cash_flow.general.cancel') %></button>
         <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
       </div>
     </div>

@@ -1,14 +1,14 @@
 <%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_filters_modal.html.erb %>
 
 <%# Container para o contador de lançamentos %>
-<div class="cf-entries-count">Exibindo <%= @issues_for_table.size %> de <%= @issue_count %> lançamentos</div>
+<div class="cf-entries-count"><%= l('foton_cash_flow.notices.showing_entries', count: @issues_for_table.size, total: @issue_count) %></div>
 
 <%# Container para os filtros ativos %>
 <div class="cf-filters-bar">
   <div class="cf-active-filters-container">
-    <div class="cf-active-filters-label">Filtros aplicados:</div>
+    <div class="cf-active-filters-label"><%= l('foton_cash_flow.filters.active_filters_label') %></div>
     <div class="cf-active-filters"></div>
-    <button class="cf-clear-all-filters cf-btn cf-btn-outline">Limpar todos</button>
+    <button class="cf-clear-all-filters cf-btn cf-btn-outline"><%= l('foton_cash_flow.filters.clear_all_button') %></button>
   </div>
 </div>
 
@@ -89,7 +89,7 @@
               <% @statuses.each do |status| %>
                 <label class="cf-checkbox-label">
                   <input type="checkbox" class="cf-filter-checkbox" value="<%= status.name %>">
-                  <span><%= status.name %></span>
+                  <span><%= l("foton_cash_flow.cf_options.#{status.name.to_s.parameterize.underscore}", default: status.name) %></span>
                 </label>
               <% end %>
             <% end %>
@@ -112,7 +112,7 @@
               <% @categories.each do |category| %>
                 <label class="cf-checkbox-label">
                   <input type="checkbox" class="cf-filter-checkbox" value="<%= category %>">
-                  <span><%= category %></span>
+                  <span><%= l("foton_cash_flow.cf_options.#{category.to_s.parameterize.underscore}", default: category) %></span>
                 </label>
               <% end %>
             <% end %>
@@ -132,11 +132,11 @@
           <div class="cf-filter-checkbox-container">
             <label class="cf-checkbox-label">
               <input type="checkbox" class="cf-filter-checkbox" value="revenue">
-              <span>Receita</span>
+              <span><%= l('foton_cash_flow.cf_options.revenue') %></span>
             </label>
             <label class="cf-checkbox-label">
               <input type="checkbox" class="cf-filter-checkbox" value="expense">
-              <span>Despesa</span>
+              <span><%= l('foton_cash_flow.cf_options.expense') %></span>
             </label>
           </div>
         </div>

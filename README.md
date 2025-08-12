@@ -144,11 +144,11 @@ Siga o passo a passo abaixo para instalar o plugin em ambientes Docker:
    docker compose exec redmine bundle exec rake redmine:plugins:migrate RAILS_ENV=production
    ```
 
-4. **Publique os assets do plugin:**
-    Isso garante que os arquivos estáticos do plugin sejam compilados e estejam disponíveis.
+4. **Pré-compile os assets:**
+    Este comando unifica os assets do Redmine e de todos os plugins para produção.
 
    ```bash
-   docker compose exec redmine bundle exec rake redmine:plugins:assets RAILS_ENV=production
+   docker compose exec redmine bundle exec rake assets:precompile RAILS_ENV=production
    ```
 
 5. **Reinicie o Redmine:**
@@ -184,10 +184,10 @@ Para atualizar o plugin para uma nova versão:
    docker compose exec redmine bundle exec rake redmine:plugins:migrate RAILS_ENV=production
    ```
 
-4. **Republique os assets:**
+4. **Pré-compile novamente os assets:**
 
    ```bash
-   docker compose exec redmine bundle exec rake redmine:plugins:assets RAILS_ENV=production
+   docker compose exec redmine bundle exec rake assets:precompile RAILS_ENV=production
    ```
 
 5. **Reinicie o Redmine:**
