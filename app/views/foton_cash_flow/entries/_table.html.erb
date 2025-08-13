@@ -99,9 +99,10 @@
           <td class="start-date-column"><%= format_date(issue.start_date) %></td>
           <td class="entry-date-column"><%= format_date(issue.cash_flow_entry_date) %></td>
           <td class="actions-column">
-              <%= link_to l('foton_cash_flow.general.edit'), edit_project_cash_flow_entry_path(issue.project, issue), class: 'icon icon-edit' %>
-              <%= link_to l('foton_cash_flow.general.delete'), project_cash_flow_entry_path(issue.project, issue), data: { confirm: l('foton_cash_flow.modals.confirm_delete.body'), method: :delete }, class: 'icon icon-del' %>
-            </td>
+              <%= link_to l('foton_cash_flow.general.edit'), edit_issue_path(issue), class: 'icon icon-edit' %>
+              <%= link_to l('foton_cash_flow.general.delete'), issue_path(issue), data: { confirm: l(:text_are_you_sure), method: :delete }, class: 'icon icon-del' %>
+          </td>
+
         </tr>
       <% end %>
     <% else %>
