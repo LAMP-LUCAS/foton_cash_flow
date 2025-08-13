@@ -59,11 +59,15 @@ module FotonCashFlow
     end
 
     # Formata a data.
-    def format_date(date_str)
-      date = Date.parse(date_str) rescue nil
+    # Este método agora lida com objetos Date e strings de data de forma robusta.
+    def format_date(date_obj_or_str)
+      return 'N/A' if date_obj_or_str.blank?
+
+      # Se já for um objeto Date, usa-o diretamente. Senão, tenta converter a string.
+      date = date_obj_or_str.is_a?(Date) ? date_obj_or_str : (Date.parse(date_obj_or_str.to_s) rescue nil)
+
       if date.present?
-        #ActionController::Base.helpers.l_date(date)
-        I18n.l(date, format: :default) # O formato :default pode ser ajustado conforme a necessidade do seu projeto.
+        I18n.l(date, format: :default)
       else
         'N/A'
       end

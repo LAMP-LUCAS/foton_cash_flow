@@ -35,6 +35,7 @@ class CashFlowPageController {
     this.viewManager = new FotonCashFlow.ViewManager('.cf-table-wrapper');
     this.filterManager = new FotonCashFlow.FilterManager(this);
     this.dashboardManager = new FotonCashFlow.DashboardManager(this);
+    this.chartManager = new FotonCashFlow.Managers.ChartManager(this.pageElement, this.dashboardManager);
 
     // Verifica se a view principal foi encontrada. Se não, a página não tem o que mostrar.
     if (!this.viewManager.isInitialized()) {
@@ -44,13 +45,14 @@ class CashFlowPageController {
 
     // 2. Adiciona os listeners para ordenação nos cabeçalhos da tabela.
     this._initializeSorters();
-    this.filterManager.initialize(); // <-- ADICIONA ESTA LINHA
+    this._initializePillFilters(); // Adiciona listeners de clique nas pílulas da tabela.
+    this.viewManager.init(); // Garante que a estilização inicial da view (ex: cores) seja aplicada.
+    this.filterManager.initialize();
+    this.chartManager.init(); // Inicializa a funcionalidade de maximizar/minimizar.
 
     // 3. Renderiza o estado inicial da página (com a ordenação padrão).
     this.onStateChange();
 
-    // 4. Inicializa os gráficos com os dados iniciais.
-    this.dashboardManager.init();
     console.log("CashFlowPageController: Inicialização concluída.");
   }
 
@@ -65,6 +67,44 @@ class CashFlowPageController {
         const header = e.target.closest('th');
         this.handleSort(header.dataset.column);
       });
+    });
+  }
+
+  /**
+   * Adiciona um listener de clique ao corpo da tabela para filtrar ao clicar em uma pílula.
+   * Usa delegação de eventos para eficiência.
+   * @private
+   */
+  _initializePillFilters() {
+    const tableBody = this.viewManager.tableBody;
+    if (!tableBody) return;
+
+    tableBody.addEventListener('click', (event) => {
+      const pill = event.target.closest('.status-tag, .transaction-tag, .category-tag');
+      if (!pill) return;
+
+      event.preventDefault();
+
+      const cell = pill.closest('td[data-column]');
+      const row = pill.closest('tr.issue-row');
+      if (!cell || !row) return;
+
+      const column = cell.dataset.column;
+      const valueToFilter = row.dataset[column];
+      const displayValue = pill.innerText.trim();
+
+      if (!column || valueToFilter === undefined) return;
+
+      // Cria uma instância de filtro compatível com o FilterManager
+      const filterInstance = {
+        operator: 'is',
+        value: displayValue, // O que o usuário vê na barra de filtros
+        matches: (rowValue) => {
+          return rowValue ? rowValue === valueToFilter : false;
+        }
+      };
+
+      this.filterManager.setFilter(column, filterInstance);
     });
   }
 
@@ -128,17 +168,69 @@ class CashFlowPageController {
    */
   applySort(rows) {
     const { column, direction } = this.sortState;
-    const dataAttribute = column; // Simplificado para buscar o data-attribute diretamente
+
+    // Busca o tipo de dado do cabeçalho da coluna para uma ordenação mais inteligente.
+    const header = this.viewManager.tableElement.querySelector(`th[data-column="${column}"]`);
+    const dataType = header ? header.dataset.type : 'string';
+
+    /**
+     * Converte uma string de data (seja 'YYYY-MM-DD' ou 'DD/MM/AAAA') para um objeto Date.
+     * @param {string} dateString - A string da data.
+     * @returns {Date|null} - O objeto Date ou null se for inválida.
+     */
+    const parseDate = (dateString) => {
+      if (!dateString) return null;
+
+      // Verifica o formato DD/MM/AAAA
+      const dmyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (dmyMatch) {
+        // Rearranja para YYYY-MM-DD para que o construtor do Date funcione de forma confiável.
+        const isoDateString = `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+        const date = new Date(isoDateString);
+        return isNaN(date) ? null : date;
+      }
+
+      // Tenta parsear diretamente (para formatos como YYYY-MM-DD)
+      const date = new Date(dateString);
+      return isNaN(date) ? null : date;
+    };
 
     return rows.sort((a, b) => {
-      const valA = a.dataset[dataAttribute] || '';
-      const valB = b.dataset[dataAttribute] || '';
+      const valA = a.dataset[column] || '';
+      const valB = b.dataset[column] || '';
 
-      // Tenta converter para número para uma ordenação numérica/data correta
-      const numA = parseFloat(valA);
-      const numB = parseFloat(valB);
+      // Trata valores nulos ou vazios, colocando-os no final da ordenação.
+      if (!valA && !valB) return 0;
+      if (!valA) return 1;
+      if (!valB) return -1;
 
-      const comparison = isNaN(numA) || isNaN(numB) ? valA.localeCompare(valB) : numA - numB;
+      let comparison = 0;
+
+      switch (dataType) {
+        case 'date':
+          const dateA = parseDate(valA);
+          const dateB = parseDate(valB);
+          if (dateA === null && dateB === null) comparison = 0;
+          else if (dateA === null) comparison = 1; // Nulos no final
+          else if (dateB === null) comparison = -1; // Nulos no final
+          else comparison = dateA - dateB;
+          break;
+
+        case 'value': // Para a coluna 'Valor'
+        case 'number':
+          const numA = parseFloat(valA);
+          const numB = parseFloat(valB);
+          if (isNaN(numA) && isNaN(numB)) comparison = 0;
+          else if (isNaN(numA)) comparison = 1; // NaN no final
+          else if (isNaN(numB)) comparison = -1; // NaN no final
+          else comparison = numA - numB;
+          break;
+
+        default: // 'string'
+          // localeCompare com a opção 'numeric' lida bem com strings que contêm números.
+          comparison = valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
+          break;
+      }
 
       return direction === 'asc' ? comparison : -comparison;
     });

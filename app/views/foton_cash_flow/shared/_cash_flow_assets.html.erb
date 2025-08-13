@@ -17,9 +17,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
 <%= javascript_include_tag 'components/filter_popup', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'utils/color_utils.js', plugin: 'foton_cash_flow' %>
 <%= javascript_include_tag 'managers/view_manager', plugin: 'foton_cash_flow' %>
 <%= javascript_include_tag 'managers/filter_manager', plugin: 'foton_cash_flow' %>
+<%= javascript_include_tag 'managers/chart_manager', plugin: 'foton_cash_flow' %>
 <%= javascript_include_tag 'managers/dashboard_manager', plugin: 'foton_cash_flow' %>
-<%= javascript_include_tag 'controllers/cash_flow_page_controller', plugin: 'foton_cash_flow' %>
-<%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>
 
+<%= javascript_include_tag 'controllers/cash_flow_page_controller', plugin: 'foton_cash_flow' %>
+
+<%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>

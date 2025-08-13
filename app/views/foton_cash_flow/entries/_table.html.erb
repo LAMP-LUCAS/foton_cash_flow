@@ -9,27 +9,15 @@
           <span class="column-icons"><span class="cf-sort-icon">[S]</span></span>
         </div>
       </th>
-      <th class="date-column" data-column="entryDate" data-type="date" data-sortable="true">
+      <th class="description-column" data-column="subject" data-type="string" data-sortable="true">
         <div class="th-content">
-          <span class="column-title"><%= l('foton_cash_flow.fields.entry_date') %></span>
+          <span class="column-title"><%= l('foton_cash_flow.fields.description') %></span>
           <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
         </div>
       </th>
-      <th class="category-column" data-column="category" data-type="list" data-sortable="true">
+      <th class="assignee-column" data-column="assignee" data-type="list" data-sortable="true">
         <div class="th-content">
-          <span class="column-title"><%= l('foton_cash_flow.fields.category') %></span>
-          <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
-        </div>
-      </th>
-      <th class="transaction-column" data-column="transactionType" data-type="list" data-sortable="true">
-        <div class="th-content">
-          <span class="column-title"><%= l('foton_cash_flow.fields.transaction_type') %></span>
-          <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
-        </div>
-      </th>
-      <th class="value-column" data-column="amount" data-type="string" data-sortable="true">
-        <div class="th-content">
-          <span class="column-title"><%= l('foton_cash_flow.fields.value') %></span>
+          <span class="column-title"><%= l('foton_cash_flow.fields.assignee', default: l(:field_assigned_to)) %></span>
           <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
         </div>
       </th>
@@ -39,58 +27,87 @@
           <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
         </div>
       </th>
-      <th class="description-column" data-column="subject" data-type="string" data-sortable="true">
+      <th class="transaction-column" data-column="transactionType" data-type="list" data-sortable="true">
         <div class="th-content">
-          <span class="column-title"><%= l('foton_cash_flow.fields.description') %></span>
+          <span class="column-title"><%= l('foton_cash_flow.fields.transaction_type') %></span>
+          <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
+        </div>
+      </th>
+      <th class="category-column" data-column="category" data-type="list" data-sortable="true">
+        <div class="th-content">
+          <span class="column-title"><%= l('foton_cash_flow.fields.category') %></span>
+          <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
+        </div>
+      </th>
+      <th class="value-column" data-column="amount" data-type="string" data-sortable="true">
+        <div class="th-content">
+          <span class="column-title"><%= l('foton_cash_flow.fields.value') %></span>
+          <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
+        </div>
+      </th>
+      <th class="start-date-column" data-column="startDate" data-type="date" data-sortable="true">
+        <div class="th-content">
+          <span class="column-title"><%= l('foton_cash_flow.fields.start_date', default: l(:field_start_date)) %></span>
+          <span class="column-icons"><span class="cf-sort-icon">[S]</span></span>
+        </div>
+      </th>
+      <th class="entry-date-column" data-column="entryDate" data-type="date" data-sortable="true">
+        <div class="th-content">
+          <span class="column-title"><%= l('foton_cash_flow.fields.entry_date') %></span>
           <span class="column-icons"><span class="cf-filter-icon">[F]</span><span class="cf-sort-icon">[S]</span></span>
         </div>
       </th>
       <th class="actions-column"><%= l('foton_cash_flow.general.actions') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if @issues_for_table.any? %>
-        <% @issues_for_table.each do |issue| %>
-          <tr class="issue-row <%= issue.cash_flow_transaction_type.to_s.downcase %>"
-              data-id="<%= issue.id %>"
-              data-entry-date="<%= issue.cash_flow_entry_date_object&.strftime('%Y-%m-%d') || issue.cash_flow_entry_date %>"
-              data-category-translated="<%= l("foton_cash_flow.cf_options.#{issue.cash_flow_category.to_s.parameterize.underscore}", default: issue.cash_flow_category) %>"
-              data-category="<%= issue.cash_flow_category %>"
-              data-transaction-type="<%= issue.cash_flow_transaction_type %>"
-              data-amount="<%= issue.cash_flow_amount.to_f %>"
-              data-status="<%= issue.status.name %>"
-              data-subject="<%= issue.subject %>">
-            <td class="id-column"><%= link_to_cash_flow_issue(issue) %></td>
-            <td class="date-column"><%= format_date(issue.cash_flow_entry_date) %></td>
-            <td class="category-column">
-              <span class="category-tag category-<%= issue.cash_flow_category.parameterize %>">
-                <%= l("foton_cash_flow.cf_options.#{issue.cash_flow_category.to_s.parameterize.underscore}", default: issue.cash_flow_category) %>
-              </span>
-            </td>
-            <td class="transaction-column">
-              <span class="transaction-tag <%= issue.cash_flow_transaction_type.to_s.downcase %>">
-                <%= l("foton_cash_flow.cf_options.#{issue.cash_flow_transaction_type.to_s.downcase}", default: issue.cash_flow_transaction_type) %>
-              </span>
-            </td>
-            <td class="value-column <%= issue.cash_flow_transaction_type.to_s.downcase %>">
-              <%= format_amount(issue.cash_flow_amount) %>
-            </td>
-            <td class="status-column">
-              <span class="status-tag <%= issue.status.name.parameterize %>">
-                <%= l("foton_cash_flow.cf_options.#{issue.status.name.to_s.parameterize.underscore}", default: issue.status.name) %>
-              </span>
-            </td>
-            <td class="description-column"><%= issue.subject %></td>
-            <td class="actions-column">
+    </tr>
+  </thead>
+  <tbody>
+    <% if @issues_for_table.any? %>
+      <% @issues_for_table.each do |issue| %>
+        <tr class="issue-row <%= issue.cash_flow_transaction_type.to_s.downcase %>"
+            data-id="<%= issue.id %>"
+            data-subject="<%= issue.subject %>"
+            data-assignee="<%= issue.assigned_to&.name %>"
+            data-status="<%= issue.status.name %>"
+            data-status-key="<%= issue.status.name.parameterize %>"
+            data-transaction-type="<%= issue.cash_flow_transaction_type %>"
+            data-category-translated="<%= l("foton_cash_flow.cf_options.#{issue.cash_flow_category.to_s.parameterize.underscore}", default: issue.cash_flow_category) %>"
+            data-category="<%= issue.cash_flow_category %>"
+            data-amount="<%= issue.cash_flow_amount.to_f %>"
+            data-start-date="<%= issue.start_date&.strftime('%Y-%m-%d') %>"
+            data-entry-date="<%= issue.cash_flow_entry_date_object&.strftime('%Y-%m-%d') || issue.cash_flow_entry_date %>">
+          <td class="id-column"><%= link_to_cash_flow_issue(issue) %></td>
+          <td class="description-column"><%= issue.subject %></td>
+          <td class="assignee-column"><%= issue.assigned_to&.name %></td>
+          <td class="status-column" data-column="status">
+            <span class="status-tag <%= issue.status.name.parameterize %>">
+              <%= l("foton_cash_flow.cf_options.#{issue.status.name.to_s.parameterize.underscore}", default: issue.status.name) %>
+            </span>
+          </td>
+          <td class="transaction-column" data-column="transactionType">
+            <span class="transaction-tag <%= issue.cash_flow_transaction_type.to_s.downcase %>">
+              <%= l("foton_cash_flow.cf_options.#{issue.cash_flow_transaction_type.to_s.downcase}", default: issue.cash_flow_transaction_type) %>
+            </span>
+          </td>
+          <td class="category-column" data-column="category">
+            <span class="category-tag">
+              <%= l("foton_cash_flow.cf_options.#{issue.cash_flow_category.to_s.parameterize.underscore}", default: issue.cash_flow_category) %>
+            </span>
+          </td>
+          <td class="value-column <%= issue.cash_flow_transaction_type.to_s.downcase %>">
+            <%= format_amount(issue.cash_flow_amount) %>
+          </td>
+          <td class="start-date-column"><%= format_date(issue.start_date) %></td>
+          <td class="entry-date-column"><%= format_date(issue.cash_flow_entry_date) %></td>
+          <td class="actions-column">
               <%= link_to l('foton_cash_flow.general.edit'), edit_project_cash_flow_entry_path(issue.project, issue), class: 'icon icon-edit' %>
               <%= link_to l('foton_cash_flow.general.delete'), project_cash_flow_entry_path(issue.project, issue), data: { confirm: l('foton_cash_flow.modals.confirm_delete.body'), method: :delete }, class: 'icon icon-del' %>
             </td>
-          </tr>
-        <% end %>
-      <% else %>
-        <tr>
-          <td colspan="8" class="no-data-message"><%= l('foton_cash_flow.notices.no_data_with_filters') %></td>
         </tr>
       <% end %>
-    </tbody>
+    <% else %>
+      <tr>
+        <td colspan="10" class="no-data-message"><%= l('foton_cash_flow.notices.no_data_with_filters') %></td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>

@@ -58,18 +58,34 @@ module FotonCashFlow
         end
       end
 
-      @issue_count = @query.count
-      @limit = per_page_option
+      # Contagem correta de issues, garantindo que a contagem seja de IDs distintos
+      # para evitar contagens infladas por JOINs na query.
+      @issue_count = @query.distinct.count
+      @limit = per_page_option  # || 25 # Garante um valor padrão para o limite
       @issue_pages = Paginator.new @issue_count, @limit, params['page']
       @offset = @issue_pages.offset
-      @issues = @project.issues.order(created_on: :desc)
-      @issues_for_table = @query.limit(@limit).offset(@offset)
-      
-      @categories = @issues.map { |i| i.cash_flow_category }.uniq.compact.sort
-      @statuses = IssueStatus.all.sort_by(&:position)
 
-      @cash_flow_status_collection = IssueStatus.all.map { |s| [s.name, s.id.to_s] }
+      # --- CORREÇÃO E OTIMIZAÇÃO ---
+
+      # 1. Obter apenas os IDs únicos das issues para a página atual.
+      #    O .distinct é crucial para evitar que a mesma issue apareça múltiplas vezes na tabela.
+      paginated_issue_ids = @query.distinct.limit(@limit).offset(@offset).pluck(:id)
+
+      # 2. Fazer uma query limpa usando esses IDs para carregar os objetos
+      #    com as associações (eager loading), resolvendo o problema de N+1.
+      #    Usamos um hash para reordenar os resultados na ordem original da query.
+      issues_map = Issue.where(id: paginated_issue_ids).includes(:status, :assigned_to).index_by(&:id)
+      @issues_for_table = paginated_issue_ids.map { |id| issues_map[id] }.compact
+
+      # 3. Corrigir o cálculo de @categories para ser eficiente e correto, buscando
+      #    os valores distintos do campo personalizado diretamente do banco.
+      category_cf_id = FotonCashFlow::SettingsHelper.cf_id(:category)
+      @categories = CustomValue.where(custom_field_id: category_cf_id, customized_type: 'Issue', customized_id: @query.select(:id)).pluck(:value).uniq.compact.sort      
       
+      # Otimização: Busca os status uma única vez e reutiliza a variável.
+      # .order() é mais eficiente que .all.sort_by() pois ordena no banco.
+      @statuses = IssueStatus.order(:position).to_a
+      @cash_flow_status_collection = @statuses.map { |s| [s.name, s.id.to_s] }
       respond_to do |format|
         format.html
         format.csv { send_data FotonCashFlow::Services::Exporter.new(@query, Setting.plugin_foton_cash_flow['default_currency']).export_csv, filename: "fluxo_de_caixa_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv" }

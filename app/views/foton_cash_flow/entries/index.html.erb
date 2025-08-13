@@ -19,47 +19,52 @@
     <div class="nodata"><%= l('foton_cash_flow.notices.no_data') %></div>
   <%# Se tudo estiver OK e houver dados, renderiza a página completa. %>
   <% else %>
-    <div class="cf-content-area">
-      <%# 2. Seção da Tabela de Lançamentos %>
-      <div class="cf-table-container cf-layout-sidebar">
-        <div class="cf-table-controls">
-          <%# Barra que exibirá as "pílulas" de filtros ativos. O JS irá populá-la. %>
-          <div id="cf-active-filters-bar"></div>
-        </div>
-        <%# O wrapper da tabela agora tem a classe 'autoscroll' para a rolagem horizontal. %>
-        <div class="cf-table-wrapper autoscroll">
-          <%= render partial: 'table', locals: {
-                project: @project,
-                issues_for_table: @issues_for_table,
-                issue_count: @issue_count,
-                issue_pages: @issue_pages,
-                limit: @limit
+    <div class="cf-main-content">
+      <%# Conteúdo Principal (Tabela e Sumário) %>
+      <div class="cf-primary-content">
+
+          <%# 1. Seção da Tabela de Lançamentos %>
+          <div class="cf-table-container">
+                <div id="cf-active-filters-bar"></div>
+                <div class="cf-table-wrapper">
+                  <%= render partial: 'table', locals: {
+                        project: @project,
+                        issues_for_table: @issues_for_table,
+                        issue_count: @issue_count,
+                        issue_pages: @issue_pages,
+                        limit: @limit
+                    } %>
+                </div>
+              </div>
+
+
+          </div>
+
+          <%# 3. Seção de Sumário (Sidebar) %>
+          <div class="cf-summary-section">
+            <%= render partial: 'summary', locals: {
+                total_revenue: @total_revenue,
+                total_expense: @total_expense,
+                balance: @balance
             } %>
-        </div>
-        <%# 1. Seção de Resumo (Cards) %>
-        <%= render partial: 'summary', locals: {
-            total_revenue: @total_revenue,
-            total_expense: @total_expense,
-            balance: @balance
-        } %>
+          </div>
       </div>
-      <%# 3. Seção de Gráficos %>
-      <%= render partial: 'charts', locals: {
-        bar_chart_labels: @bar_chart_labels,
-        bar_chart_revenue: @bar_chart_revenue,
-        bar_chart_expense: @bar_chart_expense,
-        pie_chart_labels: @pie_chart_labels,
-        pie_chart_data: @pie_chart_data,
-        balance_chart_labels: @balance_chart_labels,
-        balance_chart_data: @balance_chart_data,
-        cumulative_revenue_labels: @cumulative_revenue_labels,
-        cumulative_revenue_data: @cumulative_revenue_data,
-        cumulative_expense_data: @cumulative_expense_data
-      } %>
-      <%# 4. Renderiza os templates ocultos que serão usados pelo JavaScript (ex: modal de filtros) %>
-      <%= render 'filter_templates' %>
-      <%# 5. Renderiza a parcial que carrega todos os scripts JS necessários para esta página. %>
-      <%= render 'foton_cash_flow/shared/cash_flow_assets' %>
-    </div>
+
+      <div class="cf-secundary-content">
+        <%# 2. Seção de Gráficos (movida para dentro do conteúdo primário) %>
+        <section>
+          <%= render partial: 'charts', locals: {
+            bar_chart_labels: @bar_chart_labels, bar_chart_revenue: @bar_chart_revenue, bar_chart_expense: @bar_chart_expense,
+            pie_chart_labels: @pie_chart_labels, pie_chart_data: @pie_chart_data,
+            balance_chart_labels: @balance_chart_labels, balance_chart_data: @balance_chart_data,
+            cumulative_revenue_labels: @cumulative_revenue_labels, cumulative_revenue_data: @cumulative_revenue_data, cumulative_expense_data: @cumulative_expense_data
+          } %>
+        </section>
+      </div>
+
+    <%# 4. Renderiza os templates ocultos que serão usados pelo JavaScript (ex: modal de filtros) %>
+    <%= render 'filter_templates' %>
+    <%# 5. Renderiza a parcial que carrega todos os scripts JS necessários para esta página. %>
+    <%= render 'foton_cash_flow/shared/cash_flow_assets' %>
   <% end %>
 </div>

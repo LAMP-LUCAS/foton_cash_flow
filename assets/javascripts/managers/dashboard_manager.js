@@ -8,11 +8,9 @@ class DashboardManager {
   constructor(controller) {
     this.controller = controller;
     this.charts = {}; // Armazena as instâncias dos gráficos
-    // A inicialização agora é chamada pelo controller após a primeira renderização.
+    this.lastData = null; // Armazena os últimos dados processados para recriação
 
-    // Cores dinâmicas baseadas nas variáveis CSS do tema
     this.colors = this.getCssColors();
-    this.pieColors = ['#4A69A3', '#8B9DC3', '#C7CEE2', '#E1E4F0', '#B9D1EA', '#8EABCC', '#5B84A6', '#41658A'];
   }
 
   init() {
@@ -40,6 +38,9 @@ class DashboardManager {
     // Extrai os dados das linhas visíveis
     const data = this.extractDataFromRows(visibleRows);
 
+    // Armazena os dados para poder recriar gráficos individualmente mais tarde
+    this.lastData = data;
+
     // Renderiza os gráficos com os novos dados
     this.renderRevenueExpenseChart(data);
     this.renderExpenseByCategoryChart(data);
@@ -58,13 +59,15 @@ class DashboardManager {
     const expenseByCategory = {};
     const transactions = [];
 
+    const uncategorizedLabel = this.t('foton_cash_flow.general.uncategorized');
+
     rows.forEach(row => {
       const transactionType = row.dataset.transactionType;
       const amount = parseFloat(row.dataset.amount) || 0;
-      // Use the pre-translated category name from the data attribute if available.
-      // Fallback to the raw category name, and then to the generic "Uncategorized" string.
-      const category = row.dataset.categoryTranslated || row.dataset.category || this.t('foton_cash_flow.general.uncategorized');
       const date = new Date(row.dataset.entryDate);
+      // O nome original é usado para consistência na geração de cores.
+      const categoryRaw = row.dataset.category || 'uncategorized';
+      const categoryTranslated = row.dataset.categoryTranslated || categoryRaw;
       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
       transactions.push({ date, amount, type: transactionType });
@@ -73,7 +76,10 @@ class DashboardManager {
         revenueByMonth[monthYear] = (revenueByMonth[monthYear] || 0) + amount;
       } else if (transactionType === 'expense') {
         expenseByMonth[monthYear] = (expenseByMonth[monthYear] || 0) + amount;
-        expenseByCategory[category] = (expenseByCategory[category] || 0) + amount;
+        if (!expenseByCategory[categoryRaw]) {
+          expenseByCategory[categoryRaw] = { total: 0, label: categoryTranslated };
+        }
+        expenseByCategory[categoryRaw].total += amount;
       }
     });
 
@@ -105,8 +111,12 @@ class DashboardManager {
       labels: allMonths,
       revenueData: allMonths.map(month => revenueByMonth[month] || 0),
       expenseData: allMonths.map(month => expenseByMonth[month] || 0),
-      categoryLabels: Object.keys(expenseByCategory).sort(),
-      categoryData: Object.keys(expenseByCategory).sort().map(key => expenseByCategory[key]),
+      pieChart: {
+        // Usamos os nomes originais para gerar as cores e os traduzidos para exibir no gráfico.
+        rawLabels: Object.keys(expenseByCategory).sort(),
+        translatedLabels: Object.keys(expenseByCategory).sort().map(key => expenseByCategory[key].label),
+        data: Object.keys(expenseByCategory).sort().map(key => expenseByCategory[key].total),
+      },
       cumulative: {
         labels: cumulativeLabels,
         balance: balanceData,
@@ -149,7 +159,8 @@ class DashboardManager {
     const ctx = document.getElementById('cashFlowBarChart');
     if (!ctx) return;
 
-    this.charts.barChart = new Chart(ctx, {
+    // CORREÇÃO: Usamos o ID do canvas como a chave para consistência.
+    this.charts[ctx.id] = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: data.labels,
@@ -165,7 +176,7 @@ class DashboardManager {
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false, // Trecho que defini a adaptação do gráfico ao tamanho do canvas ou expandir-se indefinidamente
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             callbacks: { label: (context) => `${context.dataset.label}: ${this.formatCurrency(context.parsed.y)}` }
@@ -180,19 +191,33 @@ class DashboardManager {
     const ctx = document.getElementById('cashFlowPieChart');
     if (!ctx) return;
 
-    this.charts.pieChart = new Chart(ctx, {
+    let getCategoryColor;
+    // **CORREÇÃO CRÍTICA**: Atribui a função de forma segura, com um fallback.
+    if (window.FotonCashFlow && window.FotonCashFlow.Utils && typeof window.FotonCashFlow.Utils.getCategoryColor === 'function') {
+      getCategoryColor = window.FotonCashFlow.Utils.getCategoryColor;
+    } else {
+      console.warn("[DashboardManager] Utilitário de cores não encontrado. Usando cores padrão para o gráfico de pizza.");
+      // Função de fallback que retorna uma cor cinza padrão para evitar erros.
+      getCategoryColor = () => '#cccccc';
+    }
+
+    // **CORREÇÃO DE LÓGICA**: Usa os nomes de categoria *originais* para gerar cores consistentes.
+    const backgroundColors = data.pieChart.rawLabels.map(rawLabel => getCategoryColor(rawLabel));
+
+    // CORREÇÃO: Usamos o ID do canvas como a chave.
+    this.charts[ctx.id] = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: data.categoryLabels,
+        labels: data.pieChart.translatedLabels,
         datasets: [{
-          data: data.categoryData,
-          // Adicionar mais cores se necessário
-          backgroundColor: this.pieColors,
+          data: data.pieChart.data,
+          // Usa as cores geradas dinamicamente para consistência
+          backgroundColor: backgroundColors,
         }]
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false, // Trecho que defini a adaptação do gráfico ao tamanho do canvas ou expandir-se indefinidamente
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'right' },
           tooltip: { callbacks: { label: (context) => `${context.label}: ${this.formatCurrency(context.parsed)}` } }
@@ -205,7 +230,8 @@ class DashboardManager {
     const ctx = document.getElementById('cashFlowBalanceChart');
     if (!ctx || !data.cumulative) return;
 
-    this.charts.balanceChart = new Chart(ctx, {
+    // CORREÇÃO: Usamos o ID do canvas como a chave.
+    this.charts[ctx.id] = new Chart(ctx, {
       type: 'line',
       data: {
         labels: data.cumulative.labels,
@@ -220,7 +246,7 @@ class DashboardManager {
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false, // Trecho que defini a adaptação do gráfico ao tamanho do canvas ou expandir-se indefinidamente
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${this.formatCurrency(context.parsed.y)}` } }
@@ -234,7 +260,8 @@ class DashboardManager {
     const ctx = document.getElementById('cashFlowCumulativeChart');
     if (!ctx || !data.cumulative) return;
 
-    this.charts.cumulativeChart = new Chart(ctx, {
+    // CORREÇÃO: Usamos o ID do canvas como a chave.
+    this.charts[ctx.id] = new Chart(ctx, {
       type: 'line',
       data: {
         labels: data.cumulative.labels,
@@ -256,7 +283,7 @@ class DashboardManager {
       },
       options: {
         responsive: true,
-        // maintainAspectRatio: false, // Trecho que defini a adaptação do gráfico ao tamanho do canvas ou expandir-se indefinidamente
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
           tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${this.formatCurrency(context.parsed.y)}` } }
@@ -264,6 +291,41 @@ class DashboardManager {
         scales: { y: { ticks: { callback: (value) => this.formatCurrency(value) } } }
       }
     });
+  }
+
+  /**
+   * Destrói uma instância de gráfico específica pelo ID do seu canvas.
+   * @param {string} chartId - O ID do elemento <canvas>.
+   */
+  destroyChart(chartId) {
+    if (this.charts[chartId]) {
+      console.log(`[DashboardManager] Destruindo gráfico: ${chartId}`);
+      this.charts[chartId].destroy();
+      delete this.charts[chartId];
+    }
+  }
+
+  /**
+   * Recria um gráfico específico usando os últimos dados disponíveis.
+   * @param {string} chartId - O ID do elemento <canvas>.
+   */
+  recreateChart(chartId) {
+    if (!this.lastData) {
+      console.error("[DashboardManager] Não há dados para recriar o gráfico.");
+      return;
+    }
+    console.log(`[DashboardManager] Recriando gráfico: ${chartId}`);
+
+    switch (chartId) {
+      case 'cashFlowBarChart':
+        return this.renderRevenueExpenseChart(this.lastData);
+      case 'cashFlowPieChart':
+        return this.renderExpenseByCategoryChart(this.lastData);
+      case 'cashFlowBalanceChart':
+        return this.renderCumulativeBalanceChart(this.lastData);
+      case 'cashFlowCumulativeChart':
+        return this.renderCumulativeFlowChart(this.lastData);
+    }
   }
 }
 

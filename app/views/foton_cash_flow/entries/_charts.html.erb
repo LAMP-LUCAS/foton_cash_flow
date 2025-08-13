@@ -2,50 +2,38 @@
 
 <div class="cf-charts-container">
   
+  <%# Gráfico de Barras: Receita vs. Despesa %>
   <div class="cf-chart-card">
     <h3 class="cf-chart-title"><%= l('foton_cash_flow.dashboard.charts.revenue_vs_expense.title') %></h3>
-    <canvas id="cashFlowBarChart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="cashFlowBarChart"></canvas>
+    </div>
   </div>
 
+  <%# Gráfico de Linha: Saldo Acumulado %>
   <div class="cf-chart-card">
     <h3 class="cf-chart-title"><%= l('foton_cash_flow.dashboard.charts.cumulative_balance.title') %></h3>
-    <canvas id="cashFlowBalanceChart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="cashFlowBalanceChart"></canvas>
+    </div>
   </div>
 
+  <%# Gráfico de Linha: Fluxo Acumulado %>
   <div class="cf-chart-card">
     <h3 class="cf-chart-title"><%= l('foton_cash_flow.dashboard.charts.cumulative_flow.title') %></h3>
-    <canvas id="cashFlowCumulativeChart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="cashFlowCumulativeChart"></canvas>
+    </div>
   </div>
   
-  <div class="cf-chart-card">
+  <%# Gráfico de Pizza: Despesas por Categoria %>
+  <div class="cf-chart-card cf-chart-card--pie">
     <h3 class="cf-chart-title"><%= l('foton_cash_flow.dashboard.charts.expense_by_category.title') %></h3>
-    <canvas id="cashFlowPieChart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="cashFlowPieChart"></canvas>
+    </div>
   </div>
 
 </div>
-
-<script>
-  window.cashFlowBarData = {
-    labels: <%= raw bar_chart_labels.to_json %>,
-    revenue: <%= raw bar_chart_revenue.to_json %>,
-    expense: <%= raw bar_chart_expense.to_json %>
-  };
-
-  window.cashFlowPieData = {
-    labels: <%= raw pie_chart_labels.to_json %>,
-    data: <%= raw pie_chart_data.to_json %>
-  };
-
-  window.cashFlowBalanceData = {
-    labels: <%= raw balance_chart_labels.to_json %>,
-    data: <%= raw balance_chart_data.to_json %>
-  };
-
-  window.cashFlowCumulativeData = {
-    labels: <%= raw cumulative_revenue_labels.to_json %>,
-    revenue: <%= raw cumulative_revenue_data.to_json %>,
-    expense: <%= raw cumulative_expense_data.to_json %>
-  };
-</script>
 
 <%# Fim do arquivo _charts.html.erb %>

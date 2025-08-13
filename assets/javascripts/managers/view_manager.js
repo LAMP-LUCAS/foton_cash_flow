@@ -17,6 +17,15 @@ class ViewManager {
     this.activeFiltersBar = document.getElementById('cf-active-filters-bar');
   }
 
+  /**
+   * Inicializa o ViewManager. Deve ser chamado pelo controller após a criação.
+   */
+  init() {
+    if (this.isInitialized()) {
+      this.styleCategoryTags();
+    }
+  }
+
   isInitialized() {
     return !!this.container;
   }
@@ -110,6 +119,34 @@ class ViewManager {
       }
   });
 }
+
+  /**
+   * Aplica estilos dinâmicos às pílulas de categoria com base nos dados da linha.
+   * Utiliza o utilitário de cores para garantir consistência com os gráficos.
+   */
+  styleCategoryTags() {
+    if (!this.originalRows) return;
+
+    let getCategoryColor;
+    if (window.FotonCashFlow && window.FotonCashFlow.Utils && typeof window.FotonCashFlow.Utils.getCategoryColor === 'function') {
+      getCategoryColor = window.FotonCashFlow.Utils.getCategoryColor;
+    } else {
+      console.warn("[ViewManager] Utilitário de cores não encontrado. As pílulas de categoria não serão coloridas.");
+      // Se o utilitário não estiver pronto, simplesmente não fazemos nada.
+      return; 
+    }
+
+    this.originalRows.forEach(row => {
+      const categoryName = row.dataset.category;
+      const tagElement = row.querySelector('.category-column .category-tag');
+
+      if (categoryName && tagElement) {
+        const bgColor = getCategoryColor(categoryName);
+        tagElement.style.backgroundColor = bgColor;
+        tagElement.style.borderColor = bgColor;
+      }
+    });
+  }
 }
 
 window.FotonCashFlow.ViewManager = ViewManager;

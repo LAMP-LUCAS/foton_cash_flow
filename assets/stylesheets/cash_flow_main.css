@@ -1,3 +1,4 @@
+/* plugins/foton_cash_flow/assets/stylesheets/cash_flow_main.css
 /*
  * Foton Cash Flow - Folha de Estilos Principal
  * Versão: 2.0
@@ -45,7 +46,9 @@
    2. LAYOUT PRINCIPAL
    ========================================================================== */
 .cash-flow-page {
-  padding: 24px 0;
+  /* Adiciona padding horizontal para garantir a margem nas laterais */
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 .cf-header {
@@ -59,20 +62,25 @@
 
 .cf-main-content {
   display: flex;
-  gap: 24px;
+  justify-content: space-between;
+}
+
+/* NOVO: Wrapper para o conteúdo principal (tabela e sumário) */
+.cf-primary-content {
+  min-width: 80%;
+  flex-direction: column;
+  padding-bottom: 1rem;
+  margin-bottom: 1vh;
   align-items: flex-start;
 }
 
-.cf-table-section {
-  flex: 1;
-  min-width: 0; /* Previne overflow em flex container */
-}
-
 .cf-summary-section {
-  width: 280px;
+  min-width: 20%;
+  min-height: 100%;
+  margin-left: 1vw;
   flex-shrink: 0;
   position: sticky; /* Mantém o sumário visível ao rolar */
-  top: 20px;
+
 }
 
 /* ==========================================================================
@@ -131,6 +139,12 @@
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   padding: 16px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Adiciona transição suave */
+}
+.cf-card:hover {
+  transform: translateY(-4px) scale(1.02); /* Efeito de "levantar" e crescer */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12); /* Sombra mais destacada */
+  z-index: 10; /* Garante que o card fique sobre os outros ao crescer */
 }
 .cf-card-label {
   font-size: 0.9rem;
@@ -194,22 +208,27 @@
 /* ==========================================================================
    4. TABELA E INTERAÇÕES
    ========================================================================== */
+
 .cf-table-container {
-  background: var(--background-white);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-  overflow: hidden; /* Garante que a borda arredondada funcione */
+  border-radius: 0.8rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+
 }
 
 .cf-table-wrapper {
-  max-height: 65vh; /* ALTURA FIXA DA TABELA */
+  max-height: 85vh; /* ALTURA FIXA DA TABELA */
+  min-height: 10vh;
+  padding: 0.9rem;
   overflow-x: auto; /* Rolagem horizontal se necessário */
   overflow-y: auto; /* Rolagem vertical */
-}
+} 
 
 .cf-table {
-  width: 100%;
-  border-collapse: collapse;
+  /* Garante que a tabela ocupe no mínimo 100% do wrapper, mas possa expandir. */
+  /* 'width: auto' permite que ela cresça com o conteúdo. */
+  /* 'min-width: 100%' evita que ela pareça encolhida se houver poucas colunas. */
+  width: auto;
+  min-width: 100%;
 }
 
 .cf-table th, .cf-table td {
@@ -244,8 +263,8 @@
 
 .column-title {
   display: block; /* Garante que o título ocupe a linha */
-  margin: 0.3rem;
-  margin-right: 0.9rem;
+  margin: 0.4rem;
+  margin-right: 1rem;
   text-align: center;
 }
 
@@ -377,11 +396,11 @@
 
 /* --- Barra de Filtros Ativos --- */
 #cf-active-filters-bar {
-  padding: 0 16px 12px 16px;
+  padding: 5px 5px 12px 5px;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  min-height: 20px; /* Garante espaço mesmo quando vazia */
+  min-height: 0px; /* Garante espaço mesmo quando vazia */
 }
 
 /* --- Pílula de Filtro Ativo --- */
@@ -396,10 +415,14 @@
   font-size: 0.9em;
   cursor: pointer;
   transition: var(--transition);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+
 }
 .cf-filter-pill:hover {
+  transform: translateY(-1.5px) scale(1.01);
+  box-shadow: 0 9px 6px rgba(0, 0, 0, 0.24);
   border-color: #ccc;
-  background-color: #eef0f2;
+  /*background-color: #eef0f2;*/
 }
 .cf-filter-pill .pill-remove-btn {
   /* Garante que o ícone 'x' seja visível e clicável */
@@ -529,6 +552,58 @@
   gap: 8px;
 }
 
+
+/* --- Pílulas da Tabela (Tags) --- */
+/* Estilo base para pílulas usadas dentro da tabela para consistência visual. */
+.cf-table .status-tag,
+.cf-table .transaction-tag,
+.cf-table .category-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  color: var(--text-on-primary); /* Branco, para bom contraste com fundos coloridos */
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+/* Efeito de hover para todas as pílulas da tabela */
+.cf-table .status-tag:hover,
+.cf-table .transaction-tag:hover,
+.cf-table .category-tag:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  filter: brightness(110%);
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Cores para pílulas de transação */
+/* CORREÇÃO: O HTML gera a classe 'revenue', não 'income'. */
+.cf-table .transaction-tag.revenue {
+  background-color: var(--success-color);
+}
+.cf-table .transaction-tag.expense {
+  background-color: var(--error-color);
+}
+
+/* ADIÇÃO: Cores para pílulas de status, agora controladas por CSS para robustez. */
+/* As classes (paid, pending, etc.) são geradas pelo `issue.status.name.parameterize` no HTML. */
+.cf-table .status-tag.paid {
+  background-color: var(--primary-color);
+}
+.cf-table .status-tag.pending {
+  background-color: var(--warning-color);
+  color: #333; /* Texto escuro para melhor contraste em fundo amarelo */
+}
+.cf-table .status-tag.rejected {
+  background-color: var(--error-color);
+}
+
 /* ==========================================================================
    6. MODAIS
    ========================================================================== */
@@ -578,20 +653,45 @@
    ========================================================================== */
 .cf-charts-container {
   display: grid;
+  /* REVERTIDO: Usa auto-fit para se adaptar a telas ultrawide, criando mais colunas se houver espaço. */
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 24px;
-  margin-top: 24px;
 }
+
 .cf-chart-card {
   background: var(--background-white);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   padding: 16px;
+  transition: all 0.3s ease-in-out; /* Transição para todas as propriedades */
+  display: flex; /* SEMPRE será um container flex */
+  flex-direction: column; /* Título em cima, gráfico embaixo */
+  aspect-ratio: 1 / 1; /* O PRÓPRIO CARD define a proporção */
+  position: relative; /* Necessário para posicionar os ícones de ação */
 }
 .cf-chart-title {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 16px;
+}
+
+/*
+  O wrapper do gráfico agora não precisa mais de aspect-ratio.
+  Ele simplesmente cresce para preencher o espaço que o card (seu pai flex)
+  deixa disponível após o título.
+*/
+.chart-wrapper {
+  position: relative;
+  flex-grow: 1; /* Ocupa todo o espaço vertical restante */
+  min-height: 0; /* Previne problemas de overflow em containers flex */
+}
+.cf-chart-card--pie {
+  aspect-ratio: 1 / 1; /* Apenas o card de pizza tem proporção diferente */
+}
+
+.cf-chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--box-shadow);
 }
 
 /* ==========================================================================
@@ -603,6 +703,7 @@
   }
   .cf-summary-section {
     width: 100%;
+    margin-bottom: 2rem;
     position: static; /* Remove o sticky em telas menores */
   }
   .cf-summary {
@@ -615,4 +716,101 @@
   .cf-table-wrapper {
     max-height: none; /* Remove altura fixa em telas menores */
   }
+}
+
+/* ==========================================================================
+   9. FUNCIONALIDADE DE MAXIMIZAR GRÁFICO
+   ========================================================================== */
+
+/* Previne o scroll do body quando o modal/gráfico está aberto */
+body.cf-modal-open {
+  overflow: hidden;
+}
+
+/* Backdrop para focar no gráfico maximizado */
+.cf-chart-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.cf-chart-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Estilo do card quando maximizado */
+.cf-chart-card.maximized {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85vw;
+  height: 85vh;
+  z-index: 2001;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: auto; /* Remove o aspect-ratio quando maximizado */
+}
+
+/* Contêiner para os botões de ação do gráfico (Maximizar/Fechar) */
+.cf-chart-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+
+/* Estilo base para os botões de ação */
+.cf-chart-maximize-btn,
+.cf-chart-close-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-light);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.cf-chart-maximize-btn:hover,
+.cf-chart-close-btn:hover {
+  background: var(--background-white);
+  color: var(--text-color);
+  transform: scale(1.1);
+  box-shadow: var(--box-shadow);
+}
+
+/* Faz o container do canvas crescer para preencher o card maximizado */
+.cf-chart-card.maximized .chart-wrapper {
+  flex-grow: 1;
+  position: relative; /* Essencial para o Chart.js responsivo */
+}
+
+/* Lógica de visibilidade dos ícones */
+.cf-chart-card .cf-chart-maximize-btn {
+  display: flex; /* Visível no estado normal */
+}
+.cf-chart-card.maximized .cf-chart-maximize-btn {
+  display: none; /* Oculto quando maximizado */
+}
+.cf-chart-card .cf-chart-close-btn {
+  display: none; /* Oculto no estado normal */
+}
+.cf-chart-card.maximized .cf-chart-close-btn {
+  display: flex; /* Visível quando maximizado */
 }
