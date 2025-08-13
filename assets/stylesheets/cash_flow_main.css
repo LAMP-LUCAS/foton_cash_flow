@@ -83,6 +83,12 @@
 
 }
 
+.cf-secundary-content{
+  margin-top: 2vh;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ==========================================================================
    3. COMPONENTES (Botões, Cards, Dropdowns, Pílulas)
    ========================================================================== */
