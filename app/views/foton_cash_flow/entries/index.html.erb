@@ -7,7 +7,14 @@
   <div class="cf-header">
     <h2 class="cf-title"><%= l('foton_cash_flow.dashboard.title') %></h2>
     <div class="cf-header-actions">
-      <%= render partial: 'sync_btn' %>            
+      <%# Botões de ação para usuários com permissão de gerenciamento %>
+      <% if User.current.allowed_to?(:manage_cash_flow_entries, @project, global: true) %>
+        <%= link_to l('foton_cash_flow.general.import'), import_form_project_cash_flow_entries_path(@project), class: 'cf-btn cf-btn-primary' %>
+        <%# O link de exportação passa os filtros atuais para exportar exatamente o que o usuário vê %>
+        <%= link_to l('foton_cash_flow.general.export_csv'), export_project_cash_flow_entries_path(@project, format: :csv, **@filter_params), class: 'cf-btn cf-btn-secondary' %>
+      <% end %>
+      <%# O botão de sincronização é renderizado pela sua própria partial %>
+      <%= render partial: 'sync_btn' %>
     </div>
   </div>
 

@@ -2,19 +2,19 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><%= l(:warning_no_projects_title) %></h5>
+        <h5 class="modal-title"><%= l('foton_cash_flow.notices.no_projects.title') %></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p><%= l(:warning_no_projects_message) %></p>
+        <p><%= l('foton_cash_flow.notices.no_projects.message') %></p>
       </div>
       <div class="modal-footer">
-        <%= link_to l(:button_create_project), new_project_path, 
+        <%= link_to l('foton_cash_flow.general.create_project'), new_project_path, 
                     class: 'btn btn-success', 
                     data: { dismiss: 'modal' } %>
-        <%= link_to l(:button_cancel), cash_flow_entries_path, 
+        <%= link_to l('foton_cash_flow.general.cancel'), cash_flow_entries_path, 
                     class: 'btn btn-secondary', 
                     data: { dismiss: 'modal' } %>
       </div>

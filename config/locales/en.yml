@@ -88,8 +88,15 @@ en:
           title: "Cumulative Balance"
         cumulative_flow:
           title: "Cumulative Flow"
+          revenue_label: "Cumulative Revenue"
+          expense_label: "Cumulative Expense"
         expense_by_category:
           title: "Expenses by Category"
+
+    # --- Charts (JS) ---
+    charts:
+      maximize: "Maximize chart"
+      close: "Close chart"
 
     # --- Notices & Messages ---
     notices:
@@ -167,6 +174,49 @@ en:
       tip_encoding: "The file must be in UTF-8 encoding."
       select_csv_file: "Select CSV file"
       no_file_selected: "No file selected"
+
+    # --- Reconciliation Modal (JavaScript & ERB) ---
+    reconciliation:
+      title: "Reconcile Import Conflicts"
+      confirm_and_import: "Confirm and Import"
+      conflict_title: "Conflicts for column '%{column}'"
+      line_label: "Line %{number}"
+      create_new_option: "Create new: \"%{value}\""
+      action_needed: "Action needed"
+      arrow: "→"
+      unexpected_response: "Error: Unexpected response from server."
+      communication_error: "A communication error occurred with the server."
+      finalization_error: "Error finalizing the import."
+
+    # --- Errors ---
+    errors:
+      no_csv_file_provided: "Please select a CSV file to import."
+      no_file_provided: "No file was provided."
+      invalid_file_format: "Invalid file format. Please use a %{format} file."
+      dependencies_not_met: "Plugin dependencies (tracker or custom fields) are not configured. Please run the diagnostics."
+      missing_headers: "The CSV file is missing the following required columns: %{headers}."
+      malformed_csv: "The CSV file is malformed and could not be read: %{error}"
+      import_line_error: "Line %{line}: %{errors}"
+      generic_import_error: "An unexpected error occurred during import: %{error}"
+
+    # --- Exporter Headers ---
+    exporter:
+      headers:
+        id: "ID"
+        entry_date: "Entry Date"
+        transaction_type: "Transaction Type"
+        amount: "Amount"
+        category: "Category"
+        status: "Status"
+        subject: "Description"
+        project: "Project"
+        author: "Author"
+
+    # --- Pagination (JS) ---
+    pagination:
+      previous: "Previous"
+      next: "Next"
+      page_info: "Page %{current_page} of %{total_pages}"
 
     # --- Custom Field Options (for dynamic forms) ---
     cf_options:

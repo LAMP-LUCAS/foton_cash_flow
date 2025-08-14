@@ -9,6 +9,7 @@
 
 // Garante que o namespace global exista.
 window.FotonCashFlow = window.FotonCashFlow || {};
+window.FotonCashFlow.Controllers = window.FotonCashFlow.Controllers || {};
 
 class CashFlowPageController {
   /**
@@ -237,5 +238,5 @@ class CashFlowPageController {
   }
 }
 
-// Anexa a classe ao namespace global para que o application.js possa encontrá-la.
-window.FotonCashFlow.CashFlowPageController = CashFlowPageController;
+// Anexa a classe ao namespace correto para que o application.js possa encontrá-la.
+window.FotonCashFlow.Controllers.CashFlowPageController = CashFlowPageController;

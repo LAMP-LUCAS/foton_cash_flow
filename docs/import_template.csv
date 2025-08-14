@@ -1,6 +1,0 @@
-
-# Modelo de importação de lançamentos do fluxo de caixa (baseado em Issues do tracker Financeiro)
-entry_date,transaction_type,amount,category,description,notes,project_id
-2025-07-21,revenue,1000.00,Receitas Diversas,Serviço vendido,Observação opcional,1
-2025-07-22,expense,500.00,Fornecedores,Pagamento fornecedor,,1
-2025-07-23,expense,2000.00,Salários,Salário funcionário,,1

@@ -99,6 +99,10 @@ pt-BR:
           title: "Fluxo Acumulado"
         expense_by_category:
           title: "Despesas por Categoria"
+        cumulative_flow:
+          title: "Fluxo Acumulado"
+          revenue_label: "Receita Acumulada"
+          expense_label: "Despesa Acumulada"
 
     # --- Avisos & Mensagens ---
     notices:
@@ -106,6 +110,7 @@ pt-BR:
       no_data_with_filters: "Nenhum lançamento encontrado para os filtros selecionados."
       sync_confirm: "Tem certeza de que deseja executar a sincronização de dependências? Isso tentará criar/atualizar o tracker 'Financeiro' e seus campos personalizados associados."
       sync_success: "Dependências do Fluxo de Caixa sincronizadas com sucesso."
+      notice_cash_flow_sync_success: "Sincronização Concluída com sucesso"
       sync_failure: "Falha ao sincronizar as dependências do Fluxo de Caixa: %{message}"
       dependencies_missing: "As dependências do Fluxo de Caixa (tracker ou campos personalizados) estão ausentes ou configuradas incorretamente. Por favor, verifique a página de diagnóstico."
       setup_failed: "Falha ao configurar as dependências do Fluxo de Caixa: %{message}"
@@ -176,6 +181,56 @@ pt-BR:
       tip_encoding: "O arquivo deve estar em codificação UTF-8."
       select_csv_file: "Selecionar arquivo CSV"
       no_file_selected: "Nenhum arquivo selecionado"
+
+    # --- Central de Conciliação (JavaScript) ---
+    reconciliation:
+      title: "Conciliar Conflitos da Importação"
+      confirm_and_import: "Confirmar e Importar"
+      conflict_title: "Conflitos para a coluna '%{column}'"
+      line_label: "Linha %{number}"
+      create_new_option: "Criar novo: \"%{value}\""
+      action_needed: "Ação necessária"
+      arrow: "→"
+      unexpected_response: "Erro: Resposta inesperada do servidor."
+      communication_error: "Ocorreu um erro de comunicação com o servidor."
+      finalization_error: "Erro ao finalizar a importação."
+
+    # --- Gráficos (JS) ---
+    charts:
+      maximize: "Maximizar gráfico"
+      close: "Fechar gráfico"
+
+    # --- Erros ---
+    errors:
+      no_file_provided: "Nenhum arquivo foi fornecido."
+      invalid_file_format: "Formato de arquivo inválido. Por favor, use um arquivo %{format}."
+      dependencies_not_met: "As dependências do plugin (tracker ou campos personalizados) não estão configuradas. Execute o diagnóstico."
+      missing_headers: "O arquivo CSV não contém as seguintes colunas obrigatórias: %{headers}."
+      malformed_csv: "O arquivo CSV está malformado e não pôde ser lido: %{error}"
+      import_line_error: "Linha %{line}: %{errors}"
+      category_creation_failed: "Falha ao criar a categoria '%{category}': %{errors}"
+      generic_import_error: "Ocorreu um erro inesperado durante a importação: %{error}"
+      error_cash_flow_import_failed: "A importação falhou. Verifique os dados e tente novamente. Se o erro persistir, contate o suporte."
+
+
+    # --- Cabeçalhos de Exportação ---
+    exporter:
+      headers:
+        id: "ID"
+        entry_date: "Data do Lançamento"
+        transaction_type: "Tipo de Transação"
+        amount: "Valor"
+        category: "Categoria"
+        status: "Status"
+        subject: "Descrição"
+        project: "Projeto"
+        author: "Autor"
+
+    # --- Paginação (JS) ---
+    pagination:
+      previous: "Anterior"
+      next: "Próxima"
+      page_info: "Página %{current_page} de %{total_pages}"
 
     # --- Opções de Campos Personalizados (para formulários dinâmicos) ---
     cf_options:

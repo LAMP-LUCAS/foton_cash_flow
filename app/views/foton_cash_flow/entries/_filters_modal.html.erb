@@ -2,13 +2,12 @@
 
 <%# Container para o contador de lançamentos %>
 <div class="cf-entries-count"><%= l('foton_cash_flow.notices.showing_entries', count: @issues_for_table.size, total: @issue_count) %></div>
-
 <%# Container para os filtros ativos %>
 <div class="cf-filters-bar">
   <div class="cf-active-filters-container">
-    <div class="cf-active-filters-label"><%= l('foton_cash_flow.filters.active_filters_label') %></div>
+    <span class="cf-active-filters-label"><%= l('foton_cash_flow.filters.active_filters_label') %></span>
     <div class="cf-active-filters"></div>
-    <button class="cf-clear-all-filters cf-btn cf-btn-outline"><%= l('foton_cash_flow.filters.clear_all_button') %></button>
+    <button class="cf-clear-all-filters cf-btn cf-btn-outline" style="display: none;"><%= l('foton_cash_flow.filters.clear_all_button') %></button>
   </div>
 </div>
 
@@ -25,14 +24,14 @@
         <div class="cf-filter-group" data-type="string">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="contains">Contém</option>
-              <option value="starts_with">Começa com</option>
-              <option value="ends_with">Termina com</option>
-              <option value="equal">É igual a</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="contains"><%= l('foton_cash_flow.filters.operators.contains') %></option>
+              <option value="starts_with"><%= l('foton_cash_flow.filters.operators.starts_with') %></option>
+              <option value="ends_with"><%= l('foton_cash_flow.filters.operators.ends_with') %></option>
+              <option value="equal"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
-            <input type="text" class="cf-filter-input" placeholder="Digite o valor">
+            <input type="text" class="cf-filter-input" placeholder="<%= l('foton_cash_flow.filters.placeholders.type_a_value') %>">
           </label>
         </div>
 
@@ -40,18 +39,18 @@
         <div class="cf-filter-group" data-type="number value">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="equal">Igual</option>
-              <option value="greater_than">Maior que</option>
-              <option value="less_than">Menor que</option>
-              <option value="between">Entre</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="equal"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="greater_than"><%= l('foton_cash_flow.filters.operators.greater_than') %></option>
+              <option value="less_than"><%= l('foton_cash_flow.filters.operators.less_than') %></option>
+              <option value="between"><%= l('foton_cash_flow.filters.operators.between') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
           </label>
           <div class="cf-filter-number-inputs">
-            <input type="number" name="filter_value_1" class="cf-filter-input" placeholder="Valor mínimo">
-            <span class="cf-filter-and" style="display: none;">e</span>
-            <input type="number" name="filter_value_2" class="cf-filter-input between-field" placeholder="Valor máximo" style="display: none;">
+            <input type="number" name="filter_value_1" class="cf-filter-input" placeholder="<%= l('foton_cash_flow.filters.placeholders.min_value') %>">
+            <span class="cf-filter-and" style="display: none;"><%= l('foton_cash_flow.general.and') %></span>
+            <input type="number" name="filter_value_2" class="cf-filter-input between-field" placeholder="<%= l('foton_cash_flow.filters.placeholders.max_value') %>" style="display: none;">
           </div>
         </div>
 
@@ -59,17 +58,17 @@
         <div class="cf-filter-group" data-type="date">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="equal">Em</option>
-              <option value="before">Antes de</option>
-              <option value="after">Depois de</option>
-              <option value="between">Entre datas</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="equal"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="before"><%= l('foton_cash_flow.filters.operators.before') %></option>
+              <option value="after"><%= l('foton_cash_flow.filters.operators.after') %></option>
+              <option value="between"><%= l('foton_cash_flow.filters.operators.between_dates') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
           </label>
           <div class="cf-filter-date-inputs">
             <input type="date" name="filter_date_1" class="cf-filter-input">
-            <span class="cf-filter-and" style="display: none;">e</span>
+            <span class="cf-filter-and" style="display: none;"><%= l('foton_cash_flow.general.and') %></span>
             <input type="date" name="filter_date_2" class="cf-filter-input between-field" style="display: none;">
           </div>
         </div>
@@ -78,10 +77,10 @@
         <div class="cf-filter-group" data-type="status">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="is">É</option>
-              <option value="is_not">Não é</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="is"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="is_not"><%= l('foton_cash_flow.filters.operators.is_not') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
           </label>
           <div class="cf-filter-checkbox-container">
@@ -100,11 +99,11 @@
         <div class="cf-filter-group" data-type="category">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="is">É</option>
-              <option value="is_not">Não é</option>
-              <option value="contains">Contém</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="is"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="is_not"><%= l('foton_cash_flow.filters.operators.is_not') %></option>
+              <option value="contains"><%= l('foton_cash_flow.filters.operators.contains') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
           </label>
           <div class="cf-filter-checkbox-container">
@@ -123,10 +122,10 @@
         <div class="cf-filter-group" data-type="transaction">
           <label class="cf-filter-field">
             <select class="cf-filter-operator">
-              <option value="is">É</option>
-              <option value="is_not">Não é</option>
-              <option value="is_empty">Está vazio</option>
-              <option value="is_not_empty">Não está vazio</option>
+              <option value="is"><%= l('foton_cash_flow.filters.operators.is') %></option>
+              <option value="is_not"><%= l('foton_cash_flow.filters.operators.is_not') %></option>
+              <option value="is_empty"><%= l('foton_cash_flow.filters.operators.is_empty') %></option>
+              <option value="is_not_empty"><%= l('foton_cash_flow.filters.operators.is_not_empty') %></option>
             </select>
           </label>
           <div class="cf-filter-checkbox-container">
@@ -142,8 +141,8 @@
         </div>
       </div>
       <div class="cf-filter-actions">
-        <button class="cf-apply-filter-btn cf-btn cf-btn-primary">Aplicar</button>
-        <button class="cf-clear-filter-btn cf-btn cf-btn-outline">Limpar</button>
+        <button class="cf-apply-filter-btn cf-btn cf-btn-primary"><%= l('foton_cash_flow.general.apply') %></button>
+        <button class="cf-clear-filter-btn cf-btn cf-btn-outline"><%= l('foton_cash_flow.general.clear') %></button>
       </div>
     </div>
   </div>

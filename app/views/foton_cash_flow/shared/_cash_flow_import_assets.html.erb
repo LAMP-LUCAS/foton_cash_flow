@@ -1,0 +1,11 @@
+<%#
+  Arquivo: app/views/foton_cash_flow/shared/_cash_flow_import_assets.html.erb
+  Descrição: Carrega os assets JavaScript necessários para a PÁGINA DE IMPORTAÇÃO.
+             A ordem de carregamento é crucial.
+%>
+
+<%# Carrega o controller específico para o formulário de importação %>
+<%= javascript_include_tag 'controllers/import_form_controller', plugin: 'foton_cash_flow' %>
+
+<%# Ponto de entrada - DEVE SER O ÚLTIMO a ser chamado na página %>
+<%= javascript_include_tag 'application', plugin: 'foton_cash_flow' %>

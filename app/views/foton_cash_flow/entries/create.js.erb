@@ -13,15 +13,15 @@
     <div class="custom-modal-overlay" id="issueCreatedModalOverlay">
       <div class="custom-modal-content">
         <div class="custom-modal-header">
-          <h5><%= l(:title_issue_created_successfully) %></h5>
+          <h5><%= l('foton_cash_flow.notices.issue_created.title') %></h5>
           <button type="button" class="custom-modal-close-btn">&times;</button>
         </div>
         <div class="custom-modal-body">
-          <%= l(:text_issue_created_message, issue_id: @issue.id) %>
+          <%= l('foton_cash_flow.notices.issue_created.message', issue_id: @issue.id) %>
         </div>
         <div class="custom-modal-footer">
-          <a href="<%= issue_path(@issue) %>" class="cf-button"><%= l(:button_view_issue) %></a>
-          <button type="button" class="cf-button cf-button--secondary" id="goBackToListBtn"><%= l(:button_go_back_to_list) %></button>
+          <a href="<%= issue_path(@issue) %>" class="cf-button"><%= l('foton_cash_flow.general.view_issue') %></a>
+          <button type="button" class="cf-button cf-button--secondary" id="goBackToListBtn"><%= l('foton_cash_flow.general.back_to_list') %></button>
         </div>
       </div>
     </div>

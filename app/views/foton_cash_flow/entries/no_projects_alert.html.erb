@@ -1,9 +1,9 @@
 <div class="warning-box">
-  <h3><%= l(:warning_no_projects_title) %></h3>
-  <p><%= l(:warning_no_projects_message) %></p>
+  <h3><%= l('foton_cash_flow.notices.no_projects.title') %></h3>
+  <p><%= l('foton_cash_flow.notices.no_projects.message') %></p>
   
   <div class="actions">
-    <%= link_to l(:button_create_project), new_project_path, class: 'button-positive' %>
-    <%= link_to l(:button_cancel), cash_flow_entries_path, class: 'button-negative' %>
+    <%= link_to l('foton_cash_flow.general.create_project'), new_project_path, class: 'button-positive' %>
+    <%= link_to l('foton_cash_flow.general.cancel'), cash_flow_entries_path, class: 'button-negative' %>
   </div>
 </div>

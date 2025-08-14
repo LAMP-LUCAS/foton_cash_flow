@@ -43,7 +43,7 @@ class ViewManager {
     
     this.tableBody.innerHTML = ''; // Limpa o corpo da tabela
     if (rowsToRender.length === 0) {
-      this.tableBody.innerHTML = `<tr><td colspan="8" class="nodata">${I18n.t('text_no_data_with_filters')}</td></tr>`;
+      this.tableBody.innerHTML = `<tr><td colspan="8" class="nodata">${I18n.t('foton_cash_flow.notices.no_data_with_filters')}</td></tr>`;
     } else {
       rowsToRender.forEach(row => this.tableBody.appendChild(row));
     }
@@ -91,7 +91,7 @@ class ViewManager {
     if (onClearAll) {
       const clearAllBtn = document.createElement('button');
       clearAllBtn.className = 'cf-clear-all-btn';
-      clearAllBtn.textContent = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('label_clear_all_filters') : 'Clear all';
+      clearAllBtn.textContent = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('foton_cash_flow.filters.clear_all') : 'Clear all';
       clearAllBtn.addEventListener('click', onClearAll);
       this.activeFiltersBar.appendChild(clearAllBtn);
     }

@@ -6,8 +6,8 @@ module FotonCashFlow
     helper FotonCashFlow::EntriesHelper
     #helper :pagination # Opcional, se você tiver um helper de paginação separado.
 
-    before_action :find_project, only: [:index]
-    before_action :authorize_cash_flow, only: [:index]
+    before_action :find_project, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
+    before_action :authorize_cash_flow, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
     before_action :filter_params, only: [:index, :export] 
     before_action :check_dependencies_and_set_flash, only: [:index]
     #before_action :ensure_cash_flow_dependencies
@@ -86,10 +86,7 @@ module FotonCashFlow
       # .order() é mais eficiente que .all.sort_by() pois ordena no banco.
       @statuses = IssueStatus.order(:position).to_a
       @cash_flow_status_collection = @statuses.map { |s| [s.name, s.id.to_s] }
-      respond_to do |format|
-        format.html
-        format.csv { send_data FotonCashFlow::Services::Exporter.new(@query, Setting.plugin_foton_cash_flow['default_currency']).export_csv, filename: "fluxo_de_caixa_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv" }
-      end
+      # A exportação CSV é tratada pela ação #export para maior clareza.
     end
 
     def new
@@ -103,7 +100,7 @@ module FotonCashFlow
       if @issue.save
         Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Entrada de fluxo de caixa criada com sucesso: Issue ID #{@issue.id}."
         flash[:notice] = l(:notice_successful_create)
-        redirect_to cash_flow_entries_path(project_id: @project)
+        redirect_to project_cash_flow_entries_path(@project)
       else
         Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro ao criar entrada de fluxo de caixa: #{@issue.errors.full_messages.join(', ')}"
         render :new, status: :unprocessable_entity
@@ -120,7 +117,7 @@ module FotonCashFlow
       if @issue.update(issue_params)
         Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Entrada de fluxo de caixa atualizada com sucesso: Issue ID #{@issue.id}."
         flash[:notice] = l(:notice_successful_update)
-        redirect_to cash_flow_entries_path(project_id: @project)
+        redirect_to project_cash_flow_entries_path(@project)
       else
         Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro ao atualizar entrada de fluxo de caixa: #{@issue.errors.full_messages.join(', ')}"
         render :edit, status: :unprocessable_entity
@@ -136,33 +133,146 @@ module FotonCashFlow
         Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro ao deletar entrada de fluxo de caixa: #{@issue.errors.full_messages.join(', ')}"
         flash[:error] = l(:error_unable_to_delete)
       end
-      redirect_to cash_flow_entries_path(project_id: @project)
+      redirect_to project_cash_flow_entries_path(@project)
     end
 
     def import_form
-      Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando CashFlow::EntriesController#import_form."
-      # Mostra o formulário de importação
+      # Esta action pode até ficar vazia,
+      # pois o before_action :find_project já vai definir @project
+      # para a view ser renderizada corretamente.
+      logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando CashFlow::EntriesController#import_form."
     end
 
+    # Lógica substituída pelas duas abaixo, conferir se não perdeu informações.
     def import
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando CashFlow::EntriesController#import."
       if params[:csv_file].present?
         begin
-          importer_service = FotonCashFlow::Services::Importer.new(params[:csv_file].path, @project)
-          imported_count = importer_service.import
-          Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] #{imported_count} entradas importadas com sucesso."
-          flash[:notice] = l(:notice_cash_flow_imported_successfully, count: imported_count)
-          redirect_to cash_flow_entries_path(project_id: @project)
+          # **MELHORIA**: Passa o conteúdo e o nome do arquivo separadamente.
+          importer_service = FotonCashFlow::Services::Importer.new(
+            params[:csv_file].read, 
+            User.current, 
+            @project, 
+            original_filename: params[:csv_file].original_filename)
+          
+          # Supondo que `importer_service.call` agora retorna `true` ou `false` e que o serviço
+          # armazena os erros e as novas categorias criadas em atributos acessíveis.
+          if importer_service.call
+            notice_messages = []
+            
+            # 1. Mensagem de sucesso da importação
+            notice_messages << l(:notice_cash_flow_imported_successfully, count: importer_service.imported_count)
+            
+            # 2. Verifica se novas categorias foram criadas e adiciona à mensagem de aviso
+            if importer_service.newly_created_categories.present?
+              new_categories = importer_service.newly_created_categories.join(', ')
+              notice_messages << l(:notice_new_categories_created, categories: new_categories)
+              Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Novas categorias criadas automaticamente: #{new_categories}"
+            end
+
+            flash[:notice] = notice_messages.join(' ')
+            redirect_to project_cash_flow_entries_path(@project)
+          else
+            Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro na importação do fluxo de caixa: #{importer_service.errors.join(', ')}"
+            flash.now[:error] = l(:error_cash_flow_import_failed, error: importer_service.errors.join(', '))
+            render :import_form, status: :unprocessable_entity
+          end
         rescue StandardError => e
           Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Erro na importação do fluxo de caixa: #{e.message}"
-          flash[:error] = l(:error_cash_flow_import_failed, error: e.message)
+          flash.now[:error] = l(:error_cash_flow_import_failed, error: e.message)
           render :import_form, status: :unprocessable_entity
         end
       else
         Rails.logger.warn "[FOTON_CASH_FLOW][EntriesController] Nenhuma arquivo CSV fornecido para importação."
-        flash[:error] = l(:error_no_csv_file_provided)
-        render :import_form, status: :unprocessable_perhaps
+        flash.now[:error] = l(:error_no_csv_file_provided)
+        render :import_form, status: :unprocessable_entity
       end
+    end
+
+    # ETAPA 1: Recebe o arquivo, faz a pré-análise e retorna os conflitos como JSON.
+    def import_preview
+      Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Iniciando pré-análise de importação."
+      unless params[:csv_file].present?
+        return render json: { error: l(:error_no_csv_file_provided) }, status: :bad_request
+      end
+
+      # Usamos um service object para a lógica de negócio
+      preview_service = FotonCashFlow::Services::PreviewImporter.new(params[:csv_file].path, @project)
+      preview_service.call
+
+      if preview_service.conflicts.empty?
+        # Sem conflitos, podemos importar diretamente
+        importer_service = FotonCashFlow::Services::Importer.new(
+          params[:csv_file].read, 
+          User.current, 
+          @project,
+          original_filename: params[:csv_file].original_filename
+        )
+        importer_service.call # Executa a importação
+        flash[:notice] = l(:notice_cash_flow_imported_successfully, count: importer_service.imported_count)
+        render json: { redirect_url: project_cash_flow_entries_path(@project) }
+      else
+        # Há conflitos. Armazena o arquivo temporariamente e envia os conflitos para o frontend.
+        temp_file_key = "import_cache_#{SecureRandom.hex(16)}"
+        # **MELHORIA**: Armazena o conteúdo do arquivo e os conflitos no cache.
+        cached_data = {
+          file_content: File.read(params[:csv_file].path),
+          original_filename: params[:csv_file].original_filename,
+          conflicts: preview_service.conflicts
+        }
+        Rails.cache.write(temp_file_key, cached_data, expires_in: 30.minutes)
+
+        render json: {
+          conflicts: preview_service.conflicts,
+          data_key: temp_file_key 
+        }, status: :ok
+      end
+    rescue => e
+      Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][Preview] Erro: #{e.message}"
+      render json: { error: l(:error_cash_flow_import_failed, error: e.message) }, status: :internal_server_error
+    end
+
+    # ETAPA 2: Recebe as resoluções do modal e finaliza a importação.
+    def import_finalize
+      Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] Finalizando importação com resoluções."
+      data_key = params[:data_key]
+      
+      # **CORREÇÃO:** Pega o hash de resoluções diretamente.
+      # O método `permit!` é usado aqui por simplicidade, pois já confiamos nos dados
+      # que nosso próprio frontend montou. Em um cenário de API pública, seria necessário
+      # uma permissão mais granular.
+      user_resolutions = params.require(:resolutions).permit! if params[:resolutions]
+      
+      cached_data = Rails.cache.read(data_key)
+      unless cached_data
+        return render json: { error: l(:error_import_session_expired) }, status: :bad_request
+      end
+
+      # **CORREÇÃO:** Remove a lógica de transformação complexa e desnecessária.
+      # O objeto `user_resolutions` já está no formato correto que o Importer espera:
+      # { "category" => { "Valor Inválido" => "Valor Escolhido" } }
+      
+      importer_service = FotonCashFlow::Services::Importer.new(
+        cached_data[:file_content], 
+        User.current, 
+        @project, 
+        resolutions: user_resolutions || {}, # <-- Passa as resoluções diretamente
+        original_filename: cached_data[:original_filename]
+      )
+      
+      if importer_service.call
+        notice_messages = [l(:notice_cash_flow_imported_successfully, count: importer_service.imported_count)]
+        if importer_service.newly_created_categories.present?
+          notice_messages << l(:notice_new_categories_created, categories: importer_service.newly_created_categories.join(', '))
+        end
+        flash[:notice] = notice_messages.join(' ')
+        render json: { redirect_url: project_cash_flow_entries_path(@project) }
+      else
+        render json: { error: l(:error_cash_flow_import_failed, error: importer_service.errors.join(', ')) }, status: :unprocessable_entity
+      end
+    ensure
+      # Limpa o arquivo do cache após a tentativa
+      Rails.cache.delete(data_key) if data_key.present?
     end
 
     def export
@@ -193,7 +303,7 @@ module FotonCashFlow
         # ou se o projeto financeiro interno não estiver definido e 'only_finance_project' for 1
         if Setting.plugin_foton_cash_flow['only_finance_project'].to_s == '1' && FotonCashFlow::SettingsHelper.internal_finance_project_id.blank?
           Rails.logger.warn "[FOTON_CASH_FLOW][EntriesController] [find_project] Redirecionando: Projeto não encontrado ou financeiro interno não configurado."
-          return redirect_to cash_flow_settings_path, alert: l(:warning_internal_finance_project_not_set_and_needed)
+          return redirect_to foton_cash_flow_settings_path, alert: l(:warning_internal_finance_project_not_set_and_needed)
         end
       end
       Rails.logger.info "[FOTON_CASH_FLOW][EntriesController] [find_project] Finalizado. @project é #{@project&.name} (ID: #{@project&.id})"
@@ -241,7 +351,7 @@ module FotonCashFlow
     rescue ActiveRecord::RecordNotFound
       Rails.logger.error "[FOTON_CASH_FLOW][EntriesController] Issue com ID '#{params[:id]}' não encontrada para o projeto '#{@project&.name}'."
       flash[:error] = l(:error_record_not_found, msg: "Lançamento de fluxo de caixa não encontrado.")
-      redirect_to cash_flow_entries_path(project_id: @project)
+      redirect_to project_cash_flow_entries_path(@project)
     end
 
     def set_new_cash_flow_entry
@@ -297,9 +407,9 @@ module FotonCashFlow
           Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Redirecionando para página do projeto."
           project_path(@project) 
         else
-          # Tenta ir para o index geral se não houver projeto
-          Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Redirecionando para página do Fluxo de Caixa."
-          cash_flow_entries_path
+          # Se não houver projeto, redireciona para a página inicial como um fallback seguro.
+          Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Redirecionando para a página inicial (sem projeto definido)."
+          home_path
         end
       rescue => e
         Rails.logger.error "[FOTON_CASH_FLOW][EntriesController][default_rescue_path] Erro inesperado no default_rescue_path: #{e.message}"

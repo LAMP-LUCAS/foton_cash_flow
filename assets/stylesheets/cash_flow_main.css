@@ -654,6 +654,31 @@
   gap: 12px;
 }
 
+/* --- Estilos para o Modal de Conciliação de Importação --- */
+.cf-modal-body .conflict-group {
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  background-color: var(--background-light);
+}
+.cf-modal-body .conflict-group h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+.cf-modal-body .conflict-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+.cf-modal-body .conflict-item .value {
+  font-family: monospace;
+  background-color: #e9ecef; /* Um cinza um pouco mais escuro que o fundo */
+  padding: 2px 5px;
+  border-radius: 3px;
+}
 /* ==========================================================================
    7. GRÁFICOS
    ========================================================================== */

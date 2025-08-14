@@ -221,6 +221,7 @@ module FotonCashFlow
       Rails.logger.info "[DIAGNOSTICS] Status Geral das Dependências: #{results[:all_dependencies_met] ? 'MET' : 'NOT MET'}."
       results
     end
+    
     # Método para tentar criar/re-sincronizar as dependências
     def sync_dependencies_now
       begin

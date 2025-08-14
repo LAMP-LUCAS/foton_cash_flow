@@ -47,14 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: data.labels,
         datasets: [
           {
-            label: 'Receita',
+            label: I18n.t('foton_cash_flow.dashboard.revenue'),
             data: data.revenue,
             backgroundColor: 'rgba(40, 167, 69, 0.7)',
             borderColor: 'rgba(40, 167, 69, 1)',
             borderWidth: 1,
           },
           {
-            label: 'Despesa',
+            label: I18n.t('foton_cash_flow.dashboard.expense'),
             data: data.expense,
             backgroundColor: 'rgba(220, 53, 69, 0.7)',
             borderColor: 'rgba(220, 53, 69, 1)',
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: data.labels,
         datasets: [{
-          label: 'Despesas por Categoria',
+          label: I18n.t('foton_cash_flow.dashboard.charts.expense_by_category.title'),
           data: data.data,
           // Cores podem ser adicionadas aqui se necessário
         }],
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: data.labels,
         datasets: [{
-          label: 'Saldo Acumulado',
+          label: I18n.t('foton_cash_flow.dashboard.charts.cumulative_balance.title'),
           data: data.data,
           fill: true,
           backgroundColor: 'rgba(63, 81, 181, 0.2)',
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: data.labels,
         datasets: [
           {
-            label: 'Receita Acumulada',
+            label: I18n.t('foton_cash_flow.dashboard.charts.cumulative_flow.revenue_label'),
             data: data.revenue,
             borderColor: 'rgba(40, 167, 69, 1)',
             backgroundColor: 'rgba(40, 167, 69, 0.1)',
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tension: 0.1,
           },
           {
-            label: 'Despesa Acumulada',
+            label: I18n.t('foton_cash_flow.dashboard.charts.cumulative_flow.expense_label'),
             data: data.expense,
             borderColor: 'rgba(220, 53, 69, 1)',
             backgroundColor: 'rgba(220, 53, 69, 0.1)',

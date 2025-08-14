@@ -2,6 +2,7 @@
 
 module FotonCashFlow
   module EntriesHelper
+    include ApplicationHelper # Inclui os helpers padrão do Redmine
     include Redmine::Pagination::Helper
     include Redmine::I18n
 
@@ -25,8 +26,8 @@ module FotonCashFlow
       return ''.html_safe if tipo.blank?
 
       label = case tipo
-              when 'revenue' then l(:label_revenue)
-              when 'expense' then l(:label_expense)
+              when 'revenue' then l('foton_cash_flow.cf_options.revenue')
+              when 'expense' then l('foton_cash_flow.cf_options.expense')
               else tipo
               end
 
@@ -42,10 +43,10 @@ module FotonCashFlow
       # Garante que o valor é um BigDecimal ou um número antes de formatar
       parsed_amount = amount.is_a?(BigDecimal) ? amount : BigDecimal(amount.to_s) rescue BigDecimal('0.0')
 
-      css_class = amount_css_class(nil, parsed_amount)
+      css_class = amount_css_class(parsed_amount)
 
       # Usamos a localização do Redmine para garantir a formatação correta
-      formatted_amount = l_currency(parsed_amount)
+      formatted_amount = format_currency(parsed_amount)
       Rails.logger.debug "[FOTON_CASH_FLOW][EntriesHelper] Valor formatado: #{formatted_amount}, classe CSS: #{css_class}, amount: #{parsed_amount.to_s}"
 
       content_tag :span, formatted_amount, class: css_class
@@ -73,73 +74,14 @@ module FotonCashFlow
       end
     end
 
-    # Método centralizado para formatação de moeda
-    def l_currency(amount)
-      ActionController::Base.helpers.number_to_currency(
-        amount,
-        unit: 'R$',
-        separator: ',',
-        delimiter: '.',
-        precision: 2,
-        locale: :pt
-      )
-    end
-    
-    # =====================================================
-    #  RECORRÊNCIA DE LANÇAMENTOS
-    # =====================================================
-    
-    # Helper method to get custom field ID by name
-    def custom_field_id_by_name(name)
-      @@class_cf_cache[name] ||= CustomField.find_by(name: name)&.id
-    end
-
-    def recurrence_label(issue)
-      return ''.html_safe unless issue.present?
-
-      cf_recurrence_id = custom_field_id_by_name('Recorrência')
-      return ''.html_safe unless cf_recurrence_id.present?
-
-      val = issue.custom_field_value(cf_recurrence_id)
-      return ''.html_safe if val.blank?
-
-      label = case val
-              when 'mensal' then l(:label_monthly)
-              when 'anual' then l(:label_yearly)
-              when 'semanal' then l(:label_weekly)
-              else val
-              end
-
-      content_tag(:span, label,
-                  class: 'badge bg-warning text-dark',
-                  title: l(:label_recurrent_entry))
-    end
-
-    # =====================================================
-    #  FILTRO DE DEMANDA
-    # =====================================================
-    def issue_filter_options(selected_issues = [])
-      tracker = Tracker.find_by(name: 'Financeiro')
-      return ''.html_safe unless tracker.present?
-
-      issues = Issue.where(tracker_id: tracker.id).order(:subject)
-
-      options = issues.map do |issue|
-        content_tag(:div, class: 'issue-select-item') do
-          check_box_tag('query[issue_ids][]', issue.id, selected_issues.include?(issue.id.to_s),
-                        id: "issue_#{issue.id}") +
-          label_tag("issue_#{issue.id}", "##{issue.id}: #{issue.subject}")
-        end
-      end
-
-      safe_join(options)
-    end
-
     # =====================================================
     #  COLEÇÕES PARA FORMULÁRIOS
     # =====================================================
     def transaction_type_collection
-      [[l(:label_revenue), 'revenue'], [l(:label_expense), 'expense']]
+      [
+        [l('foton_cash_flow.cf_options.revenue'), 'revenue'],
+        [l('foton_cash_flow.cf_options.expense'), 'expense']
+      ]
     end
 
     def project_collection_for_select(projects)
@@ -153,15 +95,8 @@ module FotonCashFlow
     # =====================================================
     private
 
-    # Extrai o valor monetário de diferentes tipos de entrada
-    def extract_amount(value)
-      value.is_a?(BigDecimal) ? value : BigDecimal(value.to_s.gsub('.', '').gsub(',', '.').to_s)
-    rescue
-      BigDecimal('0.0')
-    end
-
     # Determina a classe CSS com base no valor
-    def amount_css_class(original_value, amount)
+    def amount_css_class(amount)
       if amount.positive?
         'text-success'
       elsif amount.negative?
@@ -171,7 +106,7 @@ module FotonCashFlow
       end
     end
 
-    # Formata o valor monetário
+    # Formata o valor monetário usando as configurações do plugin
     def format_currency(amount, options = {})
       default_options = {
         unit: (Setting.plugin_foton_cash_flow['default_currency'] || 'R$ '),
@@ -180,11 +115,44 @@ module FotonCashFlow
         precision: 2
       }
       options = default_options.merge(options)
+      # Usa o helper number_to_currency que está disponível via ApplicationHelper,
+      # que já está incluído neste helper.
       number_to_currency(amount, options)
     end
 
+    # Helper method to get custom field ID by name
     def custom_field_id_by_name(name)
-      @@class_cf_cache[name] ||= CustomField.find_by_name(name)&.id
+      @@class_cf_cache[name] ||= CustomField.find_by(name: name)&.id
     end
+
+    # =====================================================
+    #  HELPERS DE RECURSOS INCOMPLETOS (COMENTADOS)
+    # =====================================================
+
+    # O helper de recorrência foi comentado pois a funcionalidade
+    # não está completamente implementada no plugin (falta CF e lógica).
+    # def recurrence_label(issue)
+    #   return ''.html_safe unless issue.present?
+    #
+    #   cf_recurrence_id = custom_field_id_by_name('Recorrência')
+    #   return ''.html_safe unless cf_recurrence_id.present?
+    #
+    #   val = issue.custom_field_value(cf_recurrence_id)
+    #   return ''.html_safe if val.blank?
+    #
+    #   label = l("foton_cash_flow.db.cf_recurrence_#{val}", default: val.humanize)
+    #
+    #   content_tag(:span, label,
+    #               class: 'badge bg-warning text-dark',
+    #               title: l('foton_cash_flow.fields.recurrence'))
+    # end
+
+    # O helper de filtro por issue foi comentado pois não está sendo
+    # utilizado na view principal atualmente.
+    # def issue_filter_options(selected_issues = [])
+    #   tracker = Tracker.find_by(name: FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME)
+    #   return '' unless tracker.present?
+    #   # ... lógica restante
+    # end
   end
 end

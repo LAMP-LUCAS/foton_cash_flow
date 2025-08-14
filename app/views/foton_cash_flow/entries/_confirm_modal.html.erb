@@ -5,15 +5,15 @@
 <div class="cf-modal-overlay" id="confirm-delete-modal">
   <div class="cf-modal-content">
     <div class="cf-modal-header">
-      <h5>Confirmar Exclusão</h5>
+      <h5><%= l('foton_cash_flow.modals.confirm_delete.title') %></h5>
       <button class="cf-modal-close-btn" data-dismiss="modal">&times;</button>
     </div>
     <div class="cf-modal-body">
-      <p>Você tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.</p>
+      <p><%= l('foton_cash_flow.modals.confirm_delete.body') %></p>
     </div>
     <div class="cf-modal-footer">
-      <button class="cf-btn cf-btn-secondary" data-dismiss="modal">Cancelar</button>
-      <a href="#" class="cf-btn cf-btn-danger" id="confirm-delete-btn" data-method="delete" rel="nofollow">Excluir</a>
+      <button class="cf-btn cf-btn-secondary" data-dismiss="modal"><%= l('foton_cash_flow.general.cancel') %></button>
+      <a href="#" class="cf-btn cf-btn-danger" id="confirm-delete-btn" data-method="delete" rel="nofollow"><%= l('foton_cash_flow.general.delete') %></a>
     </div>
   </div>
 </div>

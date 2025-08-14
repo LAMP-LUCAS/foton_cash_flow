@@ -35,6 +35,13 @@ Redmine::Plugin.register :foton_cash_flow do |config|
     # Carrega a biblioteca principal do plugin e o patch dentro do to_prepare
     # para garantir a ordem de carregamento correta em todos os ambientes.
     require_relative 'lib/foton_cash_flow'
+
+    # Inclui o helper de assets do Redmine no controller do plugin.
+    # Isso é feito aqui para garantir que Redmine::PluginAssets::Helper já exista
+    # quando o FotonCashFlow::EntriesController for carregado.
+    FotonCashFlow::EntriesController.send(:helper, Redmine::PluginAssets::Helper)
+
+
     # Carrega o arquivo do patch aqui, garantindo que ele esteja disponível para inclusão.
     require_relative 'lib/foton_cash_flow/patches/issue_patch'
 

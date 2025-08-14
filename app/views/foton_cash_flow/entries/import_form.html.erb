@@ -1,33 +1,53 @@
+<%
+  i18n_strings = {
+    conflict_title: l('foton_cash_flow.reconciliation.conflict_title'),
+    line_label: l('foton_cash_flow.reconciliation.line_label'),
+    create_new_option: l('foton_cash_flow.reconciliation.create_new_option'),
+    action_needed: l('foton_cash_flow.reconciliation.action_needed'),
+    arrow: l('foton_cash_flow.reconciliation.arrow'),
+    unexpected_response: l('foton_cash_flow.reconciliation.unexpected_response'),
+    communication_error: l('foton_cash_flow.reconciliation.communication_error'),
+    finalization_error: l('foton_cash_flow.reconciliation.finalization_error')
+  }.to_json
+%>
 
-<div class="cf-form-container">
-  <h2 class="cf-form-title"><%= l(:label_cash_flow_import) %></h2>
+<div class="cf-form-container" data-i18n="<%= h(i18n_strings) %>">
+  <h2 class="cf-form-title"><%= l('foton_cash_flow.import.title') %></h2>
   <div class="cf-box">
     <p>
-      <%= l(:text_import_instructions) %>
-      <%= link_to l(:label_download_template), "/plugin_assets/redmine_cash_flow_pro/import_template.csv", class: 'cf-btn cf-btn-outline' %>
+      <%= l('foton_cash_flow.import.instructions') %>
+      <%= link_to l('foton_cash_flow.import.download_template'), foton_cash_flow_download_template_path, class: 'cf-btn cf-btn-outline' %>
     </p>
     <ul class="cf-import-tips">
-      <li><%= l(:text_import_tip_date) %></li>
-      <li><%= l(:text_import_tip_amount) %></li>
-      <li><%= l(:text_import_tip_types) %></li>
-      <li><%= l(:text_import_tip_encoding) %></li>
+      <li><%= l('foton_cash_flow.import.tip_date') %></li>
+      <li><%= l('foton_cash_flow.import.tip_amount') %></li>
+      <li><%= l('foton_cash_flow.import.tip_types') %></li>
+      <li><%= l('foton_cash_flow.import.tip_encoding') %></li>
     </ul>
-    <%= form_tag import_cash_flow_entries_path, multipart: true, class: 'cf-form' do %>
+
+    <%# **CORREÇÃO:** Adiciona `format: :json` para garantir que o Rails trate a requisição como JSON. %>
+    <%= form_tag import_preview_project_cash_flow_entries_path(@project, format: :json),
+                 multipart: true, 
+                 class: 'cf-form', 
+                 id: 'import-form',
+                 data: { no_file_error: j(l(:error_no_csv_file_provided)) } do %>
       <div class="cf-file-upload">
-        <%= label_tag :csv_file, l(:label_select_csv_file), class: 'cf-btn' %>
-        <%= file_field_tag :csv_file, accept: '.csv', class: 'cf-input', id: 'csv_file' %>
-        <span id="file-name"><%= l(:text_no_file_selected) %></span>
+        <%= label_tag :csv_file, l('foton_cash_flow.import.select_csv_file'), class: 'cf-btn' %>
+        <%= file_field_tag :csv_file, accept: '.csv', class: 'cf-input', id: 'csv_file', required: true %>
+        <span id="file-name" data-no-file-selected="<%= j l('foton_cash_flow.import.no_file_selected') %>"><%= l('foton_cash_flow.import.no_file_selected') %></span>
       </div>
       <div class="cf-actions">
-        <%= submit_tag l(:button_import), class: 'cf-btn cf-btn-primary' %>
-        <%= link_to l(:button_back), cash_flow_entries_path, class: 'cf-btn cf-btn-secondary' %>
+        <%# MUDANÇA: Usamos um botão do tipo 'button' para evitar o 'submit' padrão e ter controle total via JS. %>
+        <%= button_tag l('foton_cash_flow.general.import'), type: 'button', class: 'cf-btn cf-btn-primary', id: 'import-submit-btn' %>
+        <%= link_to l('foton_cash_flow.general.back'), project_cash_flow_entries_path(@project), class: 'cf-btn cf-btn-secondary' %>
       </div>
     <% end %>
   </div>
 </div>
-<script>
-  document.getElementById('csv_file').addEventListener('change', function(e) {
-    const fileName = e.target.files[0] ? e.target.files[0].name : '<%= l(:text_no_file_selected) %>';
-    document.getElementById('file-name').textContent = fileName;
-  });
-</script>
+
+<%# Renderiza o modal (inicialmente oculto). Adicionamos a URL de finalização como um data-attribute no botão. %>
+<%= render 'reconciliation_modal', finalize_url: import_finalize_project_cash_flow_entries_path(@project) %>
+
+<% content_for :header_tags do %>
+  <%= render 'foton_cash_flow/shared/cash_flow_import_assets' %>
+<% end %>

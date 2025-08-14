@@ -100,7 +100,7 @@
           <td class="entry-date-column"><%= format_date(issue.cash_flow_entry_date) %></td>
           <td class="actions-column">
               <%= link_to l('foton_cash_flow.general.edit'), edit_issue_path(issue), class: 'icon icon-edit' %>
-              <%= link_to l('foton_cash_flow.general.delete'), issue_path(issue), data: { confirm: l(:text_are_you_sure), method: :delete }, class: 'icon icon-del' %>
+              <%= link_to l('foton_cash_flow.general.delete'), issue_path(issue), data: { confirm: l('foton_cash_flow.general.are_you_sure'), method: :delete }, class: 'icon icon-del' %>
           </td>
 
         </tr>

@@ -4,17 +4,17 @@
 %>
 <div class="cf-dropdown">
   <button class="cf-btn cf-btn-secondary cf-dropdown-toggle" id="actions-menu-btn">
-    Ações <i class="icon icon-arrow-down"></i>
+    <%= l('foton_cash_flow.general.actions') %> <i class="icon icon-arrow-down"></i>
   </button>
   <div class="cf-dropdown-menu" id="actions-dropdown-menu">
     <a href="#" class="cf-dropdown-item" data-toggle="modal" data-target="#syncModal">
-      <i class="icon icon-reload"></i> Sincronizar
+      <i class="icon icon-reload"></i> <%= l('foton_cash_flow.general.sync') %>
     </a>
-    <a href="#" class="cf-dropdown-item">
-      <i class="icon icon-upload"></i> Importar (CSV)
+    <a href="<%= import_form_project_cash_flow_entries_path(@project) %>" class="cf-dropdown-item">
+      <i class="icon icon-upload"></i> <%= l('foton_cash_flow.general.import_csv') %>
     </a>
-    <a href="#" class="cf-dropdown-item">
-      <i class="icon icon-download"></i> Exportar (CSV)
+    <a href="<%= export_project_cash_flow_entries_path(@project, format: :csv, **(@filter_params || {})) %>" class="cf-dropdown-item">
+      <i class="icon icon-download"></i> <%= l('foton_cash_flow.general.export_csv') %>
     </a>
   </div>
 </div>

@@ -26,6 +26,15 @@ class ChartManager {
     console.log('[ChartManager] Maximize/minimize functionality initialized.');
   }
 
+  /**
+   * Wrapper seguro para o I18n do Redmine.
+   * @param {string} key - A chave de tradução.
+   * @param {object} options - Opções para a tradução.
+   */
+  t(key, options = {}) {
+    return (typeof I18n !== 'undefined' && I18n.t) ? I18n.t(key, options) : (options.defaultValue || key);
+  }
+
   // ==========================================================================
   // 1. FUNCIONALIDADE DE MAXIMIZAR/MINIMIZAR
   // ==========================================================================
@@ -48,12 +57,12 @@ class ChartManager {
       // 2. Cria o botão de maximizar.
       const maximizeBtn = document.createElement('button');
       maximizeBtn.className = 'cf-chart-maximize-btn icon icon-maximize';
-      maximizeBtn.setAttribute('aria-label', 'Maximizar gráfico');
+      maximizeBtn.setAttribute('aria-label', this.t('foton_cash_flow.charts.maximize', { defaultValue: 'Maximize chart' }));
 
       // 3. Cria o botão de fechar.
       const closeBtn = document.createElement('button');
       closeBtn.className = 'cf-chart-close-btn icon icon-close';
-      closeBtn.setAttribute('aria-label', 'Fechar gráfico');
+      closeBtn.setAttribute('aria-label', this.t('foton_cash_flow.charts.close', { defaultValue: 'Close chart' }));
 
       // 4. Adiciona os botões ao contêiner e o contêiner ao card.
       actionsContainer.appendChild(maximizeBtn);
