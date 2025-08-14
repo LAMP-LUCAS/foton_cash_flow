@@ -4,9 +4,16 @@
   Este formulário renderiza um único botão que, quando clicado, envia uma requisição POST
   para a ação de sincronização, mantendo a semântica HTML correta.
 %>
-<%= form_tag(run_sync_foton_cash_flow_diagnostics_path, method: :post, class: 'sync-form-button') do %>
+<%# CORREÇÃO: As classes de estilo do botão foram movidas do form_tag para o button_tag,
+   onde elas são aplicadas corretamente. O form não deve ter classes de botão. %>
+<%# MODIFICADO: A classe do botão agora é dinâmica. Ele usa a variável local 'button_class'
+   ou assume 'cf-btn-primary' como padrão se a variável não for fornecida. %>
+<% button_style_class = local_assigns.fetch(:button_class, 'cf-btn-primary') %>
+<%= form_tag(run_sync_foton_cash_flow_diagnostics_path, method: :post) do %>
   <%= hidden_field_tag 'redirect_to_entries', 'true' %>
   <%= hidden_field_tag 'project_id', @project.identifier %>
-  <%= button_tag(type: 'submit', class: 'cf-btn icon icon-reload') { l('foton_cash_flow.diagnostics.check_and_sync_button') } %>
+  <%= button_tag(type: 'submit', class: "cf-btn #{button_style_class}") do %>
+    <%= l('foton_cash_flow.diagnostics.check_and_sync_button') %>
+  <% end %>
 <% end %>
 <%# Fim do arquivo _sync_btn.html.erb %>

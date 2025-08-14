@@ -52,6 +52,7 @@ pt-BR:
       subject: "Assunto"
       status: "Status"
       priority: "Prioridade"
+      notes: "Observações"
 
     # --- Filtros & Popups ---
     filters:
@@ -153,22 +154,30 @@ pt-BR:
       tracker_workflow_configured: "Fluxo de Trabalho Configurado"
       details_not_configured: "Não configurado."
       dependencies_met: "Todas as dependências essenciais estão configuradas corretamente."
+      dependencies_missing_with_recommendation: "As dependências do Fluxo de Caixa (tracker ou campos personalizados) estão ausentes ou configuradas incorretamente. Recomenda-se executar a sincronização para garantir que todas as dependências estejam configuradas corretamente."
       cf_name: "Nome do Campo"
       status: "Status"
       details: "Detalhes"
-      found: "Encontrado"
-      missing: "Faltando"
-      ok: "OK"
-      needs_attention: "Requer Atenção"
+      # Textos de Status
+      status_ok: "OK"
+      status_warning: "Requer Atenção"
+      status_error: "Ausente"
+      status_unknown: "Desconhecido"
+      # Mensagens de Detalhe
+      found_with_id: "Encontrado. (ID: %{id})"
+      found_and_associated: "Encontrado e associado corretamente. (ID: %{id})"
+      missing_dependency: "Ausente."
       details_ok: "A configuração está correta."
-      details_missing: "O campo personalizado está faltando."
-      details_tracker_not_associated: "Não associado ao tracker '%{tracker}'."
+      details_tracker_not_associated: "Encontrado, mas não está associado ao projeto '%{tracker}'."
+      workflow_ok: "Workflow configurado corretamente para todos os papéis."
+      workflow_needs_attention: "Workflow não está configurado para todos os papéis de usuário."
+      cf_id_display: "(ID: %{id})"
+      details_separator: "; "
       details_wrong_format: "Formato incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_values: "Valores possíveis incorretos. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_required: "Status de obrigatoriedade incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
       missing_fields_summary: "Os seguintes campos personalizados estão faltando: %{fields}."
       incorrect_config_summary: "Os seguintes campos personalizados têm configurações incorretas: %{fields}."
-      sync_recommendation: "Recomenda-se executar a sincronização para garantir que todas as dependências estejam configuradas corretamente."
 
     # --- Página de Importação ---
     import:
@@ -274,6 +283,39 @@ pt-BR:
       cf_recurrence_no: "Não"
       cf_recurrence_monthly: "Mensal"
       cf_recurrence_yearly: "Anual"
+
+    # --- Página de Configurações ---
+    settings:
+      title: "Configurações do Fluxo de Caixa"
+      description: "Configure o comportamento geral do plugin de Fluxo de Caixa."
+      save_button: "Salvar Configurações"
+      # Cards
+      display_options:
+        title: "Opções de Exibição"
+        icon: "icon-visible"
+        default_columns: "Colunas padrão na tabela de lançamentos"
+        default_columns_info: "Selecione as colunas que serão visíveis por padrão na tabela principal."
+        show_in_top_menu: "Mostrar no menu superior"
+        show_in_top_menu_info: "Se marcado, um link para o plugin será adicionado ao menu superior do Redmine."
+        currency: "Moeda Padrão"
+        currency_info: "Selecione a moeda padrão para a exibição de valores monetários."
+      data_scope:
+        title: "Escopo dos Dados"
+        icon: "icon-projects"
+        custom_projects: "Projetos Específicos"
+        custom_projects_info: "Se selecionado, o plugin estará disponível apenas nestes projetos. Deixe em branco para estar disponível em todos os projetos."
+        permanent_users: "Usuários Permanentes"
+        permanent_users_info: "Usuários que sempre terão acesso, independentemente das permissões do projeto. (Use com cautela)"
+      categories:
+        title: "Categorias de Transação"
+        icon: "icon-tag"
+        categories_info: "Gerencie as categorias disponíveis para os lançamentos financeiros. Categorias vazias serão removidas ao salvar."
+        add_category: "Adicionar Categoria"
+      maintenance:
+        title: "Manutenção e Diagnóstico"
+        icon: "icon-wrench"
+        diagnostics_link: "Executar Diagnóstico"
+        diagnostics_info: "Verifica se todas as dependências do plugin (rastreador, campos personalizados) estão configuradas corretamente."
 
   # Labels para campos personalizados (usado no _form.html.erb) - Nível raiz para compatibilidade
   field_data_do_lancamento: "Data do Lançamento"

@@ -1,23 +1,28 @@
 <%# plugins/foton_cash_flow/app/views/foton_cash_flow/entries/_sync_modal.html.erb %>
 
-<div class="modal fade" id="syncModal" tabindex="-1" role="dialog" aria-labelledby="syncModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="syncModalLabel"><%= l('foton_cash_flow.diagnostics.check_and_sync_title') %></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p><%= l('foton_cash_flow.notices.sync_explanation') %></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= l('foton_cash_flow.general.cancel') %></button>
-        <%= render partial: 'foton_cash_flow/entries/sync_btn' %>
-      </div>
+<%#
+  MODIFICADO: A estrutura foi alterada para usar as classes CSS do plugin (`cf-*`),
+  garantindo que o modal flutue sobre a página com um fundo escurecido.
+  A classe 'show' é adicionada para que o modal seja visível por padrão,
+  conforme a lógica em `index.html.erb`.
+%>
+<div class="cf-modal-overlay show" id="syncModal">
+  <div class="cf-modal-content">
+    <div class="cf-modal-header">
+      <%# MODIFICADO: Adicionado ícone de aviso para dar ênfase à necessidade de ação. %>
+      <h5><span class="icon icon-warning"></span><%= l('foton_cash_flow.diagnostics.check_and_sync_title') %></h5>
+    </div>
+    <div class="cf-modal-body">
+      <%# O texto foi mantido, mas a apresentação será melhorada via CSS. %>
+      <p><%= l('foton_cash_flow.notices.sync_explanation') %></p>
+    </div>
+    <div class="cf-modal-footer">
+      <%# MODIFICADO: Usa a nova classe 'cf-btn-warning' para alinhar com o tema do modal e garantir alto contraste. %>
+      <%= render partial: 'foton_cash_flow/entries/sync_btn', locals: { button_class: 'cf-btn-warning' } %>
     </div>
   </div>
 </div>
+
+<%# Fim do arquivo _sync_modal.html.erb %>
 
 <%# Fim do arquivo _sync_modal.html.erb %>

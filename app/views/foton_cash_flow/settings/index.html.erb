@@ -1,7 +1,18 @@
-<h2><%= l(:label_cash_flow_settings) %></h2>
-
-<%= form_for :settings, url: cash_flow_settings_path, method: :post do |f| %>
-  <%= render partial: 'settings/cash_flow_settings', locals: { f: f } %>
-
-  <%= submit_tag l(:button_save) %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag "cash_flow_main", plugin: 'foton_cash_flow' %>
+  <%= javascript_include_tag "cash_flow_settings", plugin: 'foton_cash_flow' %>
 <% end %>
+
+<div class="cf-settings-page">
+  <div class="cf-header">
+    <h2 class="icon icon-settings"><%= l('foton_cash_flow.settings.title') %></h2>
+  </div>
+
+  <p><%= l('foton_cash_flow.settings.description') %></p>
+
+  <%= form_for :settings, url: cash_flow_settings_path, method: :post, html: { class: 'cf-settings-form' } do |f| %>
+    <%= render partial: 'cash_flow_settings', locals: { f: f } %>
+
+    <%= submit_tag l('foton_cash_flow.settings.save_button'), class: 'cf-btn cf-btn-primary' %>
+  <% end %>
+</div>

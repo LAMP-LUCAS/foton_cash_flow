@@ -1,116 +1,107 @@
-<% # ./app/views/diagnostics/index.html.erb %>
+<% # ./app/views/foton_cash_flow/diagnostics/index.html.erb%>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag "cash_flow_main", plugin: 'foton_cash_flow' %>
 <% end %>
 
-<h2 class="cf-title"><%= l('foton_cash_flow.diagnostics.title') %></h2>
+<%# O helper `diagnostic_details` agora está em app/helpers/foton_cash_flow/diagnostics_helper.rb %>
+<%# e é carregado automaticamente pelo Rails. %>
 
-<div class="contextual">
-  <%= link_to l('foton_cash_flow.diagnostics.sync_button'), {controller: 'foton_cash_flow/diagnostics', action: 'run_sync'}, method: :post, class: 'icon icon-sync' %>
-</div>
-
-<div class="cf-section">
-  <h3><%= l('foton_cash_flow.diagnostics.project_status') %></h3>
-  <p>
-    <%= l('foton_cash_flow.diagnostics.project_name') %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></strong><br/>
-    <%= l('foton_cash_flow.diagnostics.status') %>:
-    <% if @diagnostic_results[:project_present] %>
-      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.found') %></span> (ID: <%= @diagnostic_results[:project_id] %>)
-    <% else %>
-      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
-    <% end %>
-  </p>
-</div>
-
-<div class="cf-section">
-  <h3><%= l('foton_cash_flow.diagnostics.tracker_status') %></h3>
-  <p>
-    <%= l('foton_cash_flow.diagnostics.tracker_name') %>: <strong><%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></strong><br/>
-    <%= l('foton_cash_flow.diagnostics.status') %>:
-    <% if @diagnostic_results[:tracker_present] %>
-      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.found') %></span> (ID: <%= @diagnostic_results[:tracker_id] %>)
-    <% else %>
-      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
-    <% end %>
-  </p>
-  <p>
-    <%= l('foton_cash_flow.diagnostics.tracker_project_association') %>:
-    <% if @diagnostic_results[:tracker_associated_with_project] %>
-      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span>
-    <% else %>
-      <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.details_tracker_not_associated', tracker: FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME) %></span>
-    <% end %>
-  </p>
-  <p>
-    <%= l('foton_cash_flow.diagnostics.tracker_workflow_configured') %>:
-    <% if @diagnostic_results[:tracker_workflow_configured] %>
-      <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span>
-    <% else %>
-      <span class="cf-warning"><%= l('foton_cash_flow.diagnostics.details_not_configured') %></span>
-    <% end %>
-  </p>
-</div>
-
-<div class="cf-section">
-  <h3><%= l('foton_cash_flow.diagnostics.cf_status') %></h3>
-  <table class="list issues">
-    <thead>
-      <tr>
-        <th><%= l('foton_cash_flow.diagnostics.cf_name') %></th>
-        <th><%= l('foton_cash_flow.diagnostics.status') %></th>
-        <th><%= l('foton_cash_flow.diagnostics.details') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% FotonCashFlow::SettingsHelper::CUSTOM_FIELD_NAMES.each do |key, cf_name| %>
-        <% cf_status = @diagnostic_results[:custom_fields][cf_name] %>
-        <tr>
-          <td><%= cf_name %></td>
-          <td>
-            <% if cf_status[:present] && cf_status[:configured_correctly] %>
-              <span class="cf-success"><%= l('foton_cash_flow.diagnostics.ok') %></span> (ID: <%= cf_status[:id] %>)
-            <% elsif cf_status[:present] && !cf_status[:configured_correctly] %>
-              <span class="cf-warning"><%= l('foton_cash_flow.diagnostics.needs_attention') %></span> (ID: <%= cf_status[:id] %>)
-            <% else %>
-              <span class="cf-danger"><%= l('foton_cash_flow.diagnostics.missing') %></span>
-            <% end %>
-          </td>
-          <td>
-            <% if cf_status[:details].any? %>
-              <ul>
-                <% cf_status[:details].each { |detail| content_tag :li, detail } %>
-              </ul>
-            <% else %>
-              <%= l('foton_cash_flow.diagnostics.details_ok') %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-
-  <% if @diagnostic_results[:missing_custom_fields].any? %>
-    <p class="cf-danger">
-      <%= l('foton_cash_flow.diagnostics.missing_fields_summary', fields: @diagnostic_results[:missing_custom_fields].join(', ')) %>
-    </p>
-  <% end %>
-
-  <% if @diagnostic_results[:incorrectly_configured_fields].any? %>
-    <p class="cf-warning">
-      <%= l('foton_cash_flow.diagnostics.incorrect_config_summary', fields: @diagnostic_results[:incorrectly_configured_fields].join(', ')) %>
-    </p>
-  <% end %>
+<div class="cash-flow-page">
+  <div class="cf-header">
+    <h2 class="icon icon-health"><%= l('foton_cash_flow.diagnostics.title') %></h2>
+    <div class="cf-header-actions">
+      <%= link_to l('foton_cash_flow.diagnostics.sync_button'), { controller: 'foton_cash_flow/diagnostics', action: 'run_sync' }, method: :post, class: 'cf-btn cf-btn-primary icon' %>
+    </div>
+  </div>
 
   <% unless @diagnostic_results[:all_dependencies_met] %>
-    <p class="cf-danger"><%= l('foton_cash_flow.notices.dependencies_missing') %></p>
-    <p class="cf-info"><%= l('foton_cash_flow.diagnostics.sync_recommendation') %></p>
+    <div class="cf-flash error">
+      <i class="icon icon-cancel-circled"></i>
+      <div class="cf-flash-content">
+        <%= l('foton_cash_flow.diagnostics.dependencies_missing_with_recommendation') %>
+      </div>
+    </div>
   <% else %>
-    <p class="cf-success">
-      <%= l('foton_cash_flow.diagnostics.dependencies_met') %>
-    </p>
+    <div class="cf-flash notice">
+      <i class="icon icon-ok-circled"></i>
+      <div class="cf-flash-content"><%= l('foton_cash_flow.diagnostics.dependencies_met') %></div>
+    </div>
   <% end %>
 
+  <div class="cf-diagnostics-grid">
+    <%# Card para o Projeto Financeiro %>
+    <% status = @diagnostic_results[:project_present] ? :ok : :error %>
+    <% details = diagnostic_details(status) %>
+    <div class="cf-diagnostic-card status-<%= details[:class] %>">
+      <div class="diagnostic-header">
+        <div class="diagnostic-icon"><i class="icon <%= details[:icon] %>"></i></div>
+        <h3 class="diagnostic-title"><%= l('foton_cash_flow.diagnostics.project_status') %></h3>
+      </div>
+      <p class="diagnostic-message">
+        <%= l('foton_cash_flow.diagnostics.project_name') %>:
+        <strong><%= FotonCashFlow::SettingsHelper::FINANCE_PROJECT_NAME %></strong>.
+        <%= status == :ok ? l('foton_cash_flow.diagnostics.found_with_id', id: @diagnostic_results[:project_id]) : l('foton_cash_flow.diagnostics.missing_dependency') %>
+      </p>
+      <div class="diagnostic-status"><span class="cf-pill type-status"><%= details[:text] %></span></div>
+    </div>
+
+    <%# Card para o Tracker Financeiro %>
+    <% status = @diagnostic_results[:tracker_present] && @diagnostic_results[:tracker_associated_with_project] ? :ok : :error %>
+    <% details = diagnostic_details(status) %>
+    <div class="cf-diagnostic-card status-<%= details[:class] %>">
+      <div class="diagnostic-header">
+        <div class="diagnostic-icon"><i class="icon <%= details[:icon] %>"></i></div>
+        <h3 class="diagnostic-title"><%= l('foton_cash_flow.diagnostics.tracker_status') %></h3>
+      </div>
+      <p class="diagnostic-message">
+        <%= l('foton_cash_flow.diagnostics.tracker_name') %>:
+        <strong><%= FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME %></strong>.
+        <% if !@diagnostic_results[:tracker_present] %>
+          <%= l('foton_cash_flow.diagnostics.missing_dependency') %>
+        <% elsif !@diagnostic_results[:tracker_associated_with_project] %>
+          <%= l('foton_cash_flow.diagnostics.details_tracker_not_associated', tracker: FotonCashFlow::SettingsHelper::FINANCE_TRACKER_NAME) %>
+        <% else %>
+          <%= l('foton_cash_flow.diagnostics.found_and_associated', id: @diagnostic_results[:tracker_id]) %>
+        <% end %>
+      </p>
+      <div class="diagnostic-status"><span class="cf-pill type-status"><%= details[:text] %></span></div>
+    </div>
+
+    <%# Card para o Workflow do Tracker %>
+    <% status = @diagnostic_results[:tracker_workflow_configured] ? :ok : :warning %>
+    <% details = diagnostic_details(status) %>
+    <div class="cf-diagnostic-card status-<%= details[:class] %>">
+      <div class="diagnostic-header">
+        <div class="diagnostic-icon"><i class="icon <%= details[:icon] %>"></i></div>
+        <h3 class="diagnostic-title"><%= l('foton_cash_flow.diagnostics.tracker_workflow_configured') %></h3>
+      </div>
+      <p class="diagnostic-message">
+        <%= status == :ok ? l('foton_cash_flow.diagnostics.workflow_ok') : l('foton_cash_flow.diagnostics.workflow_needs_attention') %>
+      </p>
+      <div class="diagnostic-status"><span class="cf-pill type-status"><%= details[:text] %></span></div>
+    </div>
+
+    <%# Cards para cada Campo Personalizado %>
+    <% FotonCashFlow::SettingsHelper::CUSTOM_FIELD_NAMES.each do |key, cf_name| %>
+      <% cf_status = @diagnostic_results[:custom_fields][cf_name] %>
+      <% status = cf_status[:present] ? (cf_status[:configured_correctly] ? :ok : :warning) : :error %>
+      <% details = diagnostic_details(status) %>
+      <div class="cf-diagnostic-card status-<%= details[:class] %>">
+        <div class="diagnostic-header">
+          <div class="diagnostic-icon"><i class="icon <%= details[:icon] %>"></i></div>
+          <h3 class="diagnostic-title"><%= cf_name %></h3>
+        </div>
+        <p class="diagnostic-message">
+          <%= cf_status[:details].any? ? cf_status[:details].join(l('foton_cash_flow.diagnostics.details_separator')) : l('foton_cash_flow.diagnostics.details_ok') %>
+          <% if cf_status[:present] %>
+            <%= l('foton_cash_flow.diagnostics.cf_id_display', id: cf_status[:id]) %>
+          <% end %>
+        </p>
+        <div class="diagnostic-status"><span class="cf-pill type-status"><%= details[:text] %></span></div>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <% # Fim do arquivo diagnostics/index.html.erb %>

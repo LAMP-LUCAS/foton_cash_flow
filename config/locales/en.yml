@@ -43,6 +43,7 @@ en:
       subject: "Subject"
       status: "Status"
       priority: "Priority"
+      notes: "Notes"
 
     # --- Filters & Popups ---
     filters:
@@ -146,22 +147,30 @@ en:
       tracker_workflow_configured: "Workflow Configured"
       details_not_configured: "Not configured."
       dependencies_met: "All essential dependencies are correctly configured."
+      dependencies_missing_with_recommendation: "Cash Flow dependencies (tracker or custom fields) are missing or incorrectly configured. It is recommended to run the synchronization to ensure all dependencies are correctly set up."
       cf_name: "Field Name"
       status: "Status"
       details: "Details"
-      found: "Found"
-      missing: "Missing"
-      ok: "OK"
-      needs_attention: "Needs Attention"
+      # Status Texts
+      status_ok: "OK"
+      status_warning: "Needs Attention"
+      status_error: "Missing"
+      status_unknown: "Unknown"
+      # Detail Messages
+      found_with_id: "Found. (ID: %{id})"
+      found_and_associated: "Found and correctly associated. (ID: %{id})"
+      missing_dependency: "Missing."
       details_ok: "Configuration is correct."
-      details_missing: "Custom field is missing."
-      details_tracker_not_associated: "Not associated with '%{tracker}' tracker."
+      details_tracker_not_associated: "Found, but not associated with the '%{tracker}' project."
+      workflow_ok: "Workflow is correctly configured for all roles."
+      workflow_needs_attention: "Workflow is not configured for all user roles."
+      cf_id_display: "(ID: %{id})"
+      details_separator: "; "
       details_wrong_format: "Incorrect format. Expected: '%{expected}', Actual: '%{actual}'."
       details_wrong_values: "Incorrect possible values. Expected: '%{expected}', Actual: '%{actual}'."
       details_wrong_required: "Incorrect required status. Expected: '%{expected}', Actual: '%{actual}'."
       missing_fields_summary: "The following custom fields are missing: %{fields}."
       incorrect_config_summary: "The following custom fields have incorrect configurations: %{fields}."
-      sync_recommendation: "It is recommended to run the synchronization to ensure all dependencies are correctly set up."
 
     # --- Import Page ---
     import:
@@ -260,6 +269,39 @@ en:
       cf_recurrence_no: "No"
       cf_recurrence_monthly: "Monthly"
       cf_recurrence_yearly: "Yearly"
+
+    # --- Settings Page ---
+    settings:
+      title: "Cash Flow Settings"
+      description: "Configure the general behavior of the Cash Flow plugin."
+      save_button: "Save Settings"
+      # Cards
+      display_options:
+        title: "Display Options"
+        icon: "icon-visible"
+        default_columns: "Default columns in the entries table"
+        default_columns_info: "Select the columns that will be visible by default in the main table."
+        show_in_top_menu: "Show in top menu"
+        show_in_top_menu_info: "If checked, a link to the plugin will be added to Redmine's top menu."
+        currency: "Default Currency"
+        currency_info: "Select the default currency for displaying monetary values."
+      data_scope:
+        title: "Data Scope"
+        icon: "icon-projects"
+        custom_projects: "Specific Projects"
+        custom_projects_info: "If selected, the plugin will only be available in these projects. Leave empty to be available in all projects."
+        permanent_users: "Permanent Users"
+        permanent_users_info: "Users who will always have access, regardless of project permissions. (Use with caution)"
+      categories:
+        title: "Transaction Categories"
+        icon: "icon-tag"
+        categories_info: "Manage the categories available for financial entries. Empty categories will be removed upon saving."
+        add_category: "Add Category"
+      maintenance:
+        title: "Maintenance & Diagnostics"
+        icon: "icon-wrench"
+        diagnostics_link: "Run Diagnostics"
+        diagnostics_info: "Check if all plugin dependencies (tracker, custom fields) are correctly configured."
 
   # Labels for custom fields (used in _form.html.erb)
   field_data_do_lancamento: "Entry Date"
