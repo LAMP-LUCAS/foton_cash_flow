@@ -23,6 +23,7 @@ class ViewManager {
   init() {
     if (this.isInitialized()) {
       this.styleCategoryTags();
+      this.styleStatusTags();
     }
   }
 
@@ -144,6 +145,32 @@ class ViewManager {
         const bgColor = getCategoryColor(categoryName);
         tagElement.style.backgroundColor = bgColor;
         tagElement.style.borderColor = bgColor;
+      }
+    });
+  }
+
+  /**
+   * Aplica estilos dinâmicos às pílulas de status com base nos dados da linha.
+   * Utiliza o utilitário de cores para garantir consistência.
+   */
+  styleStatusTags() {
+    if (!this.originalRows) return;
+
+    let getStatusColor;
+    if (window.FotonCashFlow && window.FotonCashFlow.Utils && typeof window.FotonCashFlow.Utils.getStatusColor === 'function') {
+      getStatusColor = window.FotonCashFlow.Utils.getStatusColor;
+    } else {
+      console.warn("[ViewManager] Utilitário getStatusColor não encontrado. As pílulas de status não serão coloridas.");
+      return;
+    }
+
+    this.originalRows.forEach(row => {
+      const statusKey = row.dataset.statusKey; // Usando 'data-status-key' do HTML
+      const tagElement = row.querySelector('.status-column .status-tag');
+
+      if (statusKey && tagElement) {
+        const bgColor = getStatusColor(statusKey);
+        tagElement.style.backgroundColor = bgColor;
       }
     });
   }

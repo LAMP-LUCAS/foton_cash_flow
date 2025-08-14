@@ -29,5 +29,19 @@ window.FotonCashFlow.Utils = window.FotonCashFlow.Utils || {};
     return CATEGORY_COLORS[index];
   };
 
-})(window.FotonCashFlow.Utils);
+  /**
+   * Retorna uma cor específica com base no nome parametrizado de um status.
+   * @param {string} statusKey - O nome do status (ex: 'paid', 'pending').
+   * @returns {string} - A cor hexadecimal.
+   */
+  Utils.getStatusColor = function(statusKey) {
+    // Mapeia chaves de status para cores específicas.
+    const statusColorMap = {
+      'paid': '#3F51B5',     // --primary-color
+      'pending': '#ffc107',  // --warning-color
+      'rejected': '#dc3545'  // --error-color
+    };
+    return statusColorMap[statusKey] || '#6c757d'; // Cor cinza padrão
+  };
 
+})(window.FotonCashFlow.Utils);

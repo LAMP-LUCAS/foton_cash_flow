@@ -1,4 +1,4 @@
 Data do Lançamento;Descrição;Valor;Tipo de Transação;Categoria
 2025-08-15;"Recebimento de cliente A";"R$ 5.000,00";revenue;"Vendas"
-2025-08-16;"Compra de material de escritório";"-150,75";expense;"Despesas Administrativas"
-2025-08-17;"Pagamento de fornecedor B";-1234,56;expense;"Fornecedores"
+"2025-08-16;"Compra de material de escritório";"150,75";expense;"Despesas Administrativas""
+2025-08-17;"Pagamento de fornecedor B";1234.56;expense;"Fornecedores"

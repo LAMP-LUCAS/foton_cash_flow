@@ -3,15 +3,15 @@
 <section class="cf-summary">
   <div class="cf-card">
     <div class="cf-card-label"><%= l('foton_cash_flow.dashboard.total_revenue') %>:</div>
-    <div class="cf-card-value cf-success"><%= format_amount(total_revenue) %></div>
+    <div id="cf-summary-revenue" class="cf-card-value cf-success"><%= format_amount(total_revenue) %></div>
   </div>
   <div class="cf-card">
     <div class="cf-card-label"><%= l('foton_cash_flow.dashboard.total_expense') %>:</div>
-    <div class="cf-card-value cf-danger"><%= format_amount(total_expense) %></div>
+    <div id="cf-summary-expense" class="cf-card-value cf-danger"><%= format_amount(total_expense) %></div>
   </div>
   <div class="cf-card">
     <div class="cf-card-label"><%= l('foton_cash_flow.dashboard.balance') %>:</div>
-      <div class="cf-card-value <%= balance.present? && balance.to_f >= 0 ? 'cf-success' : 'cf-danger' %>"><%= format_amount(balance) %></div>
+      <div id="cf-summary-balance" class="cf-card-value <%= balance.present? && balance.to_f >= 0 ? 'cf-success' : 'cf-danger' %>"><%= format_amount(balance) %></div>
   </div>
 </section>
 

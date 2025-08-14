@@ -38,10 +38,14 @@ class DashboardManager {
     // Extrai os dados das linhas visíveis
     const data = this.extractDataFromRows(visibleRows);
 
+    // ATUALIZAÇÃO: Primeiro atualiza os cards do sumário
+    this.updateSummaryCards(data.totals);
+
     // Armazena os dados para poder recriar gráficos individualmente mais tarde
     this.lastData = data;
 
     // Renderiza os gráficos com os novos dados
+    // (Passamos 'data' em vez de 'data.chartData' para manter a estrutura)
     this.renderRevenueExpenseChart(data);
     this.renderExpenseByCategoryChart(data);
     this.renderCumulativeBalanceChart(data);
@@ -57,6 +61,8 @@ class DashboardManager {
     const revenueByMonth = {};
     const expenseByMonth = {};
     const expenseByCategory = {};
+    let totalRevenue = 0;
+    let totalExpense = 0;
     const transactions = [];
 
     const uncategorizedLabel = this.t('foton_cash_flow.general.uncategorized');
@@ -74,8 +80,10 @@ class DashboardManager {
 
       if (transactionType === 'revenue') {
         revenueByMonth[monthYear] = (revenueByMonth[monthYear] || 0) + amount;
+        totalRevenue += amount;
       } else if (transactionType === 'expense') {
         expenseByMonth[monthYear] = (expenseByMonth[monthYear] || 0) + amount;
+        totalExpense += amount;
         if (!expenseByCategory[categoryRaw]) {
           expenseByCategory[categoryRaw] = { total: 0, label: categoryTranslated };
         }
@@ -108,6 +116,11 @@ class DashboardManager {
     const allMonths = [...new Set([...Object.keys(revenueByMonth), ...Object.keys(expenseByMonth)])].sort();
 
     return {
+      totals: {
+        revenue: totalRevenue,
+        expense: totalExpense,
+        balance: totalRevenue - totalExpense,
+      },
       labels: allMonths,
       revenueData: allMonths.map(month => revenueByMonth[month] || 0),
       expenseData: allMonths.map(month => expenseByMonth[month] || 0),
@@ -153,6 +166,27 @@ class DashboardManager {
    */
   t(key) {
     return (typeof I18n !== 'undefined' && I18n.t) ? I18n.t(key) : key;
+  }
+
+  /**
+   * Atualiza os cards de sumário com os totais calculados.
+   * @param {object} totals - Objeto com { revenue, expense, balance }.
+   */
+  updateSummaryCards(totals) {
+    const revenueEl = document.getElementById('cf-summary-revenue');
+    const expenseEl = document.getElementById('cf-summary-expense');
+    const balanceEl = document.getElementById('cf-summary-balance');
+
+    if (revenueEl) {
+      revenueEl.textContent = this.formatCurrency(totals.revenue);
+    }
+    if (expenseEl) {
+      expenseEl.textContent = this.formatCurrency(totals.expense);
+    }
+    if (balanceEl) {
+      balanceEl.textContent = this.formatCurrency(totals.balance);
+      balanceEl.className = `cf-card-value ${totals.balance >= 0 ? 'cf-success' : 'cf-danger'}`;
+    }
   }
 
   renderRevenueExpenseChart(data) {
