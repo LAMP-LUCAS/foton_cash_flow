@@ -2,8 +2,8 @@ pt-BR:
   # Chave usada no menu de administração do Redmine (init.rb)
   # Informações do Plugin & Menus
   label_cash_flow: "Fluxo de Caixa"
-  label_cash_flow_pro: "FOTON Fluxo de Caixa"
-  label_cash_flow_pro_module: "Fluxo de Caixa"
+  label_foton_cash_flow: "FOTON Fluxo de Caixa"
+  label_foton_cash_flow_module: "Fluxo de Caixa"
 
   # Permissões (lidas pela tela de Papéis e Permissões do Redmine)
   permission_view_cash_flow: "Visualizar fluxo de caixa"

@@ -1,8 +1,8 @@
 en:
   # Plugin Info & Menus
   label_cash_flow: "Cash Flow"
-  label_cash_flow_pro: "FOTON Cash Flow"
-  label_cash_flow_pro_module: "Cash Flow"
+  label_foton_cash_flow: "FOTON Cash Flow"
+  label_foton_cash_flow_module: "Cash Flow"
 
   foton_cash_flow:
     # --- General UI Elements ---

@@ -54,7 +54,7 @@ Redmine::Plugin.register :foton_cash_flow do |config|
   end
 
   # Permissões atualizadas
-  project_module :cash_flow_pro do
+  project_module :foton_cash_flow do
     permission :view_cash_flow, {
       'foton_cash_flow/entries': [:index, :show]
     }, public: true
@@ -84,13 +84,13 @@ Redmine::Plugin.register :foton_cash_flow do |config|
     'categories' => []
   }, partial: 'foton_cash_flow/settings/cash_flow_settings'
 
-  menu :top_menu, :cash_flow_pro_top, { controller: 'foton_cash_flow/entries', action: 'index' },
-       caption: :label_cash_flow_pro,
+  menu :top_menu, :foton_cash_flow_top, { controller: 'foton_cash_flow/entries', action: 'index' },
+       caption: :label_foton_cash_flow,
        if: ->(_context) { Setting.plugin_foton_cash_flow['show_in_top_menu'].to_s == 'true' }
 
-  menu :project_menu, :cash_flow_pro, { controller: 'foton_cash_flow/entries', action: 'index' },
+  menu :project_menu, :foton_cash_flow, { controller: 'foton_cash_flow/entries', action: 'index' },
        caption: :label_cash_flow, param: :project_id,
-       if: proc { |p| p.module_enabled?(:cash_flow_pro) && (User.current.admin? || User.current.allowed_to?(:view_cash_flow, p)) }
+       if: proc { |p| p.module_enabled?(:foton_cash_flow) && (User.current.admin? || User.current.allowed_to?(:view_cash_flow, p)) }
 
   menu :admin_menu, :foton_cash_flow_diagnostics, { controller: 'foton_cash_flow/diagnostics', action: 'index' },
        caption: :label_foton_cash_flow_diagnostics, html: { class: 'icon icon-server' },
