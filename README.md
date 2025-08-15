@@ -10,7 +10,6 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 > [!TIP]
 > Consulte a [estrutura detalhada do projeto e explicação dos arquivos](estrutura_projeto.md) para entender como o plugin está organizado.
-
 > [!TIP]
 > Consulte a [Estrutura dos Dados do Plugin](estrutura_dados.md) para entender como os dados são armazenados e manipulados no Redmine.
 
@@ -82,7 +81,7 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
   - `controllers/`: Orquestram as páginas (ex: `cash_flow_page_controller.js`).
   - `managers/`: Gerenciam a lógica de negócio (filtros, visualização, dados).
   - `components/`: Componentes de UI reutilizáveis (popups, etc.).
-  - `cash_flow_charts.js`: Lógica para a renderização dos gráficos do dashboard.
+  - `cash_flow_dashboard.js`: Lógica para a renderização dos gráficos do dashboard.
 
 > [!TIP]
 > Para uma documentação técnica detalhada sobre os scripts, consulte o `Readme.md` na pasta `assets/javascripts`.
@@ -91,20 +90,22 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 ## Instalação, Atualização e Remoção Automatizadas
 
-Utilize os scripts Python disponíveis na raiz do plugin:
+Utilize os scripts Python disponíveis na pasta `lib/tasks/`:
 
-- `install_plugin.py`: Instala o plugin (migrações, assets e reinicialização do container).
-- `update_plugin.py`: Atualiza o plugin (git pull, migrações, assets e reinicialização).
-- `remove_plugin.py`: Remove o plugin (migrações reversas, apaga a pasta e reinicia o container).
+- `install_plugin.py`: Instala o plugin (executa migrações, assets e reinicia o container).
+- `update_plugin.py`: Atualiza o plugin (executa `git pull`, migrações, assets e reinicia).
+- `uninstall_plugin.py`: Desinstala o plugin (reverte migrações, apaga a pasta e reinicia).
 
 Esses scripts utilizam as configurações do arquivo `.config` (nome do container, caminhos, etc). Edite conforme necessário.
 
 **Exemplo de uso:**
 
 ```bash
-python install_plugin.py
-python update_plugin.py
-python remove_plugin.py
+# O nome do plugin 'foton_cash_flow' é passado como argumento.
+# Execute os comandos a partir da raiz do projeto Redmine.
+python3 plugins/foton_cash_flow/lib/tasks/install_plugin.py foton_cash_flow
+python3 plugins/foton_cash_flow/lib/tasks/update_plugin.py foton_cash_flow
+python3 plugins/foton_cash_flow/lib/tasks/uninstall_plugin.py foton_cash_flow
 ```
 
 **Atenção:**
