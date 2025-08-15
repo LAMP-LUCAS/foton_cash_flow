@@ -11,7 +11,7 @@ Redmine::Plugin.register :foton_cash_flow do |config|
   name 'FOTON Fluxo de Caixa'
   author 'LAMP/foton'
   description 'Plugin de fluxo de caixa para Redmine desenvolvido pela comunidade FOTON'
-  version '0.0.1'
+  version '0.0.1-alpha.1'
 
   #ActionController::Base.asset_host = proc { |source| "/plugin_assets/foton_cash_flow" }
 
