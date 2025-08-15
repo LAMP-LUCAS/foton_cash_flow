@@ -96,8 +96,6 @@ pt-BR:
           title: "Receita vs. Despesa Mensal"
         cumulative_balance:
           title: "Saldo Acumulado"
-        cumulative_flow:
-          title: "Fluxo Acumulado"
         expense_by_category:
           title: "Despesas por Categoria"
         cumulative_flow:
@@ -174,6 +172,7 @@ pt-BR:
       cf_id_display: "(ID: %{id})"
       details_separator: "; "
       details_wrong_format: "Formato incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
+      details_wrong_position: "Posição incorreta. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_values: "Valores possíveis incorretos. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_required: "Status de obrigatoriedade incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
       missing_fields_summary: "Os seguintes campos personalizados estão faltando: %{fields}."

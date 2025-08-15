@@ -167,6 +167,7 @@ en:
       cf_id_display: "(ID: %{id})"
       details_separator: "; "
       details_wrong_format: "Incorrect format. Expected: '%{expected}', Actual: '%{actual}'."
+      details_wrong_position: "Incorrect position. Expected: '%{expected}', Actual: '%{actual}'."
       details_wrong_values: "Incorrect possible values. Expected: '%{expected}', Actual: '%{actual}'."
       details_wrong_required: "Incorrect required status. Expected: '%{expected}', Actual: '%{actual}'."
       missing_fields_summary: "The following custom fields are missing: %{fields}."
@@ -309,7 +310,6 @@ en:
         message: "This settings page is exclusive to system administrators."
         back_button: "Back"
 
-  # Labels for custom fields (used in _form.html.erb)
   field_data_do_lancamento: "Entry Date"
   field_valor: "Value"
   field_tipo_de_transacao: "Transaction Type"
