@@ -91,6 +91,7 @@ Utilizamos o padrão Conventional Commits para padronizar as mensagens de commit
   - `cf-bloco__elemento--modificador`
 
 **Exemplos:**
+
 - `.cf-filter-modal` (Bloco)
 - `.cf-filter-modal__header` (Elemento)
 - `.cf-filter-modal__button--primary` (Modificador)
@@ -102,6 +103,7 @@ As chaves de tradução devem seguir uma estrutura hierárquica para facilitar a
 - **Padrão**: `foton_cash_flow.<area>.<subarea_ou_chave>`
 
 **Exemplos:**
+
 - `foton_cash_flow.settings.title`
 - `foton_cash_flow.dashboard.charts.revenue_vs_expense.title`
 - `foton_cash_flow.errors.missing_headers`
