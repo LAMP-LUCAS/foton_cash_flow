@@ -3,26 +3,13 @@
 # frozen_string_literal: true
 
 require 'redmine'
-require_relative 'lib/foton_cash_flow'
-require_relative 'lib/foton_cash_flow/patches/issue_patch'
 
-Redmine::Plugin.register :foton_cash_flow do |config|
+Redmine::Plugin.register :foton_cash_flow do # |config|
   Rails.logger.info "[FOTON_CASH_FLOW] Carregando plugin"
   name 'FOTON Fluxo de Caixa'
   author 'LAMP/foton'
   description 'Plugin de fluxo de caixa para Redmine desenvolvido pela comunidade FOTON'
-  version '0.0.1-alpha.1'
-
-  #ActionController::Base.asset_host = proc { |source| "/plugin_assets/foton_cash_flow" }
-
-  # Garante que o patch da Issue seja incluído imediatamente na classe Issue.
-  # Isso é mais robusto do que usar um callback.
-  unless Issue.included_modules.include?(FotonCashFlow::Patches::IssuePatch)
-    Issue.send(:include, FotonCashFlow::Patches::IssuePatch)
-    Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' incluído com sucesso na classe Issue."
-  else
-    Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' já incluído. Pulando."
-  end
+  version '0.0.1-alpha.2'
 
   # Carregamento do hook para o layout do Redmine
   require_relative 'lib/foton_cash_flow/hooks' if File.exist?(File.join(__dir__, 'lib', 'foton_cash_flow', 'hooks.rb'))
@@ -31,25 +18,29 @@ Redmine::Plugin.register :foton_cash_flow do |config|
   # corretamente em um ambiente Rails 7.
   ActiveSupport::Reloader.to_prepare do
     Rails.logger.info "[FOTON_CASH_FLOW] Verificando e aplicando patches..."
-
-    # Carrega a biblioteca principal do plugin e o patch dentro do to_prepare
-    # para garantir a ordem de carregamento correta em todos os ambientes.
+    # Carregamento dos arquivos dos patches aqui
     require_relative 'lib/foton_cash_flow'
-
-    # Inclui o helper de assets do Redmine no controller do plugin.
-    # Isso é feito aqui para garantir que Redmine::PluginAssets::Helper já exista
-    # quando o FotonCashFlow::EntriesController for carregado.
-    FotonCashFlow::EntriesController.send(:helper, Redmine::PluginAssets::Helper)
-
-
-    # Carrega o arquivo do patch aqui, garantindo que ele esteja disponível para inclusão.
     require_relative 'lib/foton_cash_flow/patches/issue_patch'
+    require_dependency 'foton_cash_flow/patches/issue_custom_field_patch'
+    require_dependency 'foton_cash_flow/patches/issue_custom_value_patch'
 
-    unless Issue.included_modules.include?(FotonCashFlow::Patches::IssuePatch)
-      Issue.send(:include, FotonCashFlow::Patches::IssuePatch)
-      Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' incluído com sucesso na classe Issue."
-    else
-      Rails.logger.info "[FOTON_CASH_FLOW] Patch 'IssuePatch' já incluído. Pulando."
+    #FotonCashFlow::EntriesController.send(:helper, Redmine::PluginAssets::Helper)
+
+    # Carrega e aplica todos os patches de forma segura.
+    # O uso de require_dependency é a forma correta de garantir que as classes
+    # do Redmine sejam carregadas antes de tentarmos modificá-las.
+    patch_map = {
+      Issue: FotonCashFlow::Patches::IssuePatch,
+      IssueCustomField: FotonCashFlow::Patches::IssueCustomFieldPatch,
+      IssueCustomValue: FotonCashFlow::Patches::IssueCustomValuePatch
+    }
+
+    patch_map.each do |klass_name, patch_module|
+      klass = klass_name.to_s.constantize
+      if klass.included_modules.exclude?(patch_module)
+        klass.send(:include, patch_module)
+        Rails.logger.info "[FOTON_CASH_FLOW] Patch '#{patch_module}' aplicado com sucesso em '#{klass_name}'."
+      end
     end
   end
 

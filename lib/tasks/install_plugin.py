@@ -1,6 +1,6 @@
 # install_plugin.py
 import sys
-from task_utils import load_config, run_command
+from task_utils import load_config, run_command, CalledProcessError
 
 
 def install(plugin_name):
@@ -14,9 +14,14 @@ def install(plugin_name):
     run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:migrate NAME={plugin_name} RAILS_ENV=production",
         working_dir=project_root)
 
-    print("2/3: Publicando assets do plugin...")
-    run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production",
-        working_dir=project_root)
+    print("2/3: Publicando assets do plugin (para retrocompatibilidade)...")
+    try:
+        run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production",
+            working_dir=project_root)
+    except CalledProcessError:
+        # Se o comando falhar, captura o erro, imprime um aviso e continua
+        print("    -> Aviso: A tarefa 'redmine:plugins:assets' falhou. Isso é normal e esperado em versões mais recentes do Redmine. Continuando...")
+    
 
     print("3/3: Reiniciando o Redmine...")
     run_command(f"docker compose restart {cfg['CONTAINER_NAME']}",
