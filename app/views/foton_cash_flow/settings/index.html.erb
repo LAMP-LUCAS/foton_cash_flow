@@ -1,18 +1,53 @@
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag "cash_flow_main", plugin: 'foton_cash_flow' %>
   <%= javascript_include_tag "cash_flow_settings", plugin: 'foton_cash_flow' %>
+  <%# Recomenda-se mover este estilo para o arquivo cash_flow_main.css %>
+  <style>
+    .cf-admin-only-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      padding: 40px;
+      margin-top: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .cf-admin-only-content h3 {
+      font-size: 1.5em;
+      color: #555;
+      margin-bottom: 15px;
+    }
+    .cf-admin-only-content p {
+      font-size: 1.1em;
+      color: #666;
+      margin-bottom: 25px;
+    }
+  </style>
 <% end %>
 
-<div class="cf-settings-page">
-  <div class="cf-header">
-    <h2 class="icon icon-settings"><%= l('foton_cash_flow.settings.title') %></h2>
+<% if User.current.admin? %>
+  <div class="cf-settings-page">
+    <div class="cf-header">
+      <h2 class="icon icon-settings"><%= l('foton_cash_flow.settings.title') %></h2>
+    </div>
+
+    <p><%= l('foton_cash_flow.settings.description') %></p>
+
+    <%= form_for :settings, url: cash_flow_settings_path, method: :post, html: { class: 'cf-settings-form' } do |f| %>
+      <%= render partial: 'cash_flow_settings', locals: { f: f } %>
+
+      <%= submit_tag l('foton_cash_flow.settings.save_button'), class: 'cf-btn cf-btn-primary' %>
+    <% end %>
   </div>
-
-  <p><%= l('foton_cash_flow.settings.description') %></p>
-
-  <%= form_for :settings, url: cash_flow_settings_path, method: :post, html: { class: 'cf-settings-form' } do |f| %>
-    <%= render partial: 'cash_flow_settings', locals: { f: f } %>
-
-    <%= submit_tag l('foton_cash_flow.settings.save_button'), class: 'cf-btn cf-btn-primary' %>
-  <% end %>
-</div>
+<% else %>
+  <div class="cf-admin-only-panel">
+    <div class="cf-admin-only-content">
+      <h3 class="icon icon-lock"><%= l('foton_cash_flow.settings.admin_only.title') %></h3>
+      <p><%= l('foton_cash_flow.settings.admin_only.message') %></p>
+      <%= link_to l('foton_cash_flow.settings.admin_only.back_button'), :back, class: 'cf-btn cf-btn-secondary icon icon-cancel' %>
+    </div>
+  </div>
+<% end %>

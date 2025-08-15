@@ -283,6 +283,8 @@ en:
         default_columns_info: "Select the columns that will be visible by default in the main table."
         show_in_top_menu: "Show in top menu"
         show_in_top_menu_info: "If checked, a link to the plugin will be added to Redmine's top menu."
+        top_menu_group_id_label: "Group with top menu access"
+        top_menu_group_id_info: "In addition to admins, members of this group will also see the link in the top menu (if the option above is checked)."
         currency: "Default Currency"
         currency_info: "Select the default currency for displaying monetary values."
       data_scope:
@@ -302,6 +304,10 @@ en:
         icon: "icon-wrench"
         diagnostics_link: "Run Diagnostics"
         diagnostics_info: "Check if all plugin dependencies (tracker, custom fields) are correctly configured."
+      admin_only:
+        title: "Restricted Access"
+        message: "This settings page is exclusive to system administrators."
+        back_button: "Back"
 
   # Labels for custom fields (used in _form.html.erb)
   field_data_do_lancamento: "Entry Date"

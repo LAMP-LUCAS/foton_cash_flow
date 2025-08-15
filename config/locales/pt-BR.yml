@@ -297,6 +297,8 @@ pt-BR:
         default_columns_info: "Selecione as colunas que serão visíveis por padrão na tabela principal."
         show_in_top_menu: "Mostrar no menu superior"
         show_in_top_menu_info: "Se marcado, um link para o plugin será adicionado ao menu superior do Redmine."
+        top_menu_group_id_label: "Grupo com acesso ao menu superior"
+        top_menu_group_id_info: "Além dos administradores, membros deste grupo também verão o link no menu superior (se a opção acima estiver marcada)."
         currency: "Moeda Padrão"
         currency_info: "Selecione a moeda padrão para a exibição de valores monetários."
       data_scope:
@@ -316,6 +318,10 @@ pt-BR:
         icon: "icon-wrench"
         diagnostics_link: "Executar Diagnóstico"
         diagnostics_info: "Verifica se todas as dependências do plugin (rastreador, campos personalizados) estão configuradas corretamente."
+      admin_only:
+        title: "Acesso Restrito"
+        message: "Esta página de configurações é exclusiva para administradores do sistema."
+        back_button: "Voltar"
 
   # Labels para campos personalizados (usado no _form.html.erb) - Nível raiz para compatibilidade
   field_data_do_lancamento: "Data do Lançamento"

@@ -47,6 +47,18 @@
         </label>
         <em class="info"><%= l('foton_cash_flow.settings.display_options.show_in_top_menu_info') %></em>
       </div>
+
+      <div class="cf-form-group">
+        <label><%= l('foton_cash_flow.settings.display_options.top_menu_group_id_label') %></label>
+        <%= select_tag 'settings[top_menu_group_id]',
+                       options_for_select(
+                         [[l(:label_none), '']] + Group.givable.order(:lastname).map { |g| [g.name, g.id] },
+                         @settings['top_menu_group_id']
+                       ),
+                       class: 'cf-select2' %>
+        <em class="info"><%= l('foton_cash_flow.settings.display_options.top_menu_group_id_info') %></em>
+      </div>
+
     </div>
   </div>
 

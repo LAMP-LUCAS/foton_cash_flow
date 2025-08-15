@@ -78,7 +78,8 @@ Redmine::Plugin.register :foton_cash_flow do |config|
   settings default: {
     'default_columns' => %w[entry_date transaction_type amount category description notes],
     'default_currency' => 'R$ ',
-    'show_in_top_menu' => 'false',
+    'show_in_top_menu' => 'true',
+    'top_menu_group_id' => nil,
     'internal_finance_project_id' => nil,
     'only_finance_project' => '0',
     'categories' => []
@@ -86,7 +87,13 @@ Redmine::Plugin.register :foton_cash_flow do |config|
 
   menu :top_menu, :foton_cash_flow_top, { controller: 'foton_cash_flow/entries', action: 'index' },
        caption: :label_foton_cash_flow,
-       if: ->(_context) { Setting.plugin_foton_cash_flow['show_in_top_menu'].to_s == 'true' }
+       if: proc {
+         show_link = Setting.plugin_foton_cash_flow['show_in_top_menu'].to_s == 'true'
+         next false unless show_link
+
+         group_id = Setting.plugin_foton_cash_flow['top_menu_group_id']
+         User.current.admin? || (group_id.present? && User.current.groups.exists?(group_id.to_i))
+       }
 
   menu :project_menu, :foton_cash_flow, { controller: 'foton_cash_flow/entries', action: 'index' },
        caption: :label_cash_flow, param: :project_id,
