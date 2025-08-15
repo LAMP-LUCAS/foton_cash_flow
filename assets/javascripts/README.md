@@ -30,35 +30,44 @@ A lógica é dividida em três camadas principais: **Controladores**, **Gerencia
 
 ### 1. `application.js` (Ponto de Entrada)
 
-**Propósito:** É o único script carregado globalmente. Ele atua como um roteador, detectando em qual página o usuário está e inicializando o **Controlador** apropriado.
+**Propósito:** É o único script carregado globalmente. Ele atua como um roteador, detectando em qual página o usuário está e inicializando o **Controlador** apropriado (ex: `CashFlowPageController` para a página principal, `ImportFormController` para a de importação).
 
----
 
 ### 2. `controllers/`
 
 **Propósito:** Contêm as classes que orquestram uma página ou uma seção complexa da aplicação. Um controlador não manipula o DOM diretamente; ele instancia e coordena os **Gerenciadores**.
 
-- **`cash_flow_page_controller.js`**: Orquestra a página de listagem de lançamentos. Ele inicializa todos os gerenciadores (filtros, ordenação, gráficos, etc.) e os faz reagir a mudanças de estado.
+- **`import_form_controller.js`**: Gerencia a lógica do formulário de importação, incluindo a pré-análise do arquivo CSV, a exibição do modal de conciliação de conflitos e a finalização da importação via AJAX.
 
----
 
 ### 3. `managers/`
 
 **Propósito:** Cada gerenciador encapsula uma área de lógica de negócio específica.
 
-- **`filter_manager.js`**: Gerencia o estado dos filtros ativos e a interação com o `FilterPopup`.
-- **`dashboard_manager.js`**: Gerencia a lógica de agregação de dados e a atualização dos gráficos (Chart.js) em resposta aos filtros. Substitui a lógica do antigo `cash_flow_dashboard.js`.
-- **`view_manager.js`**: **Único responsável por manipular o DOM**. Ele recebe comandos do controlador e atualiza a UI (renderiza a tabela, as pílulas de filtro, os indicadores de ordenação, etc.).
+- **`chart_manager.js`**: Gerencia a interatividade dos gráficos, como a funcionalidade de maximizar e minimizar. Ele trabalha em conjunto com o `DashboardManager`.
+- **`dashboard_manager.js`**: Gerencia a lógica de agregação de dados e a renderização/atualização dos gráficos (usando Chart.js) em resposta aos filtros aplicados. Ele extrai os dados das linhas visíveis da tabela e os processa para os gráficos.
+- **`view_manager.js`**: **Único responsável por manipular o DOM da página principal**. Ele recebe comandos do controlador e atualiza a UI (renderiza a tabela, as pílulas de filtro, os indicadores de ordenação, etc.).
 
----
 
 ### 4. `components/`
 
 **Propósito:** São classes menores e focadas que representam um elemento de UI reutilizável.
 
-- **`filter_popup.js`**: Classe que representa o popup de filtro que aparece ao clicar no ícone de uma coluna.
 
 ---
+
+### 5. `utils/`
+
+**Propósito:** Contém funções auxiliares e puras que podem ser reutilizadas em diferentes partes da aplicação.
+
+- **`color_utils.js`**: Fornece funções para gerar cores consistentes e determinísticas para elementos como categorias de despesa e status, garantindo que a mesma categoria tenha sempre a mesma cor nos gráficos e na tabela.
+
+---
+
+### 6. Outros Scripts
+
+- **`cash_flow_settings.js`**: Contém a lógica para a página de configurações do plugin, como a adição e remoção dinâmica de categorias. Não segue a arquitetura de managers/controllers por ser uma página mais simples.
+
 
 ### Fluxo de Dados
 

@@ -24,10 +24,13 @@ Este documento descreve como o plugin "Fluxo de Caixa" armazena, utiliza e manip
 - **Categoria** (`Categoria`): Categoria do lançamento (ex: Receita, Despesa, etc.)
 - **Data do Lançamento** (`Data do Lançamento`): Data em que o lançamento ocorreu
 - **Tipo de Transação** (`Tipo de Transação`): revenue (Receita) ou expense (Despesa)
-- **Status** (`Status`): Situação do lançamento (ex: Pendente, Pago, Cancelado)
+- **Status do Lançamento** (`Status do Lançamento`): Situação do lançamento (ex: Pendente, Pago, Cancelado). Este campo é específico do plugin e não deve ser confundido com o Status padrão da Issue do Redmine.
 - **Valor** (`Valor`): Valor monetário do lançamento
 - **Recorrência** (`Recorrência`): Indica se o lançamento é recorrente
 - **Issue Relacionada** (`Issue Relacionada`): Para vincular a uma tarefa Redmine
+
+> [!NOTE]
+> O campo **Recorrência** está presente na estrutura de dados, mas sua lógica de negócio e interface ainda não estão completamente implementadas no plugin.
 
 > Os nomes dos campos personalizados podem ser ajustados conforme a configuração do Redmine.
 
@@ -41,7 +44,7 @@ Este documento descreve como o plugin "Fluxo de Caixa" armazena, utiliza e manip
 | Categoria            | Despesa              |
 | Data do Lançamento   | 2025-07-21           |
 | Tipo de Transação    | expense              |
-| Status               | Pago                 |
+| Status do Lançamento | Pago                 |
 | Valor                | 1500.00              |
 | Recorrência          | Não                  |
 | Issue Relacionada    | #123                 |

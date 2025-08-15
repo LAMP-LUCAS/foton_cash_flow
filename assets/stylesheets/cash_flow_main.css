@@ -375,6 +375,9 @@
   transition: var(--transition);
   cursor: pointer;
   color: var(--text-secondary);
+  display: inline-block; /* Essencial para a transformação de rotação */
+  transform: rotate(0deg); /* Define o estado inicial para a transição */
+  font-weight: bold; /* Deixa a seta mais visível */
 }
 .th-content:hover .cf-filter-icon,
 .th-content:hover .cf-sort-icon {
@@ -383,6 +386,21 @@
 .cf-table thead th .cf-filter-icon.active {
   opacity: 1;
   color: var(--primary-color);
+}
+
+/* REVISADO: Estilo para ícone de ordenação ativo e rotação dinâmica.
+   O JavaScript precisa adicionar as classes 'sorted-asc' ou 'sorted-desc' ao <th>. */
+.cf-table thead th.sorted .cf-sort-icon {
+  opacity: 1;
+  color: var(--primary-color);
+}
+.cf-table thead th.sorted-asc .cf-sort-icon {
+  /* Gira a seta para cima (ascendente) */
+  transform: rotate(180deg);
+}
+.cf-table thead th.sorted-desc .cf-sort-icon {
+  /* Garante que a seta volte para baixo (descendente) */
+  transform: rotate(0deg);
 }
 
 /* REVISADO: Barra e Pílulas de Filtro Ativo */
@@ -1011,4 +1029,103 @@ body.cf-modal-open {
   margin-left: 0 !important; /* !important para garantir a sobreposição */
   font-weight: 600;
   color: var(--text-primary);
+}
+
+/* ==========================================================================
+   13. RESPONSIVIDADE (VERSÃO FINAL SIMPLIFICADA)
+   ========================================================================== */
+
+/*
+ * Regras Universais para a Tabela:
+ * Estas regras garantem que a tabela possa rolar horizontalmente quando
+ * seu contêiner for mais estreito que a própria tabela.
+*/
+.cf-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Melhora a rolagem em iOS */
+}
+
+.cf-table th,
+.cf-table td {
+  white-space: nowrap; /* Impede a quebra de linha nas células */
+}
+
+/* ==========================================================================
+   BREAKPOINT PARA TABLETS E SMARTPHONES (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+
+  /* AQUI ESTÁ A MUDANÇA CRUCIAL SUGERIDA POR VOCÊ */
+  .cf-main-content {
+    display: block; /* Desativa o layout flexível */
+  }
+
+  /*
+   * Com o flex desativado, os elementos se comportam como blocos.
+   * Adicionamos uma margem para criar o espaçamento vertical (o "gap").
+  */
+  .cf-primary-content {
+    margin-bottom: 32px;
+  }
+
+  .cf-summary-section {
+    width: 100%;
+    position: static;
+  }
+
+  .cf-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .cf-header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .cf-table-wrapper {
+    max-height: none;
+  }
+}
+
+
+/* ==========================================================================
+   AJUSTES FINOS PARA SMARTPHONES (<= 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+  .cash-flow-page {
+    padding: 0 16px;
+  }
+
+  .cf-header {
+    padding-top: 16px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cf-header h1, .cf-header h2 {
+    font-size: 1.6rem;
+    width: 100%;
+  }
+
+  .cf-card-value {
+    font-size: 1.5rem;
+  }
+
+  /* Empilha botões em rodapés de modais e popups */
+  .cf-modal-footer,
+  .cf-filter-popup-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cf-modal-footer .cf-btn,
+  .cf-filter-popup-footer .cf-btn {
+    width: 100%;
+  }
+
+  .cf-charts-container {
+    grid-template-columns: 1fr;
+  }
 }

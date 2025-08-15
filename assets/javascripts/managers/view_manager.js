@@ -106,17 +106,14 @@ class ViewManager {
   updateSortIndicators(column, direction) {
     const headers = this.tableElement.querySelectorAll('th[data-sortable="true"]');
     headers.forEach(header => {
-      header.classList.remove('sorted', 'asc', 'desc');
-      const icon = header.querySelector('.cf-sort-icon');
-      if (icon) {
-        // Remove apenas as classes de direção, mantendo as classes base.
-        icon.classList.remove('icon-sort-asc', 'icon-sort-desc');
-      }
+      // Remove as classes de estado de ordenação anteriores para um estado limpo.
+      header.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
 
       const isSortedColumn = header.dataset.column === column;
       if (isSortedColumn) {
-        header.classList.add('sorted', direction);
-        if (icon) icon.classList.add(`icon-sort-${direction}`);
+        // CORREÇÃO: Adiciona a classe 'sorted' (para a cor) e a classe de direção
+        // específica (`sorted-asc` ou `sorted-desc`) que o CSS usa para a animação de rotação.
+        header.classList.add('sorted', `sorted-${direction}`);
       }
   });
 }

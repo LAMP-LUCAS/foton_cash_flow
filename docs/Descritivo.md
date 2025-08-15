@@ -15,24 +15,25 @@ O plugin segue um padrão MVC (Model-View-Controller) com separação clara de r
 ```plaintext
 foton_cash_flow/
 ├── app/
-│   ├── controllers/
-│   │   ├── cash_flow_entries_controller.rb  # Cérebro do plugin (coordena ações)
-│   │   └── cash_flow_settings_controller.rb # Gerencia configurações
-│   ├── helpers/
-│   │   └── cash_flow_entries_helper.rb      # Lógica de apresentação
-│   └── views/
-│       ├── cash_flow_entries/               # Templates para operações financeiras
-│       └── cash_flow_settings/              # Templates de configuração
+│   ├── controllers/foton_cash_flow/
+│   │   ├── entries_controller.rb      # Cérebro do plugin (coordena ações)
+│   │   └── settings_controller.rb     # Gerencia configurações
+│   ├── helpers/foton_cash_flow/
+│   │   └── entries_helper.rb          # Lógica de apresentação
+│   └── views/foton_cash_flow/
+│       ├── entries/                   # Templates para operações financeiras
+│       └── settings/                  # Templates de configuração
 ├── lib/
-│   ├── services/                            ★ Núcleo da lógica de negócio ★
-│   │   ├── cash_flow_query_builder.rb       # Construção de queries com filtros
-│   │   ├── cash_flow_importer.rb            # Importação de dados via CSV
-│   │   ├── cash_flow_exporter.rb            # Exportação para CSV
-│   │   └── cash_flow_summary_service.rb     # Cálculo de totais e gráficos
-│   └── tasks/                               # Scripts de administração
-│       ├── install.rake
-│       ├── remove.rake
-│       └── update.rake
+│   ├── foton_cash_flow/
+│   │   ├── services/                    ★ Núcleo da lógica de negócio ★
+│   │   │   ├── query_builder.rb         # Construção de queries com filtros
+│   │   │   ├── importer.rb              # Importação de dados via CSV
+│   │   │   ├── exporter.rb              # Exportação para CSV
+│   │   │   └── summary_service.rb       # Cálculo de totais e gráficos
+│   └── tasks/                           # Scripts de automação (Python)
+│       ├── install_plugin.py
+│       ├── remove_plugin.py
+│       └── update_plugin.py
 ├── assets/                                  # Frontend
 │   ├── javascripts/                         # Comportamentos dinâmicos
 │   └── stylesheets/                         # Estilos visuais
@@ -52,11 +53,11 @@ foton_cash_flow/
 ```mermaid
 graph TD
     A[Usuário] -->|Requisição| B[Controller]
-    B -->|Consulta| C[QueryBuilder]
-    B -->|Importar| D[Importer]
-    B -->|Exportar| E[Exporter]
-    B -->|Dashboard| F[SummaryService]
-    C -->|Resultados| G[View]
+    B -->|Consulta| C[Service: QueryBuilder]
+    B -->|Importar| D[Service: Importer]
+    B -->|Exportar| E[Service: Exporter]
+    B -->|Dashboard| F[Service: SummaryService]
+    C -->|Resultados| G[View: Tabela]
     D -->|Dados| H[Banco de Dados]
     E -->|CSV| I[Download]
     F -->|Gráficos/Totais| J[Dashboard]
@@ -72,7 +73,7 @@ graph TD
 
 ### **Papel de Cada Componente**
 
-#### 1. **Controller (`app/controllers/cash_flow_entries_controller.rb`)**
+#### 1. **Controller (`app/controllers/foton_cash_flow/entries_controller.rb`)**
 - **Função**: Coordenador principal
 - **Responsabilidades**:
   - Recebe requisições HTTP
@@ -87,32 +88,33 @@ graph TD
 #### 2. **Serviços (`lib/services/`)**
 | Serviço                  | Função                                      | Input                  | Output               |
 |--------------------------|---------------------------------------------|------------------------|----------------------|
-| `QueryBuilder`           | Construção de queries com filtros           | Parâmetros de pesquisa | Coleção de Issues    |
-| `Importer`               | Importação segura de CSV                    | Arquivo CSV            | Issues persistidas   |
-| `Exporter`               | Geração de relatórios em CSV                | Parâmetros de exportação | Arquivo CSV        |
-| `SummaryService`         | Cálculo de totais e gráficos                | Coleção de Issues      | Dados agregados      |
+| `FotonCashFlow::Services::QueryBuilder` | Construção de queries com filtros | Parâmetros de pesquisa | Coleção de Issues    |
+| `FotonCashFlow::Services::Importer`     | Importação segura de CSV          | Arquivo CSV            | Issues persistidas   |
+| `FotonCashFlow::Services::Exporter`     | Geração de relatórios em CSV      | Parâmetros de exportação | Arquivo CSV        |
+| `FotonCashFlow::Services::SummaryService` | Cálculo de totais e gráficos    | Coleção de Issues      | Dados agregados      |
 
-#### 3. **Helpers (`app/helpers/cash_flow_entries_helper.rb`)**
+#### 3. **Helpers (`app/helpers/foton_cash_flow/entries_helper.rb`)**
 - **Função**: Lógica de apresentação
 - **Recursos**:
-  - Formatação de valores monetários
-  - Geração de labels para gráficos
-  - Cache de IDs de campos customizados
+  - Formatação de dados para a UI (moeda, datas, tipos de transação)
+  - Geração de coleções para selects de formulários
+  - Lógica de classes CSS condicionais
   - Internacionalização de textos
 
-#### 4. **Views (`app/views/cash_flow_entries/`)**
+#### 4. **Views (`app/views/foton_cash_flow/entries/`)**
 - **Estrutura**:
   - `index.html.erb`: Dashboard principal
-  - `_filters.html.erb`: Componente de filtros reutilizável
-  - `_summary.html.erb`: Cards de totais e gráficos
+  - `_table.html.erb`: Tabela de lançamentos
+  - `_charts.html.erb`: Contêineres para os gráficos
+  - `_form.html.erb`: Formulário de criação/edição
   - `import_form.html.erb`: Formulário de importação
 
-#### 5. **Tarefas (`lib/tasks/`)**
+#### 5. **Tarefas (`lib/tasks/` - Scripts Python)**
 - **Função**: Automatização de operações
 - **Exemplos**:
-  - `install.rake`: Migrações e configuração inicial
-  - `update.rake`: Atualização segura do plugin
-  - `remove.rake`: Limpeza de dados e configurações
+  - `install_plugin.py`: Instalação completa (migrações, assets, restart)
+  - `update_plugin.py`: Atualização do código e da base de dados
+  - `remove_plugin.py`: Remoção segura do plugin
 
 ---
 
@@ -126,10 +128,11 @@ graph TD
 2. **Padrão de Desenho Service Layer**:
    ```ruby
    # Exemplo de uso no controller
-   def index
-     @issues = CashFlowQueryBuilder.new(filter_params).build
-     @summary = CashFlowSummaryService.new(@issues).calculate
-   end
+  def index
+    @query_service = FotonCashFlow::Services::QueryBuilder.new(filter_params)
+    @issues = @query_service.build
+    @summary = FotonCashFlow::Services::SummaryService.new(@issues).calculate
+  end
    ```
 
 3. **Cache Estratégico**:
@@ -159,12 +162,12 @@ graph TD
 ```mermaid
 sequenceDiagram
     Usuário->>Controller: GET /cash_flow_entries
-    Controller->>QueryBuilder: filter_params
-    QueryBuilder->>Database: Query otimizada
-    Database-->>QueryBuilder: Resultados
-    QueryBuilder-->>Controller: Coleção de Issues
-    Controller->>SummaryService: Processar dados
-    SummaryService-->>Controller: Totais + Gráficos
+    Controller->>Service: QueryBuilder.new(filter_params)
+    Service->>Database: Query otimizada
+    Database-->>Service: Resultados
+    Service-->>Controller: Coleção de Issues
+    Controller->>Service: SummaryService.new(issues)
+    Service-->>Controller: Totais + Gráficos
     Controller->>View: Renderizar dashboard
     View-->>Usuário: HTML + Assets
 ```

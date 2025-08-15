@@ -82,7 +82,7 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
   - `controllers/`: Orquestram as páginas (ex: `cash_flow_page_controller.js`).
   - `managers/`: Gerenciam a lógica de negócio (filtros, visualização, dados).
   - `components/`: Componentes de UI reutilizáveis (popups, etc.).
-  - `cash_flow_dashboard.js`: Lógica para a renderização dos gráficos do dashboard.
+  - `cash_flow_charts.js`: Lógica para a renderização dos gráficos do dashboard.
 
 > [!TIP]
 > Para uma documentação técnica detalhada sobre os scripts, consulte o `Readme.md` na pasta `assets/javascripts`.

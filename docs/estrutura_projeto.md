@@ -68,9 +68,10 @@ O Plugin foton Fluxo de Caixa é uma solução avançada para gerenciamento fina
 │               └── _cash_flow_assets.html.erb
 ├── assets
 │   ├── javascripts
-│   │   ├── application.js
-│   │   ├── cash_flow_dashboard.js
-│   │   ├── cash_flow_main.js
+│   │   ├── application.js         # Ponto de entrada (roteador de controllers)
+│   │   ├── cash_flow_charts.js    # Lógica dos gráficos (Chart.js)
+│   │   ├── cash_flow_main.js      # Lógica da página principal (filtros, interações)
+│   │   ├── cash_flow_settings.js  # Lógica da página de configurações
 │   │   └── README.md
 │   └── stylesheets
 │       ├── cash_flow_main.css
@@ -145,7 +146,6 @@ Principal diretório da aplicação, seguindo a convenção Rails:
 - **controllers/**
   - `cash_flow_entries_controller.rb`: Controlador principal do plugin. Gerencia o CRUD de lançamentos financeiros (Issues), filtros dinâmicos, importação/exportação CSV e permissões.
   - `cash_flow_settings_controller.rb`: Interface administrativa para configurações do plugin.
-  - `admin/cash_flow_settings_controller.rb`: Configurações avançadas administrativas.
 
 - **helpers/**
   - `cash_flow_entries_helper.rb`: Métodos auxiliares para views, incluindo formatação de valores, datas, tipos e categorias.
@@ -154,20 +154,21 @@ Principal diretório da aplicação, seguindo a convenção Rails:
 - **views/**
   - **cash_flow_entries/**
     - `index.html.erb`: Tela principal com dashboard, filtros, tabela de lançamentos e ações.
+    - `_charts.html.erb`: Partial que renderiza os contêineres dos gráficos.
     - `_form.html.erb`: Partial de formulário reutilizado para criação e edição de lançamentos (Issues).
     - `new.html.erb`, `edit.html.erb`: Usam o partial `_form.html.erb` para criar/editar lançamentos.
     - `import_form.html.erb`: Interface para importação de lançamentos via CSV.
-    - (Outros partials auxiliares, como `_filter_header.html.erb`, para filtros avançados.)
   - **cash_flow_settings/**: Views administrativas para configuração do plugin.
-  - **settings/**: Configurações gerais do plugin.
 
 ### Diretório `assets/`
 
 Recursos estáticos e bibliotecas:
 
 - **javascripts/**
-  - `cash_flow_main.js`: JS principal para filtros, interações e lógica geral (sem dependências externas).
-  - `cash_flow_dashboard.js`: JS exclusivo para gráficos (Chart.js).
+  - `application.js`: Ponto de entrada que inicializa os scripts da página correta.
+  - `cash_flow_main.js`: Lógica interativa da página principal (filtros, modais, etc.).
+  - `cash_flow_charts.js`: Inicialização e gerenciamento dos gráficos do dashboard (usando Chart.js).
+  - `cash_flow_settings.js`: Lógica para a página de configurações (ex: adicionar categorias dinamicamente).
 
 - **stylesheets/**
   - `cash_flow_main.css`: CSS principal, unificado, documentado e sem dependências externas.
@@ -187,9 +188,11 @@ Recursos estáticos e bibliotecas:
 
 ### Diretório `lib/`
 
-- **redmine_cash_flow_pro/**
+- **foton_cash_flow/**
 
-  - `hooks.rb`: Integração com hooks do Redmine para carregamento de recursos e extensibilidade.
+  - `hooks.rb`: Integração com hooks do Redmine para carregamento de assets e extensibilidade.
+  - `patches/`: Módulos que estendem classes do core do Redmine (ex: `IssuePatch`).
+  - `services/`: Classes que encapsulam a lógica de negócio (ex: `Importer`, `QueryBuilder`).
 
 ### Raiz do Projeto
 
