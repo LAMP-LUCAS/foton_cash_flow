@@ -18,8 +18,10 @@ module FotonCashFlow
 
       REQUIRED_HEADERS = [:description].freeze # Apenas descrição é realmente obrigatória para criar o alerta
 
-      def initialize(file_content, user, project, resolutions: {}, original_filename: 'import.csv')
-        @file_content = file_content
+      def initialize(file_content_binary, user, project, resolutions: {}, original_filename: 'import.csv')
+        # Força a interpretação do conteúdo do arquivo como UTF-8.
+        # Isso é crucial para lidar com arquivos que contêm caracteres acentuados.
+        @file_content = file_content_binary.force_encoding('UTF-8')
         @user = user
         @project = project
         @resolutions = resolutions
@@ -28,7 +30,7 @@ module FotonCashFlow
         @header_map = {}
         @errors = []
         @newly_created_categories = []
-        @cf_cache = cache_custom_fields
+        @cf_objects = cache_custom_field_objects # Alterado para buscar os objetos
         Rails.logger.info "[FOTON_CASH_FLOW][Importer] Initialized with resolutions: #{@resolutions.inspect}"
       end
 
@@ -167,11 +169,18 @@ module FotonCashFlow
         }
 
         # Garante que os custom fields tenham valores válidos
+        category_cf_object = @cf_objects[:category]
+        category_value_to_assign = if category_cf_object&.multiple?
+                                     resolved_category_strings
+                                   else
+                                     resolved_category_strings.first
+                                   end
+
         custom_field_values = {}
-        custom_field_values[@cf_cache[:entry_date]] = parsed_date if @cf_cache[:entry_date]
-        custom_field_values[@cf_cache[:amount]] = parsed_amount if @cf_cache[:amount]
-        custom_field_values[@cf_cache[:transaction_type]] = resolved_type_string if @cf_cache[:transaction_type]
-        custom_field_values[@cf_cache[:category]] = resolved_category_strings if @cf_cache[:category]
+        custom_field_values[@cf_objects[:entry_date]&.id] = parsed_date if @cf_objects[:entry_date]
+        custom_field_values[@cf_objects[:amount]&.id] = parsed_amount if @cf_objects[:amount]
+        custom_field_values[@cf_objects[:transaction_type]&.id] = resolved_type_string if @cf_objects[:transaction_type]
+        custom_field_values[@cf_objects[:category]&.id] = category_value_to_assign if @cf_objects[:category]
 
         issue_attributes[:custom_field_values] = custom_field_values
 
@@ -221,7 +230,7 @@ module FotonCashFlow
           
           # FORÇAR RELOAD do campo para garantir que as mudanças sejam refletidas
           if @cf_cache[:category]
-            category_cf = CustomField.find(@cf_cache[:category])
+            category_cf = CustomField.find(@cf_objects[:category].id)
             Rails.logger.info "[FOTON_CASH_FLOW][Importer] Categories after creation: #{category_cf.possible_values.inspect}"
           end
         end
@@ -245,6 +254,13 @@ module FotonCashFlow
           return false
         end
         
+        # VERIFICAÇÃO DE ENCODING: Garante que o arquivo é UTF-8 válido.
+        # Se não for, o arquivo provavelmente foi salvo com uma codificação incompatível (ex: ISO-8859-1).
+        unless @file_content.valid_encoding?
+          @errors << I18n.t('foton_cash_flow.errors.invalid_encoding')
+          return false
+        end
+        
         unless File.extname(@original_filename).casecmp('.csv').zero?
           @errors << I18n.t('foton_cash_flow.errors.invalid_file_format', format: '.csv')
           return false
@@ -254,7 +270,7 @@ module FotonCashFlow
       end
 
       def dependencies_met?
-        if @cf_cache.values.any?(&:nil?) || FotonCashFlow::SettingsHelper.finance_tracker_id.blank?
+        if @cf_objects.values.any?(&:nil?) || FotonCashFlow::SettingsHelper.finance_tracker_id.blank?
           @errors << I18n.t('foton_cash_flow.errors.dependencies_not_met')
           return false
         end
@@ -289,12 +305,12 @@ module FotonCashFlow
         ';' # Caso contrário, assume o padrão ponto e vírgula.
       end
 
-      def cache_custom_fields
+      def cache_custom_field_objects
         {
-          entry_date: FotonCashFlow::SettingsHelper.cf_id(:entry_date),
-          amount: FotonCashFlow::SettingsHelper.cf_id(:amount),
-          transaction_type: FotonCashFlow::SettingsHelper.cf_id(:transaction_type),
-          category: FotonCashFlow::SettingsHelper.cf_id(:category)
+          entry_date: CustomField.find_by(id: FotonCashFlow::SettingsHelper.cf_id(:entry_date)),
+          amount: CustomField.find_by(id: FotonCashFlow::SettingsHelper.cf_id(:amount)),
+          transaction_type: CustomField.find_by(id: FotonCashFlow::SettingsHelper.cf_id(:transaction_type)),
+          category: CustomField.find_by(id: FotonCashFlow::SettingsHelper.cf_id(:category))
         }
       end
 
@@ -349,7 +365,7 @@ module FotonCashFlow
       def create_new_category(value)
         Rails.logger.info "[FOTON_CASH_FLOW][Importer] Attempting to create category: '#{value}'"
         
-        category_cf = CustomField.find_by(id: @cf_cache[:category])
+        category_cf = @cf_objects[:category]
         unless category_cf&.field_format == 'list'
           Rails.logger.error "[FOTON_CASH_FLOW][Importer] Category custom field not found or not a list"
           return false
@@ -387,7 +403,7 @@ module FotonCashFlow
       
       # NOVO: Método para criar novos tipos de transação se necessário
       def create_new_transaction_type(value)
-        transaction_type_cf = CustomField.find_by(id: @cf_cache[:transaction_type])
+        transaction_type_cf = @cf_objects[:transaction_type]
         return unless transaction_type_cf&.field_format == 'list'
 
         # Normaliza o valor para minúsculo

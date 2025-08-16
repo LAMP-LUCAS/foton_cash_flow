@@ -204,7 +204,8 @@ class ImportFormController {
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest' // Adicionar este cabeçalho também é uma boa prática
         }
       });
       const result = await response.json();

@@ -8,6 +8,9 @@ module FotonCashFlow
 
     before_action :find_project, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
     before_action :authorize_cash_flow, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
+    # Garante que o usuário esteja logado para as ações de importação
+    before_action :require_login, only: [:import_form, :import_preview, :import_finalize]
+
     before_action :filter_params, only: [:index, :export] 
     before_action :check_dependencies_and_set_flash, only: [:index]
     #before_action :ensure_cash_flow_dependencies

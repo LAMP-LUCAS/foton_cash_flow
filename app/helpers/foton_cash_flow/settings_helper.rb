@@ -369,11 +369,11 @@ module FotonCashFlow
       last_dot_pos = sanitized_str.rindex('.')
 
       if last_comma_pos && (!last_dot_pos || last_comma_pos > last_dot_pos)
-        # Formato brasileiro detectado: remove pontos de milhar e troca a vírgula decimal.
-        sanitized_str.gsub!('.', '').tr!(',', '.')
+        # Formato brasileiro detectado: remove pontos de milhar e troca a vírgula decimal. (Usa gsub/tr sem '!')
+        sanitized_str = sanitized_str.gsub('.', '').tr(',', '.')
       else
-        # Formato americano ou sem separador de milhar: apenas remove as vírgulas.
-        sanitized_str.gsub!(',', '')
+        # Formato americano ou sem separador de milhar: apenas remove as vírgulas. (Usa gsub sem '!')
+        sanitized_str = sanitized_str.gsub(',', '')
       end
       
       # 3. Tenta a conversão final. Se falhar, retorna 0.0 para não interromper a importação.
@@ -383,6 +383,29 @@ module FotonCashFlow
         Rails.logger.warn "[FOTON_CASH_FLOW][SettingsHelper] Falha ao converter o valor monetário: '#{value_str}'. Usando 0.0 como padrão."
         BigDecimal('0.0')
       end
+    end
+
+    # NOVO MÉTODO:
+    # Converte uma string de moeda para BigDecimal, mas retorna `nil` em caso de falha.
+    # Ideal para validações, pois permite diferenciar um valor inválido de um valor zero.
+    def self.parse_currency_to_decimal_or_nil(value_str)
+      return nil if value_str.blank?
+
+      sanitized_str = value_str.to_s.gsub(/[^\d,\.]/, '')
+
+      last_comma_pos = sanitized_str.rindex(',')
+      last_dot_pos = sanitized_str.rindex('.')
+
+      if last_comma_pos && (!last_dot_pos || last_comma_pos > last_dot_pos)
+        sanitized_str = sanitized_str.gsub('.', '').tr(',', '.')
+      else
+        sanitized_str = sanitized_str.gsub(',', '')
+      end
+
+      BigDecimal(sanitized_str)
+    rescue ArgumentError
+      # Retorna nil se a string, mesmo após sanitizada, não for um número válido.
+      nil
     end
     
     def self.cf_id(key)
