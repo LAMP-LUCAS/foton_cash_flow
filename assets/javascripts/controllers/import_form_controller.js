@@ -295,7 +295,10 @@ class ImportFormController {
       item.resolution_options.forEach(opt => select.appendChild(this._createElement('option', { value: opt, textContent: opt })));
       resolutionDiv.appendChild(select);
     } else {
-      resolutionDiv.textContent = this.t('action_needed');
+      // **MELHORIA:** Exibe a mensagem de erro específica vinda do backend.
+      const errorMessageSpan = this._createElement('span', { className: 'conflict-error-message' });
+      errorMessageSpan.textContent = item.message || this.t('action_needed');
+      resolutionDiv.appendChild(errorMessageSpan);
     }
     itemDiv.appendChild(resolutionDiv);
     return itemDiv;

@@ -25,8 +25,8 @@ begin
   Rails.logger.info "FotonCashFlow: Aplicando patches..."
   Issue.send(:include, FotonCashFlow::Patches::IssuePatch)
   IssueCustomField.send(:include, FotonCashFlow::Patches::IssueCustomFieldPatch)
-  IssueCustomValue.send(:include, FotonCashFlow::Patches::IssueCustomValuePatch)
-  Rails.logger.info "FotonCashFlow: Patches aplicados com sucesso."
+  CustomValue.send(:include, FotonCashFlow::Patches::CustomValuePatch)
+  Rails.logger.info "FotonCashFlow: Patches aplicados com sucesso. #{Issue.count} / #{IssueCustomField.count} / #{CustomValue.count} "
 rescue => e
   Rails.logger.error "FotonCashFlow: Erro ao aplicar patches: #{e.message}"
 end

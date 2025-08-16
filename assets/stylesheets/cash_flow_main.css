@@ -614,7 +614,13 @@
   transition: var(--transition);
 }
 .cf-modal-close-btn:hover { opacity: 1; color: var(--text-primary); }
-.cf-modal-body { padding: 20px; }
+.cf-modal-body {
+  padding: 20px;
+  max-width: 70vw;
+  max-height: 70vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}
 .cf-modal-footer {
   padding: 12px 20px;
   border-top: 1px solid var(--border-color);

@@ -352,30 +352,37 @@ module FotonCashFlow
     # MÉTODOS DE AJUDA
     # -----------------------------------------------------------------
     
-    # Método para converter uma string de moeda no formato BR para BigDecimal de forma robusta
+    # MÉTODO CORRIGIDO:
+    # Converte uma string de moeda em diversos formatos para BigDecimal de forma robusta.
+    # Lida com "R$ 1.000,00", "1,000.00", "1000,00", "1000.00" e outros.
     def self.parse_currency_to_decimal(value_str)
       return BigDecimal('0.0') if value_str.blank?
-      
-      # Remove caracteres não numéricos exceto vírgula, ponto e sinal negativo
-      sanitized_str = value_str.to_s.gsub(/[^\d,\-\.]/, '')
-      
-      # Se houver vírgula e ponto, mantém apenas o último como separador decimal
-      if sanitized_str.count(',') > 0 && sanitized_str.count('.') > 0
-        if sanitized_str.rindex(',') > sanitized_str.rindex('.')
-          sanitized_str.gsub!('.', '') # Remove pontos (milhares)
-        else
-          sanitized_str.gsub!(',', '') # Remove vírgulas (milhares)
-        end
+
+      # 1. Remove tudo que NÃO for dígito, vírgula ou ponto.
+      #    Isso elimina "R$", espaços, etc.
+      sanitized_str = value_str.to_s.gsub(/[^\d,\.]/, '')
+
+      # 2. Verifica se o último separador (vírgula ou ponto) indica um formato brasileiro.
+      #    Se a string contém uma vírgula e ela aparece depois do último ponto,
+      #    é quase certo que o formato é brasileiro (ex: "1.000,00").
+      last_comma_pos = sanitized_str.rindex(',')
+      last_dot_pos = sanitized_str.rindex('.')
+
+      if last_comma_pos && (!last_dot_pos || last_comma_pos > last_dot_pos)
+        # Formato brasileiro detectado: remove pontos de milhar e troca a vírgula decimal.
+        sanitized_str.gsub!('.', '').tr!(',', '.')
+      else
+        # Formato americano ou sem separador de milhar: apenas remove as vírgulas.
+        sanitized_str.gsub!(',', '')
       end
       
-      # Substitui a vírgula por ponto se for o separador decimal
-      sanitized_str.gsub!(',', '.') if sanitized_str.count(',') == 1
-      
-      # Converte para BigDecimal
-      BigDecimal(sanitized_str)
-    rescue => e
-      Rails.logger.error "[FOTON_CASH_FLOW] Erro ao converter valor: #{value_str} - #{e.message}"
-      BigDecimal('0.0')
+      # 3. Tenta a conversão final. Se falhar, retorna 0.0 para não interromper a importação.
+      begin
+        BigDecimal(sanitized_str)
+      rescue ArgumentError
+        Rails.logger.warn "[FOTON_CASH_FLOW][SettingsHelper] Falha ao converter o valor monetário: '#{value_str}'. Usando 0.0 como padrão."
+        BigDecimal('0.0')
+      end
     end
     
     def self.cf_id(key)
@@ -384,6 +391,12 @@ module FotonCashFlow
     
     def self.finance_tracker_id
       Setting.plugin_foton_cash_flow['finance_tracker_id']
+    end
+
+    # Retorna o objeto Tracker financeiro com base no ID salvo nas configurações.
+    def self.finance_tracker
+      tracker_id = finance_tracker_id
+      tracker_id ? Tracker.find_by(id: tracker_id) : nil
     end
 
     def self.internal_finance_project_id

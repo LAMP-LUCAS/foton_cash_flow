@@ -6,7 +6,7 @@ require_dependency 'custom_value'
 
 module FotonCashFlow
   module Patches
-    module IssueCustomValuePatch
+    module CustomValuePatch
       extend ActiveSupport::Concern
 
       included do
