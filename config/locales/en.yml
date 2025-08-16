@@ -111,6 +111,7 @@ en:
       sync_explanation: "Do you want to synchronize the basic settings for the plugin to start?"
       delete_entry_failed: "Unable to delete cash flow entry."
       showing_entries: "Showing %{count} of %{total} entries"
+      table_summary: "Showing %{filtered} of %{total} total entries"
       no_projects:
         title: "No Projects Found"
         message: "To create a cash flow entry, you first need to create a project in Redmine."

@@ -253,6 +253,15 @@
   background-color: var(--bg-surface);
   overflow: hidden;
 }
+
+.cf-table-summary {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: right;
+  background-color: var(--bg-main);
+}
+
 .cf-table-wrapper {
   max-height: 75vh;
   overflow: auto;
@@ -261,6 +270,7 @@
   width: 100%;
   border-collapse: collapse;
 }
+
 .cf-table th, .cf-table td {
   padding: 12px 16px;
   text-align: left;
@@ -270,6 +280,29 @@
 .cf-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* Garante que o conteúdo da coluna de descrição esteja sempre alinhado à esquerda. */
+.cf-table .description-column {
+  text-align: left;
+}
+
+.cf-table .description-column a {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 16px;
+  background-color: var(--pill-bg-green);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none !important; /* Garante que o sublinhado seja removido */
+  transition: var(--transition);
+}
+
+.cf-table .description-column a:hover {
+  background-color: var(--pill-bg-blue);
+  color: var(--pill-text-blue);
+  transform: translateY(-2px) scale(1.05); /* Animação de salto e crescimento */
+}
+
 .cf-table thead th {
   position: sticky;
   top: 0;
@@ -280,6 +313,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   z-index: 2; /* Acima do conteúdo da tabela */
+  text-align: center;
 }
 .th-content {
   position: relative;
@@ -289,8 +323,7 @@
 }
 .column-title {
   display: block;
-  margin: 0.4rem;
-  text-align: left;
+  margin: 0.4rem 0;
 }
 .column-icons {
   position: absolute;
@@ -309,7 +342,7 @@
 }
 .cf-table .value-column.revenue { color: var(--success-color); font-weight: 500; }
 .cf-table .value-column.expense { color: var(--error-color); font-weight: 500; }
-.cf-table .actions-column { text-align: right; }
+.cf-table .actions-column { text-align: center; }
 .cf-table .actions-column a { margin-left: 12px; }
 
 /* REVISADO: Paginação */
@@ -557,7 +590,16 @@
   line-height: 1.4;
   white-space: nowrap;
   text-transform: capitalize;
-  cursor: default; /* Não são clicáveis por padrão */
+  cursor: pointer; /* Altera o cursor para indicar interatividade */
+  transition: var(--transition); /* Adiciona transição para a animação */
+}
+
+/* Animação de hover para as pílulas */
+.cf-table .status-tag:hover,
+.cf-table .transaction-tag:hover,
+.cf-table .category-tag:hover {
+  transform: translateY(-2px) scale(1.08);
+  filter: brightness(1.05); /* Um leve brilho para complementar */
 }
 .cf-table .transaction-tag.revenue { background-color: var(--pill-bg-green); color: var(--pill-text-green); }
 .cf-table .transaction-tag.expense { background-color: var(--pill-bg-red); color: var(--pill-text-red); }
@@ -1134,4 +1176,75 @@ body.cf-modal-open {
   .cf-charts-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   14. CONTROLES DE PAGINAÇÃO (REDMINE HELPERS)
+   ========================================================================== */
+
+.cf-pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  /* Garante que os cantos inferiores do container da tabela fiquem arredondados */
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  margin-top: -1px; /* Sobrepõe a borda inferior do table-wrapper */
+}
+
+.cf-pagination-controls .pagination {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Espaçamento entre os elementos da paginação */
+}
+
+.cf-pagination-controls .pagination a,
+.cf-pagination-controls .pagination span.current,
+.cf-pagination-controls .pagination span.gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.cf-pagination-controls .pagination a:hover {
+  color: var(--primary-color);
+  background: var(--pill-bg-blue);
+}
+
+.cf-pagination-controls .pagination span.current {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.cf-pagination-controls .per-page-selector {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.cf-pagination-controls .per-page-selector a.selected {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.cf-pagination-controls .per-page-selector .separator {
+  color: var(--border-color);
+  margin: 0 8px;
+  font-weight: 300;
 }

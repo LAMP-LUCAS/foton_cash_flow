@@ -33,6 +33,12 @@ module FotonCashFlow
         @bar_chart_labels = @bar_chart_revenue = @bar_chart_expense = @pie_chart_labels = @pie_chart_data = []
       else
         begin
+          # --- ADICIONADO: Cálculo do total de lançamentos do projeto ---
+          # Esta query simples e eficiente conta todos os lançamentos do projeto,
+          # independentemente dos filtros aplicados pelo usuário.
+          @total_project_entries_count = Issue.where(project_id: @project.id, tracker_id: FotonCashFlow::SettingsHelper.finance_tracker_id).count
+          # ----------------------------------------------------------------
+
           @query = FotonCashFlow::Services::QueryBuilder.new(params, User.current).build
           
           # --- Adiciona a nova lógica de filtragem por servidor aqui ---
