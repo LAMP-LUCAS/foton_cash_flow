@@ -10,7 +10,6 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 > [!TIP]
 > Consulte a [estrutura detalhada do projeto e explicação dos arquivos](estrutura_projeto.md) para entender como o plugin está organizado.
-
 > [!TIP]
 > Consulte a [Estrutura dos Dados do Plugin](estrutura_dados.md) para entender como os dados são armazenados e manipulados no Redmine.
 
@@ -91,20 +90,32 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 ## Instalação, Atualização e Remoção Automatizadas
 
-Utilize os scripts Python disponíveis na raiz do plugin:
+Para simplificar o gerenciamento do plugin, fornecemos scripts de automação e um `Makefile` de conveniência.
 
-- `install_plugin.py`: Instala o plugin (migrações, assets e reinicialização do container).
-- `update_plugin.py`: Atualiza o plugin (git pull, migrações, assets e reinicialização).
-- `remove_plugin.py`: Remove o plugin (migrações reversas, apaga a pasta e reinicia o container).
+### Passo 1: Copiar o Makefile (Apenas uma vez)
 
-Esses scripts utilizam as configurações do arquivo `.config` (nome do container, caminhos, etc). Edite conforme necessário.
+O repositório do plugin inclui um arquivo `Makefile` para criar atalhos fáceis de usar. Copie-o da pasta do plugin para a pasta raiz da sua instalação do Redmine.
+
+```bash
+# Estando na pasta raiz do Redmine
+cp plugins/foton_cash_flow/Makefile .
+```
+
+### Passo 2: Usar os Comandos
+
+Após copiar o `Makefile`, você pode gerenciar o plugin com os seguintes comandos simples, executados a partir da raiz do Redmine:
 
 **Exemplo de uso:**
 
 ```bash
-python install_plugin.py
-python update_plugin.py
-python remove_plugin.py
+# Instala ou executa as migrações do plugin
+make install plugin=foton_cash_flow
+
+# Atualiza o plugin a partir do repositório Git
+make update plugin=foton_cash_flow
+
+# Desinstala completamente o plugin
+make uninstall plugin=foton_cash_flow
 ```
 
 **Atenção:**

@@ -8,6 +8,9 @@ module FotonCashFlow
 
     before_action :find_project, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
     before_action :authorize_cash_flow, only: [:index, :import_form, :import, :export, :import_preview, :import_finalize]
+    # Garante que o usuário esteja logado para as ações de importação
+    before_action :require_login, only: [:import_form, :import_preview, :import_finalize]
+
     before_action :filter_params, only: [:index, :export] 
     before_action :check_dependencies_and_set_flash, only: [:index]
     #before_action :ensure_cash_flow_dependencies
@@ -30,6 +33,12 @@ module FotonCashFlow
         @bar_chart_labels = @bar_chart_revenue = @bar_chart_expense = @pie_chart_labels = @pie_chart_data = []
       else
         begin
+          # --- ADICIONADO: Cálculo do total de lançamentos do projeto ---
+          # Esta query simples e eficiente conta todos os lançamentos do projeto,
+          # independentemente dos filtros aplicados pelo usuário.
+          @total_project_entries_count = Issue.where(project_id: @project.id, tracker_id: FotonCashFlow::SettingsHelper.finance_tracker_id).count
+          # ----------------------------------------------------------------
+
           @query = FotonCashFlow::Services::QueryBuilder.new(params, User.current).build
           
           # --- Adiciona a nova lógica de filtragem por servidor aqui ---

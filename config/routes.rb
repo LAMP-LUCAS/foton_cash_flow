@@ -24,6 +24,9 @@ RedmineApp::Application.routes.draw do
   # Agrupa todas as rotas globais sob o namespace 'foton_cash_flow'
   # Isso evita conflitos com outras rotas do Redmine e organiza o código.
   namespace :foton_cash_flow do
+    # Define a rota principal para o menu superior. Gera o path /foton_cash_flow
+    root to: 'entries#index'
+
     # Rotas para o controlador de diagnósticos
     resources :diagnostics, only: [:index] do
       post 'run_sync', on: :collection
@@ -36,5 +39,5 @@ RedmineApp::Application.routes.draw do
   # === ROTA DE ACESSO AO ARQUIVO DE DOWNLOAD ===
   # Esta rota é responsável por fornecer o arquivo de template para download.
   get 'foton_cash_flow/download_template', to: 'fcf_downloads#template'
-
+  
 end
