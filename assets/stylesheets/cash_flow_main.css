@@ -263,7 +263,7 @@
 }
 
 .cf-table-wrapper {
-  max-height: 75vh;
+  max-height: 40vh;
   overflow: auto;
 }
 .cf-table {
@@ -345,57 +345,129 @@
 .cf-table .actions-column { text-align: center; }
 .cf-table .actions-column a { margin-left: 12px; }
 
-/* REVISADO: Paginação */
-.cf-pagination-container {
-  padding: 16px;
+/* --- Container Principal --- */
+/* A base se mantém, pois está boa. Apenas garantimos o alinhamento com Flexbox. */
+.cf-pagination-controls {
+  display: flex;
+  justify-content: space-between; /* Números da página à esquerda, seletor à direita */
+  align-items: center;
+  flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas pequenas */
+  gap: 16px; /* Espaçamento entre os grupos de paginação e seletor */
+  padding: 12px 16px;
   border-top: 1px solid var(--border-color);
-  background-color: var(--bg-surface);
+
 }
-.cf-pagination {
+
+/* --- Grupo de links: Números da página e Seletor "por página" --- */
+/* Estilo comum para os dois grupos de links para manter a consistência */
+.pagination,
+.per-page-selector {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 8px; /* Espaçamento entre os botões/links */
 }
-.cf-pagination-btn, .cf-pagination-page {
+
+.per-page-selector .separator {
+  color: var(--border-color);
+}
+
+/* --- NOVO: Base para a lista de páginas gerada pelo Redmine --- */
+.pagination ul.pages {
+  list-style: none; /* Remove os pontos da lista */
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espaçamento entre os botões */
+}
+
+/* --- Botões e Links Individuais --- */
+/*
+  MELHORIA: Estilos unificados para os botões de página E para os links do seletor.
+  Isso garante que "25", "50", "Todos" tenham a mesma aparência dos botões "1", "2", "3".
+*/
+.cf-pagination-btn,
+.cf-pagination-page,
+.pagination ul.pages a,
+.pagination ul.pages li.previous span, /* Botão "Anterior" desabilitado */
+.pagination ul.pages li.current span,  /* Página atual */
+.pagination ul.pages li.spacer span,   /* Reticências "..." */
+.per-page-selector a,
+.per-page-selector span.selected { /* O `span.selected` é o item ativo no seletor */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 36px;
-  height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  /* MELHORIA: Borda transparente para evitar que o botão "salte" no hover */
+  border: 1px solid transparent;
+  border-radius: 6px; /* Um pouco mais arredondado para um look mais moderno */
   background: var(--bg-surface);
   color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  /* MELHORIA: Transição mais suave, incluindo transform e box-shadow */
+  transition: all 0.2s ease-in-out;
+  text-decoration: none; /* Garante que os links não tenham sublinhado */
 }
-.cf-pagination-btn:hover:not(.disabled), .cf-pagination-page:hover:not(.active) {
+
+/* --- Efeitos de Hover --- */
+/* MELHORIA: Efeito de "levantar" e sombra suave no hover para mais interatividade */
+.cf-pagination-btn:hover:not(.disabled),
+.cf-pagination-page:hover:not(.active),
+.per-page-selector a:hover,
+.pagination ul.pages a:hover,
+.per-page-selector a:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
   background: var(--pill-bg-blue);
+  transform: translateY(-2px); /* Efeito de elevação */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
-.cf-pagination-btn.disabled {
+
+/* --- Estado Ativo --- */
+/* MELHORIA: Adicionado `font-weight: bold` para maior destaque */
+.cf-pagination-page.active,
+.per-page-selector span.selected,
+.pagination ul.pages li.current span,
+.per-page-selector span.selected {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  border-color: var(--primary-color);
+  font-weight: bold; /* Destaque extra para o item ativo */
+  cursor: default;
+}
+
+/* --- Estado Desabilitado --- */
+.cf-pagination-btn.disabled,
+.pagination ul.pages li.previous span,
+.pagination ul.pages li.next span,
+.pagination .items {
   opacity: 0.6;
   cursor: not-allowed;
   background-color: var(--bg-main);
 }
-.cf-pagination-page.active {
-  background: var(--primary-color);
-  color: var(--text-on-primary);
-  border-color: var(--primary-color);
-  font-weight: 600;
+
+.pagination .items {
+  align-self: center;
+  text-align: center;
 }
-.cf-pagination-ellipsis {
+
+/* --- Separadores e Elipse (...) --- */
+.cf-pagination-ellipsis,
+.pagination ul.pages li.spacer span {
   display: flex;
   align-items: center;
-  height: 36px;
-  padding: 0 4px;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
   color: var(--text-tertiary);
+}
+
+/* Estilo para o separador " | " no seletor por página */
+.per-page-selector .separator {
+    color: var(--border-color);
 }
 
 /* ==========================================================================

@@ -74,6 +74,18 @@ module FotonCashFlow
       end
     end
 
+    # Formata a data de lançamento para ser usada em atributos 'data-*' do HTML.
+    # Retorna uma string no formato 'YYYY-MM-DD' ou uma string vazia se a data for nula.
+    def formatted_data_attribute_date(issue)
+      # O método `cash_flow_entry_date_object` já parece tentar converter para um objeto Date.
+      date_object = issue.cash_flow_entry_date_object
+
+      # Se o objeto responder a `strftime` (ou seja, for um objeto Date/Time), formata-o.
+      # Caso contrário, retorna uma string vazia para evitar imprimir o valor bruto.
+      return date_object.strftime('%Y-%m-%d') if date_object.respond_to?(:strftime)
+      ''
+    end
+
     # =====================================================
     #  COLEÇÕES PARA FORMULÁRIOS
     # =====================================================

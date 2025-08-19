@@ -70,15 +70,25 @@ module FotonCashFlow
       # Contagem correta de issues, garantindo que a contagem seja de IDs distintos
       # para evitar contagens infladas por JOINs na query.
       @issue_count = @query.distinct.count
-      @limit = per_page_option  # || 25 # Garante um valor padrão para o limite
-      @issue_pages = Paginator.new @issue_count, @limit, params['page']
-      @offset = @issue_pages.offset
 
-      # --- CORREÇÃO E OTIMIZAÇÃO ---
-
-      # 1. Obter apenas os IDs únicos das issues para a página atual.
-      #    O .distinct é crucial para evitar que a mesma issue apareça múltiplas vezes na tabela.
-      paginated_issue_ids = @query.distinct.limit(@limit).offset(@offset).pluck(:id)
+      # --- LÓGICA DE PAGINAÇÃO CONDICIONAL ---
+      if params[:per_page].to_s == 'all'
+        # Se "Exibir Todos" estiver ativo, não há paginação.
+        @limit = @issue_count
+        # CORREÇÃO: Criamos um objeto Paginator mesmo no modo "todos" para que os helpers da view
+        # (como per_page_links) continuem funcionando. O limite é o próprio total de itens.
+        @issue_pages = Paginator.new @issue_count, @limit, params['page']
+        @offset = @issue_pages.offset
+        # Busca todos os IDs, sem limit/offset.
+        paginated_issue_ids = @query.distinct.pluck(:id)
+        flash.now[:warning] = l('foton_cash_flow.warnings.show_all_performance') if @issue_count > 200
+      else
+        # Comportamento padrão com paginação.
+        @limit = per_page_option
+        @issue_pages = Paginator.new(@issue_count, @limit, params['page'])
+        @offset = @issue_pages.offset
+        paginated_issue_ids = @query.distinct.limit(@limit).offset(@offset).pluck(:id)
+      end
 
       # 2. Fazer uma query limpa usando esses IDs para carregar os objetos
       #    com as associações (eager loading), resolvendo o problema de N+1.
@@ -348,7 +358,7 @@ module FotonCashFlow
     def filter_params
       @filter_params = params.permit(
         :from_date, :to_date, :search, :project_id, :author, :page,
-        :query_transaction_type, :query_status, :query_category
+        :query_id, :query_transaction_type, :query_status, :query_category
       )
       Rails.logger.debug "[FOTON_CASH_FLOW][EntriesController] [filter_params] Parâmetros filtrados: #{@filter_params.inspect}"
     end
@@ -441,6 +451,11 @@ module FotonCashFlow
 
     def apply_server_side_filters(query)
       filtered_query = query
+      # Filtro por ID da issue
+      if params[:query_id].present?
+        # Permite filtrar por um ou mais IDs, separados por vírgula
+        filtered_query = filtered_query.where(id: params[:query_id].split(','))
+      end
       # Filtro por tipo de transação (custom field)
       if params[:query_transaction_type].present?
         cf_id = FotonCashFlow::SettingsHelper.cf_id(:transaction_type)

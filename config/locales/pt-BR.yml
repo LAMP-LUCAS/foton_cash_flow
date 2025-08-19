@@ -1,5 +1,6 @@
 pt-BR:
   # Chave usada no menu de administração do Redmine (init.rb)
+  label_all: "Todos"
   # Informações do Plugin & Menus
   label_cash_flow: "Fluxo de Caixa"
   label_foton_cash_flow: "FOTON Fluxo de Caixa"
