@@ -43,4 +43,17 @@ def run_command(cmd, working_dir):
         # Re-lança a exceção para que o script chamador possa tratá-la (ou parar)
         raise
 
-    
+def publish_plugin_assets(cfg, project_root, step_message):
+    """
+    Tenta executar a tarefa 'redmine:plugins:assets'.
+    Em versões mais recentes do Redmine, esta tarefa não existe mais.
+    O erro é capturado e um aviso é exibido, permitindo que o script continue.
+    """
+    print(step_message)
+    try:
+        run_command(
+            f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production",
+            working_dir=project_root
+        )
+    except CalledProcessError:
+        print("    -> Aviso: A tarefa 'redmine:plugins:assets' falhou. Isso é normal e esperado em versões mais recentes do Redmine. Continuando...")

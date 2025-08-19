@@ -2,7 +2,7 @@
 import os
 import sys
 import shutil
-from task_utils import load_config, run_command, CalledProcessError
+from task_utils import load_config, run_command, publish_plugin_assets
 
 def uninstall(plugin_name):
     """Desinstala um plugin do Redmine, revertendo migrações e removendo seus arquivos."""
@@ -22,14 +22,7 @@ def uninstall(plugin_name):
     else:
         print(f"2/4: Diretório do plugin '{plugin_path}' não encontrado. Pulando.")
 
-    print("3/4: Publicando assets (para limpar referências em retrocompatibilidade)...)...")
-    try:
-        run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production",
-            working_dir=project_root)
-    except CalledProcessError:
-        # Se o comando falhar, captura o erro, imprime um aviso e continua
-        print("    -> Aviso: A tarefa 'redmine:plugins:assets' falhou. Isso é normal e esperado em versões mais recentes do Redmine. Continuando...")
-    
+    publish_plugin_assets(cfg, project_root, "3/4: Publicando assets (para limpar referências em retrocompatibilidade)...")
 
     print("4/4: Reiniciando o Redmine...")
     run_command(f"docker compose restart {cfg['CONTAINER_NAME']}",
