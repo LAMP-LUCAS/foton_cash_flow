@@ -13,7 +13,10 @@ module FotonCashFlow
         amount: ['Valor', 'Amount', 'Value'],
         transaction_type: ['Tipo de Transação', 'Transaction Type', 'Type'],
         category: ['Categoria', 'Category'],
-        description: ['Descrição', 'Description', 'Subject'] # Adicionado para contexto
+        description: ['Descrição', 'Description', 'Subject'],
+        status: ['Status', 'Situação'],
+        responsible_name: ['Responsável', 'Responsible', 'Assigned To'],
+        attachment_name: ['Arquivo', 'Anexo', 'Comprovante', 'Attachment']
       }.freeze
 
       def initialize(file_path, project)
@@ -30,15 +33,18 @@ module FotonCashFlow
 
       def call
         # 1. Mapeia os cabeçalhos do arquivo. Se falhar, não continua.
-        return self unless map_headers_from_file
+        separator = detect_separator(@file_path)
+        return self unless map_headers_from_file(separator)
 
         # 2. Itera sobre cada linha do CSV, começando a contagem na linha 2.
-        CSV.foreach(@file_path, headers: true, col_sep: ';', encoding: 'UTF-8').with_index(2) do |row, row_number|
+        CSV.foreach(@file_path, headers: true, col_sep: separator, encoding: 'UTF-8').with_index(2) do |row, row_number|
           # Valida cada coluna relevante da linha.
           validate_entry_date(row, row_number)
           validate_amount(row, row_number)
           validate_transaction_type(row, row_number)
           validate_category(row, row_number)
+          validate_status(row, row_number)
+          # A validação de responsável é opcional, pois a lógica é de fallback
         end
 
         self # Retorna a própria instância do serviço.
@@ -48,9 +54,9 @@ module FotonCashFlow
 
       # Mapeia os cabeçalhos do arquivo CSV para as chaves internas do sistema.
       # Retorna `false` e adiciona um erro global se um cabeçalho obrigatório faltar.
-      def map_headers_from_file
+      def map_headers_from_file(separator)
         begin
-          csv_headers = CSV.read(@file_path, headers: true, col_sep: ';', encoding: 'UTF-8').headers
+          csv_headers = CSV.read(@file_path, headers: true, col_sep: separator, encoding: 'UTF-8').headers
         rescue => e
           add_conflict(
             row_number: 1,
@@ -67,6 +73,14 @@ module FotonCashFlow
           @header_map[canonical_key] = found_header if found_header
         end
         true
+      end
+      
+      # Lê a primeira linha do arquivo para determinar o separador mais provável.
+      def detect_separator(file_path)
+        first_line = File.open(file_path, 'r', &:readline)
+        # Retorna vírgula se houver mais vírgulas do que ponto e vírgulas.
+        return ',' if first_line.count(',') > first_line.count(';')
+        ';' # Caso contrário, assume o padrão ponto e vírgula.
       end
 
       # Valida a coluna 'Data do Lançamento'.
@@ -86,16 +100,22 @@ module FotonCashFlow
           return
         end
 
-        # Tenta parsear a data no formato AAAA-MM-DD
-        Date.strptime(value, '%Y-%m-%d')
-      rescue ArgumentError
-        add_conflict(
-          row_number: row_number,
-          column_name: header,
-          invalid_value: value,
-          error_type: 'invalid_date_format',
-          message: 'O formato da data é inválido. Use AAAA-MM-DD.'
-        )
+        # Tenta múltiplos formatos de data para maior flexibilidade.
+        parsed_date = begin
+          Date.parse(value)
+        rescue ArgumentError
+          begin
+            Date.strptime(value, '%B %d, %Y') # Ex: "August 19, 2024"
+          rescue ArgumentError
+            nil
+          end
+        end
+
+        unless parsed_date
+          add_conflict(row_number: row_number, column_name: header, invalid_value: value,
+                       error_type: 'invalid_date_format',
+                       message: "Formato de data inválido. Use AAAA-MM-DD ou 'Mês DD, AAAA'.")
+        end
       end
 
       # Valida a coluna 'Valor'.
@@ -167,19 +187,46 @@ module FotonCashFlow
 
         value = row[header]&.strip
         return if value.blank? # Permite categorias em branco.
-
+        
+        # Divide a string por vírgulas para lidar com múltiplas categorias.
+        categories_from_csv = value.split(',').map(&:strip).reject(&:blank?)
         valid_options = @category_cf&.possible_values || []
 
-        # Verifica se o valor está na lista de opções válidas (case-insensitive).
-        unless valid_options.any? { |opt| opt.casecmp(value) == 0 }
+        # Itera sobre cada categoria encontrada e a valida individualmente.
+        categories_from_csv.each do |category_name|
+          # Verifica se o valor está na lista de opções válidas (case-insensitive).
+          unless valid_options.any? { |opt| opt.casecmp(category_name) == 0 }
+            add_conflict(
+              row_number: row_number,
+              column_name: header,
+              invalid_value: category_name, # Conflito para a categoria específica.
+              error_type: 'value_not_in_list',
+              column_key: :category,
+              message: "A categoria '#{category_name}' não existe.",
+              resolution_options: valid_options
+            )
+          end
+        end
+      end
+
+      # Valida a coluna 'Status'.
+      def validate_status(row, row_number)
+        header = @header_map[:status]
+        return unless header
+
+        value = row[header]&.strip
+        return if value.blank? # Status pode ser em branco, usará o padrão.
+
+        # Verifica se o status existe no Redmine.
+        status_exists = IssueStatus.exists?(['LOWER(name) = ?', value.downcase])
+
+        unless status_exists
           add_conflict(
             row_number: row_number,
             column_name: header,
             invalid_value: value,
-            error_type: 'value_not_in_list',
-            column_key: :category,
-            message: "A categoria '#{value}' não existe.",
-            resolution_options: valid_options
+            error_type: 'invalid_status',
+            message: "O status '#{value}' não é válido. Deixe em branco para usar o padrão."
           )
         end
       end

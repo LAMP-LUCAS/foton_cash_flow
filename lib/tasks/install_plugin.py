@@ -1,36 +1,30 @@
-import os
-import subprocess
+# install_plugin.py
+import sys
+from task_utils import load_config, run_command, publish_plugin_assets
 
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), '.config')
 
-def load_config():
-    config = {
-        'CONTAINER_NAME': 'foton_redmine',
-        'PLUGINS_PATH': '/caminho/para/redmine/plugins',
-        'PLUGIN_DIR': 'redmine_cash_flow_pro',
-    }
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-            for line in f:
-                if '=' in line and not line.strip().startswith('#'):
-                    k, v = line.strip().split('=', 1)
-                    config[k.strip()] = v.strip()
-    return config
-
-def run(cmd):
-    print(f'Executando: {cmd}')
-    subprocess.run(cmd, shell=True, check=True)
-
-def install():
+def install(plugin_name):
+    """Instala um plugin no Redmine, executando migrações e publicando assets."""
     cfg = load_config()
-    os.chdir(cfg['PLUGINS_PATH'])
-    print('Executando migrações do plugin...')
-    run(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:migrate RAILS_ENV=production")
-    print('Publicando assets do plugin...')
-    run(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production")
-    print('Reiniciando o Redmine...')
-    run(f"docker compose restart {cfg['CONTAINER_NAME']}")
-    print('Instalação concluída!')
+    project_root = cfg['PROJECT_ROOT_PATH']
+
+    print(f"--- Instalando plugin: {plugin_name} ---")
+
+    print("1/3: Executando migrações do plugin...")
+    run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:migrate NAME={plugin_name} RAILS_ENV=production",
+        working_dir=project_root)
+
+    publish_plugin_assets(cfg, project_root, "2/3: Publicando assets do plugin (para retrocompatibilidade)...")
+
+    print("3/3: Reiniciando o Redmine...")
+    run_command(f"docker compose restart {cfg['CONTAINER_NAME']}",
+        working_dir=project_root)
+
+    print(f"Instalação do plugin '{plugin_name}' concluída! ✅")
 
 if __name__ == '__main__':
-    install()
+    if len(sys.argv) < 2:
+        print(f"Uso: python3 {os.path.basename(__file__)} <nome_do_plugin>")
+        sys.exit(1)
+    plugin_to_install = sys.argv[1]
+    install(plugin_to_install)

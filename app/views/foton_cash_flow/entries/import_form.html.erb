@@ -25,8 +25,7 @@
       <li><%= l('foton_cash_flow.import.tip_encoding') %></li>
     </ul>
 
-    <%# **CORREÇÃO:** Adiciona `format: :json` para garantir que o Rails trate a requisição como JSON. %>
-    <%= form_tag import_preview_project_cash_flow_entries_path(@project, format: :json),
+    <%= form_tag import_preview_project_cash_flow_entries_path(@project),
                  multipart: true, 
                  class: 'cf-form', 
                  id: 'import-form',

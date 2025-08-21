@@ -1,5 +1,6 @@
 pt-BR:
   # Chave usada no menu de administração do Redmine (init.rb)
+  label_all: "Todos"
   # Informações do Plugin & Menus
   label_cash_flow: "Fluxo de Caixa"
   label_foton_cash_flow: "FOTON Fluxo de Caixa"
@@ -96,8 +97,6 @@ pt-BR:
           title: "Receita vs. Despesa Mensal"
         cumulative_balance:
           title: "Saldo Acumulado"
-        cumulative_flow:
-          title: "Fluxo Acumulado"
         expense_by_category:
           title: "Despesas por Categoria"
         cumulative_flow:
@@ -118,6 +117,7 @@ pt-BR:
       sync_explanation: "Deseja sincronizar as configurações básicas para o plugin iniciar?"
       delete_entry_failed: "Não foi possível deletar o lançamento do fluxo de caixa."
       showing_entries: "Exibindo %{count} de %{total} lançamentos"
+      table_summary: "Exibindo %{filtered} de %{total} lançamentos no total"
       no_projects:
         title: "Nenhum Projeto Encontrado"
         message: "Para criar um lançamento de fluxo de caixa, você primeiro precisa criar um projeto no Redmine."
@@ -174,6 +174,7 @@ pt-BR:
       cf_id_display: "(ID: %{id})"
       details_separator: "; "
       details_wrong_format: "Formato incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
+      details_wrong_position: "Posição incorreta. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_values: "Valores possíveis incorretos. Esperado: '%{expected}', Atual: '%{actual}'."
       details_wrong_required: "Status de obrigatoriedade incorreto. Esperado: '%{expected}', Atual: '%{actual}'."
       missing_fields_summary: "Os seguintes campos personalizados estão faltando: %{fields}."

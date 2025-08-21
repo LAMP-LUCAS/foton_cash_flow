@@ -33,6 +33,10 @@
         <%# Conteúdo Primário (Tabela) %>
         <div class="cf-primary-content">
           <div class="cf-table-container">
+            <%# Adiciona o sumário de contagem de lançamentos acima da tabela %>
+            <%# <div class="cf-table-summary">
+              <span><%= l('foton_cash_flow.notices.table_summary', filtered: @issue_count, total: @total_project_entries_count) % </span>
+            </div> %>
             <div id="cf-active-filters-bar"></div>
             <div class="cf-table-wrapper">
               <%= render partial: 'table', locals: {
@@ -42,6 +46,40 @@
                     issue_pages: @issue_pages,
                     limit: @limit
                 } %>
+            </div>
+            <%# Adiciona os controles de paginação abaixo da tabela %>
+            <div class="cf-pagination-controls">
+              <%# Renderiza os links de página (1, 2, 3...). O helper não renderizará nada se houver apenas uma página. %>
+              <span class="pagination">
+                <%= pagination_links_full @issue_pages, @issue_count, per_page_links: false %>
+              </span>
+              <%# Renderiza os seletores de itens por página (25 | 50 | Todos), que ficam sempre visíveis %>
+              <span class="per-page-selector">
+                <%
+                  # Recria a lógica do helper per_page_links para evitar o erro `no block given (yield)`
+                  # 1. Pega as opções de paginação padrão (ex: [25, 50, 100])
+                  options = per_page_options(@issue_pages)
+
+                  # 2. Gera os links para as opções numéricas
+                  links = options.collect do |n|
+                    # A opção atual é a que corresponde ao limite por página, exceto se for o modo "todos"
+                    is_current = (n == @issue_pages.per_page && params[:per_page].to_s != 'all')
+
+                    if is_current
+                      content_tag('span', n.to_s, class: 'selected')
+                    else
+                      # Não mostra links para opções de página maiores que o total de itens
+                      link_to(n.to_s, url_for(params.to_unsafe_h.merge(per_page: n))) if @issue_count >= n
+                    end
+                  end.compact # .compact remove os nils gerados pelo if
+
+                  # 3. Adiciona a opção "Todos" se o total de itens for maior que a menor opção de página
+                  if @issue_count > (options.min || 0)
+                    links << (params[:per_page] == 'all' ? content_tag('span', l(:label_all), class: 'selected') : link_to(l(:label_all), url_for(params.to_unsafe_h.merge(per_page: 'all'))))
+                  end
+                %>
+                <%= links.join(content_tag('span', ' | ', class: 'separator')).html_safe %>
+              </span>
             </div>
           </div>
         </div>

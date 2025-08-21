@@ -253,14 +253,24 @@
   background-color: var(--bg-surface);
   overflow: hidden;
 }
+
+.cf-table-summary {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: right;
+  background-color: var(--bg-main);
+}
+
 .cf-table-wrapper {
-  max-height: 75vh;
+  max-height: 40vh;
   overflow: auto;
 }
 .cf-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .cf-table th, .cf-table td {
   padding: 12px 16px;
   text-align: left;
@@ -270,6 +280,29 @@
 .cf-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* Garante que o conteúdo da coluna de descrição esteja sempre alinhado à esquerda. */
+.cf-table .description-column {
+  text-align: left;
+}
+
+.cf-table .description-column a {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 16px;
+  background-color: var(--pill-bg-green);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none !important; /* Garante que o sublinhado seja removido */
+  transition: var(--transition);
+}
+
+.cf-table .description-column a:hover {
+  background-color: var(--pill-bg-blue);
+  color: var(--pill-text-blue);
+  transform: translateY(-2px) scale(1.05); /* Animação de salto e crescimento */
+}
+
 .cf-table thead th {
   position: sticky;
   top: 0;
@@ -280,6 +313,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   z-index: 2; /* Acima do conteúdo da tabela */
+  text-align: center;
 }
 .th-content {
   position: relative;
@@ -289,8 +323,7 @@
 }
 .column-title {
   display: block;
-  margin: 0.4rem;
-  text-align: left;
+  margin: 0.4rem 0;
 }
 .column-icons {
   position: absolute;
@@ -309,60 +342,132 @@
 }
 .cf-table .value-column.revenue { color: var(--success-color); font-weight: 500; }
 .cf-table .value-column.expense { color: var(--error-color); font-weight: 500; }
-.cf-table .actions-column { text-align: right; }
+.cf-table .actions-column { text-align: center; }
 .cf-table .actions-column a { margin-left: 12px; }
 
-/* REVISADO: Paginação */
-.cf-pagination-container {
-  padding: 16px;
+/* --- Container Principal --- */
+/* A base se mantém, pois está boa. Apenas garantimos o alinhamento com Flexbox. */
+.cf-pagination-controls {
+  display: flex;
+  justify-content: space-between; /* Números da página à esquerda, seletor à direita */
+  align-items: center;
+  flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas pequenas */
+  gap: 16px; /* Espaçamento entre os grupos de paginação e seletor */
+  padding: 12px 16px;
   border-top: 1px solid var(--border-color);
-  background-color: var(--bg-surface);
+
 }
-.cf-pagination {
+
+/* --- Grupo de links: Números da página e Seletor "por página" --- */
+/* Estilo comum para os dois grupos de links para manter a consistência */
+.pagination,
+.per-page-selector {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 8px; /* Espaçamento entre os botões/links */
 }
-.cf-pagination-btn, .cf-pagination-page {
+
+.per-page-selector .separator {
+  color: var(--border-color);
+}
+
+/* --- NOVO: Base para a lista de páginas gerada pelo Redmine --- */
+.pagination ul.pages {
+  list-style: none; /* Remove os pontos da lista */
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espaçamento entre os botões */
+}
+
+/* --- Botões e Links Individuais --- */
+/*
+  MELHORIA: Estilos unificados para os botões de página E para os links do seletor.
+  Isso garante que "25", "50", "Todos" tenham a mesma aparência dos botões "1", "2", "3".
+*/
+.cf-pagination-btn,
+.cf-pagination-page,
+.pagination ul.pages a,
+.pagination ul.pages li.previous span, /* Botão "Anterior" desabilitado */
+.pagination ul.pages li.current span,  /* Página atual */
+.pagination ul.pages li.spacer span,   /* Reticências "..." */
+.per-page-selector a,
+.per-page-selector span.selected { /* O `span.selected` é o item ativo no seletor */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 36px;
-  height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  /* MELHORIA: Borda transparente para evitar que o botão "salte" no hover */
+  border: 1px solid transparent;
+  border-radius: 6px; /* Um pouco mais arredondado para um look mais moderno */
   background: var(--bg-surface);
   color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  /* MELHORIA: Transição mais suave, incluindo transform e box-shadow */
+  transition: all 0.2s ease-in-out;
+  text-decoration: none; /* Garante que os links não tenham sublinhado */
 }
-.cf-pagination-btn:hover:not(.disabled), .cf-pagination-page:hover:not(.active) {
+
+/* --- Efeitos de Hover --- */
+/* MELHORIA: Efeito de "levantar" e sombra suave no hover para mais interatividade */
+.cf-pagination-btn:hover:not(.disabled),
+.cf-pagination-page:hover:not(.active),
+.per-page-selector a:hover,
+.pagination ul.pages a:hover,
+.per-page-selector a:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
   background: var(--pill-bg-blue);
+  transform: translateY(-2px); /* Efeito de elevação */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
-.cf-pagination-btn.disabled {
+
+/* --- Estado Ativo --- */
+/* MELHORIA: Adicionado `font-weight: bold` para maior destaque */
+.cf-pagination-page.active,
+.per-page-selector span.selected,
+.pagination ul.pages li.current span,
+.per-page-selector span.selected {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  border-color: var(--primary-color);
+  font-weight: bold; /* Destaque extra para o item ativo */
+  cursor: default;
+}
+
+/* --- Estado Desabilitado --- */
+.cf-pagination-btn.disabled,
+.pagination ul.pages li.previous span,
+.pagination ul.pages li.next span,
+.pagination .items {
   opacity: 0.6;
   cursor: not-allowed;
   background-color: var(--bg-main);
 }
-.cf-pagination-page.active {
-  background: var(--primary-color);
-  color: var(--text-on-primary);
-  border-color: var(--primary-color);
-  font-weight: 600;
+
+.pagination .items {
+  align-self: center;
+  text-align: center;
 }
-.cf-pagination-ellipsis {
+
+/* --- Separadores e Elipse (...) --- */
+.cf-pagination-ellipsis,
+.pagination ul.pages li.spacer span {
   display: flex;
   align-items: center;
-  height: 36px;
-  padding: 0 4px;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
   color: var(--text-tertiary);
+}
+
+/* Estilo para o separador " | " no seletor por página */
+.per-page-selector .separator {
+    color: var(--border-color);
 }
 
 /* ==========================================================================
@@ -557,7 +662,16 @@
   line-height: 1.4;
   white-space: nowrap;
   text-transform: capitalize;
-  cursor: default; /* Não são clicáveis por padrão */
+  cursor: pointer; /* Altera o cursor para indicar interatividade */
+  transition: var(--transition); /* Adiciona transição para a animação */
+}
+
+/* Animação de hover para as pílulas */
+.cf-table .status-tag:hover,
+.cf-table .transaction-tag:hover,
+.cf-table .category-tag:hover {
+  transform: translateY(-2px) scale(1.08);
+  filter: brightness(1.05); /* Um leve brilho para complementar */
 }
 .cf-table .transaction-tag.revenue { background-color: var(--pill-bg-green); color: var(--pill-text-green); }
 .cf-table .transaction-tag.expense { background-color: var(--pill-bg-red); color: var(--pill-text-red); }
@@ -614,7 +728,13 @@
   transition: var(--transition);
 }
 .cf-modal-close-btn:hover { opacity: 1; color: var(--text-primary); }
-.cf-modal-body { padding: 20px; }
+.cf-modal-body {
+  padding: 20px;
+  max-width: 70vw;
+  max-height: 70vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}
 .cf-modal-footer {
   padding: 12px 20px;
   border-top: 1px solid var(--border-color);
@@ -1128,4 +1248,75 @@ body.cf-modal-open {
   .cf-charts-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   14. CONTROLES DE PAGINAÇÃO (REDMINE HELPERS)
+   ========================================================================== */
+
+.cf-pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  /* Garante que os cantos inferiores do container da tabela fiquem arredondados */
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  margin-top: -1px; /* Sobrepõe a borda inferior do table-wrapper */
+}
+
+.cf-pagination-controls .pagination {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Espaçamento entre os elementos da paginação */
+}
+
+.cf-pagination-controls .pagination a,
+.cf-pagination-controls .pagination span.current,
+.cf-pagination-controls .pagination span.gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.cf-pagination-controls .pagination a:hover {
+  color: var(--primary-color);
+  background: var(--pill-bg-blue);
+}
+
+.cf-pagination-controls .pagination span.current {
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.cf-pagination-controls .per-page-selector {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.cf-pagination-controls .per-page-selector a.selected {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.cf-pagination-controls .per-page-selector .separator {
+  color: var(--border-color);
+  margin: 0 8px;
+  font-weight: 300;
 }

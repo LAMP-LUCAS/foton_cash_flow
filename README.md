@@ -10,7 +10,6 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 > [!TIP]
 > Consulte a [estrutura detalhada do projeto e explicação dos arquivos](estrutura_projeto.md) para entender como o plugin está organizado.
-
 > [!TIP]
 > Consulte a [Estrutura dos Dados do Plugin](estrutura_dados.md) para entender como os dados são armazenados e manipulados no Redmine.
 
@@ -74,6 +73,34 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 ---
 
+## Imagens
+
+### Página principal vazia
+
+![Captura de tela_21-8-2025_19575_redmine mundoaec com](https://github.com/user-attachments/assets/0eae24d7-9f0f-4064-bb05-5096cdaf6cc8)
+
+### Página de Importação
+
+![Captura de tela_21-8-2025_195722_redmine mundoaec com](https://github.com/user-attachments/assets/4b764733-42c1-4f9b-a3e6-7f079924cf52)
+
+### Modal de Conciliação
+
+![Captura de tela_21-8-2025_19594_redmine mundoaec com](https://github.com/user-attachments/assets/df2cd85f-412e-4996-a95e-0b012ffd2d28)
+
+### Página principal com dados
+
+![Captura de tela_21-8-2025_195753_redmine mundoaec com](https://github.com/user-attachments/assets/f3153a7e-d1ac-403c-b046-2084fb8566f7)
+
+### Página de checagem
+
+![Captura de tela_21-8-2025_20557_redmine mundoaec com](https://github.com/user-attachments/assets/517e8df2-efe3-4757-bb61-6495e703162f)
+
+### Página de configurações
+
+![Captura de tela_21-8-2025_20631_redmine mundoaec com](https://github.com/user-attachments/assets/43d08614-2de9-4bed-81e4-7dccbf991778)
+
+---
+
 ## Estrutura de CSS/JS
 
 - `assets/stylesheets/cash_flow_main.css`: CSS principal, unificado, documentado e sem dependências externas.
@@ -91,20 +118,32 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 ## Instalação, Atualização e Remoção Automatizadas
 
-Utilize os scripts Python disponíveis na raiz do plugin:
+Para simplificar o gerenciamento do plugin, fornecemos scripts de automação e um `Makefile` de conveniência.
 
-- `install_plugin.py`: Instala o plugin (migrações, assets e reinicialização do container).
-- `update_plugin.py`: Atualiza o plugin (git pull, migrações, assets e reinicialização).
-- `remove_plugin.py`: Remove o plugin (migrações reversas, apaga a pasta e reinicia o container).
+### Passo 1: Copiar o Makefile (Apenas uma vez)
 
-Esses scripts utilizam as configurações do arquivo `.config` (nome do container, caminhos, etc). Edite conforme necessário.
+O repositório do plugin inclui um arquivo `Makefile` para criar atalhos fáceis de usar. Copie-o da pasta do plugin para a pasta raiz da sua instalação do Redmine.
+
+```bash
+# Estando na pasta raiz do Redmine
+cp plugins/foton_cash_flow/Makefile .
+```
+
+### Passo 2: Usar os Comandos
+
+Após copiar o `Makefile`, você pode gerenciar o plugin com os seguintes comandos simples, executados a partir da raiz do Redmine:
 
 **Exemplo de uso:**
 
 ```bash
-python install_plugin.py
-python update_plugin.py
-python remove_plugin.py
+# Instala ou executa as migrações do plugin
+make install plugin=foton_cash_flow
+
+# Atualiza o plugin a partir do repositório Git
+make update plugin=foton_cash_flow
+
+# Desinstala completamente o plugin
+make uninstall plugin=foton_cash_flow
 ```
 
 **Atenção:**

@@ -1,42 +1,37 @@
+# update_plugin.py
 import os
-import subprocess
+import sys
+from task_utils import load_config, run_command, publish_plugin_assets
 
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), '.config')
 
-def load_config():
-    config = {
-        'CONTAINER_NAME': 'foton_redmine',
-        'PLUGINS_PATH': '/caminho/para/redmine/plugins',
-        'PLUGIN_DIR': 'redmine_cash_flow_pro',
-    }
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-            for line in f:
-                if '=' in line and not line.strip().startswith('#'):
-                    k, v = line.strip().split('=', 1)
-                    config[k.strip()] = v.strip()
-    return config
-
-def run(cmd):
-    print(f'Executando: {cmd}')
-    subprocess.run(cmd, shell=True, check=True)
-
-def update():
+def update(plugin_name):
+    """Atualiza um plugin existente, puxando as últimas alterações e rodando as migrações."""
     cfg = load_config()
-    plugin_path = os.path.join(cfg['PLUGINS_PATH'], cfg['PLUGIN_DIR'])
-    os.chdir(plugin_path)
-    try:
-        print('Atualizando repositório do plugin...')
-        run('git pull origin main')
-    except subprocess.CalledProcessError as e:
-        print(f'\n\nErro ao executar "git pull": {e}\n\n')
-    print('Executando migrações do plugin...')
-    run(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:migrate RAILS_ENV=production")
-    print('Publicando assets do plugin...')
-    run(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:assets RAILS_ENV=production")
-    print('Reiniciando o Redmine...')
-    run(f"docker compose restart {cfg['CONTAINER_NAME']}")
-    print('Atualização concluída!')
+    project_root = cfg['PROJECT_ROOT_PATH']
+    plugin_path = os.path.join(project_root, 'redmine', 'plugins', plugin_name)
+
+    print(f"--- Atualizando plugin: {plugin_name} ---")
+
+    print("1/4: Atualizando repositório do plugin via Git...")
+    # De acordo com nomenclaturas.md, 'develop' é a branch de integração para novas funcionalidades.
+    # Use 'main' se o objetivo for atualizar para a última versão estável.
+    run_command('git pull origin develop', working_dir=plugin_path)
+
+    print("2/4: Executando migrações do plugin...")
+    run_command(f"docker compose exec {cfg['CONTAINER_NAME']} bundle exec rake redmine:plugins:migrate NAME={plugin_name} RAILS_ENV=production",
+        working_dir=project_root)
+
+    publish_plugin_assets(cfg, project_root, "3/4: Publicando assets do plugin (para Retrocompatibilidade)...")
+
+    print("4/4: Reiniciando o Redmine...")
+    run_command(f"docker compose restart {cfg['CONTAINER_NAME']}",
+        working_dir=project_root)
+
+    print(f"Atualização do plugin '{plugin_name}' concluída! ✅")
 
 if __name__ == '__main__':
-    update()
+    if len(sys.argv) < 2:
+        print(f"Uso: python3 {os.path.basename(__file__)} <nome_do_plugin>")
+        sys.exit(1)
+    plugin_to_update = sys.argv[1]
+    update(plugin_to_update)

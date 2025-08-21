@@ -138,14 +138,19 @@ module FotonCashFlow
         amount_cf_id = FotonCashFlow::SettingsHelper.cf_id(:amount)
         if amount_cf_id
           amount_value = get_custom_field_value(amount_cf_id)
-          parsed_amount = FotonCashFlow::SettingsHelper.parse_currency_to_decimal(amount_value)
+          amount_cf = CustomField.find(amount_cf_id)
           
           if amount_value.present?
-            if parsed_amount.nil? || parsed_amount <= 0
+            # Usa o novo helper que retorna nil para formatos inválidos.
+            parsed_amount = FotonCashFlow::SettingsHelper.parse_currency_to_decimal_or_nil(amount_value)
+            
+            # Se o valor está presente mas o formato é inválido (ex: "abc"), `parsed_amount` será nil.
+            if parsed_amount.nil?
               errors.add(:base, l(:error_cf_amount_invalid))
             end
           else
-            errors.add(:base, l(:error_cf_amount_invalid)) unless amount_cf_id.present? && CustomField.find(amount_cf_id).is_required == false
+            # Se o valor está em branco, adiciona erro apenas se o campo for obrigatório.
+            errors.add(:base, l(:error_cf_amount_invalid)) if amount_cf.is_required?
           end
         end
 
