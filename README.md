@@ -73,6 +73,34 @@ O **foton Fluxo de Caixa** é um plugin desenvolvido pela comunidade FOTON para 
 
 ---
 
+## Imagens
+
+### Página principal vazia
+
+![Captura de tela_21-8-2025_19575_redmine mundoaec com](https://github.com/user-attachments/assets/0eae24d7-9f0f-4064-bb05-5096cdaf6cc8)
+
+### Página de Importação
+
+![Captura de tela_21-8-2025_195722_redmine mundoaec com](https://github.com/user-attachments/assets/4b764733-42c1-4f9b-a3e6-7f079924cf52)
+
+### Modal de Conciliação
+
+![Captura de tela_21-8-2025_19594_redmine mundoaec com](https://github.com/user-attachments/assets/df2cd85f-412e-4996-a95e-0b012ffd2d28)
+
+### Página principal com dados
+
+![Captura de tela_21-8-2025_195753_redmine mundoaec com](https://github.com/user-attachments/assets/f3153a7e-d1ac-403c-b046-2084fb8566f7)
+
+### Página de checagem
+
+![Captura de tela_21-8-2025_20557_redmine mundoaec com](https://github.com/user-attachments/assets/517e8df2-efe3-4757-bb61-6495e703162f)
+
+### Página de configurações
+
+![Captura de tela_21-8-2025_20631_redmine mundoaec com](https://github.com/user-attachments/assets/43d08614-2de9-4bed-81e4-7dccbf991778)
+
+---
+
 ## Estrutura de CSS/JS
 
 - `assets/stylesheets/cash_flow_main.css`: CSS principal, unificado, documentado e sem dependências externas.
