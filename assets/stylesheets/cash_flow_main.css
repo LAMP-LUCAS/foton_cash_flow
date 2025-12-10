@@ -1143,10 +1143,10 @@ body.cf-modal-open {
   border-top: 1px solid var(--border-color);
 }
 
-/* RESTAURADO E CORRIGIDO: Compatibilidade com classes do Redmine */
-.tabular.settings label,
-.tabular label {
-  margin-left: 0 !important; /* !important para garantir a sobreposição */
+/* RESTAURADO E CORRIGIDO: Compatibilidade com classes do Redmine - ESCOPADO */
+.cash-flow-page .tabular.settings label,
+.cash-flow-page .tabular label {
+  margin-left: 0 !important; /* !important para garantir a sobreposição apenas dentro do plugin */
   font-weight: 600;
   color: var(--text-primary);
 }
